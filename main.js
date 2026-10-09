@@ -1,10 +1,10 @@
 "use strict";
 /* «Proton» — десктопный браузер (Electron).
    Главный процесс: окно + встроенный поисковый движок, система вкладок,
-   подсказки, Википедия, мгновенные ответы, настройки и проверка обновлений через GitHub Releases.
-   Текущая версия: 2.8.0 (Вкладки, черный лаконичный стиль OLED, стили оформления) */
+   голосовой ввод, фоновые обои, настройки и надежное обновление через GitHub Releases.
+   Текущая версия: 2.8.1 (Исправленное обновление в приложении, голосовой поиск) */
 
-const { app, BrowserWindow, ipcMain, shell } = require("electron");
+const { app, BrowserWindow, ipcMain, shell, session } = require("electron");
 const path = require("path");
 const fs = require("fs");
 const https = require("https");
@@ -14,7 +14,7 @@ const crypto = require("crypto");
 
 app.setName("Proton");
 
-const APP_VERSION = "2.8.0";
+const APP_VERSION = "2.8.1";
 const GITHUB_REPO = "UsmanMusav/Iskatel";
 const LATEST_RELEASE_URL = `https://api.github.com/repos/${GITHUB_REPO}/releases/latest`;
 
@@ -771,7 +771,17 @@ async function checkForUpdates() {
     const expectedName = getExpectedAssetName();
 
     const assets = release.assets || [];
-    const matchedAsset = assets.find((a) => a.name === expectedName);
+    let matchedAsset = assets.find((a) => a.name === expectedName);
+    if (!matchedAsset) {
+      if (process.platform === "win32") {
+        matchedAsset = assets.find((a) => a.name.includes("win64-setup") || a.name.endsWith(".exe"));
+      } else if (process.platform === "linux") {
+        matchedAsset = assets.find((a) => a.name.endsWith(".deb"));
+      } else if (process.platform === "darwin") {
+        const arch = process.arch;
+        matchedAsset = assets.find((a) => a.name.includes(arch) && a.name.endsWith(".dmg")) || assets.find((a) => a.name.endsWith(".dmg"));
+      }
+    }
 
     return {
       hasUpdate,
@@ -801,28 +811,47 @@ async function checkForUpdates() {
   }
 }
 
-function downloadFileWithProgress(url, destPath, onProgress) {
+function downloadFileWithProgress(initialUrl, destPath, onProgress) {
   return new Promise((resolve, reject) => {
     fs.mkdirSync(path.dirname(destPath), { recursive: true });
+    if (fs.existsSync(destPath)) {
+      try { fs.unlinkSync(destPath); } catch (_) {}
+    }
     const file = fs.createWriteStream(destPath);
+    let redirects = 0;
 
-    function requestUrl(targetUrl) {
-      const client = targetUrl.startsWith("https") ? https : http;
+    function get(currentUrl) {
+      let parsed;
+      try {
+        parsed = new URL(currentUrl);
+      } catch (err) {
+        file.close();
+        return reject(err);
+      }
+      const client = parsed.protocol === "http:" ? http : https;
       const req = client.get(
-        targetUrl,
+        currentUrl,
         {
           headers: {
-            "User-Agent": `Iskatel/${APP_VERSION}`,
+            "User-Agent": `Proton/${APP_VERSION}`,
           },
         },
         (res) => {
           if (res.statusCode >= 300 && res.statusCode < 400 && res.headers.location) {
-            return requestUrl(res.headers.location);
+            redirects++;
+            if (redirects > 10) {
+              file.close();
+              return reject(new Error("Слишком много перенаправлений"));
+            }
+            res.resume();
+            const nextUrl = new URL(res.headers.location, currentUrl).toString();
+            return get(nextUrl);
           }
+
           if (res.statusCode !== 200) {
             file.close();
-            fs.unlink(destPath, () => {});
-            return reject(new Error(`HTTP ${res.statusCode}`));
+            try { fs.unlinkSync(destPath); } catch (_) {}
+            return reject(new Error(`HTTP ${res.statusCode}: ${res.statusMessage || ""}`));
           }
 
           const total = parseInt(res.headers["content-length"] || "0", 10);
@@ -849,30 +878,42 @@ function downloadFileWithProgress(url, destPath, onProgress) {
 
       req.on("error", (err) => {
         file.close();
-        fs.unlink(destPath, () => {});
+        try { fs.unlinkSync(destPath); } catch (_) {}
         reject(err);
       });
     }
 
-    requestUrl(url);
+    get(initialUrl);
   });
 }
 
 async function launchSystemInstaller(filePath) {
   const platform = process.platform;
-  if (platform === "win32") {
-    // Запуск системного инсталлятора Windows (.exe)
-    const p = spawn(filePath, [], { detached: true, stdio: "ignore" });
-    p.unref();
-    return true;
-  } else if (platform === "darwin") {
-    // Открытие образа macOS (.dmg)
-    await shell.openPath(filePath);
-    return true;
-  } else if (platform === "linux") {
-    // Открытие системного установщика пакетов Linux (.deb)
-    await shell.openPath(filePath);
-    return true;
+  try {
+    if (platform === "win32") {
+      // Запуск системного инсталлятора Windows (.exe)
+      const err = await shell.openPath(filePath);
+      if (err) {
+        const p = spawn(filePath, [], { detached: true, stdio: "ignore" });
+        p.unref();
+      }
+      // Закрываем Proton через 1.5 секунды, чтобы инсталлятор мог обновить занятые файлы
+      setTimeout(() => {
+        app.quit();
+      }, 1500);
+      return true;
+    } else if (platform === "darwin") {
+      // Открытие образа macOS (.dmg)
+      await shell.openPath(filePath);
+      return true;
+    } else if (platform === "linux") {
+      // Открытие системного установщика пакетов Linux (.deb)
+      await shell.openPath(filePath);
+      return true;
+    }
+  } catch (e) {
+    console.error("Ошибка запуска установщика:", e);
+    return false;
   }
   return false;
 }
@@ -909,6 +950,22 @@ function createWindow() {
 /* ---------- регистрация IPC и запуск ---------- */
 
 app.whenReady().then(() => {
+  // Разрешаем доступ к микрофону для голосового поиска
+  session.defaultSession.setPermissionRequestHandler((webContents, permission, callback) => {
+    if (permission === "media" || permission === "microphone") {
+      callback(true);
+    } else {
+      callback(false);
+    }
+  });
+
+  session.defaultSession.setPermissionCheckHandler((webContents, permission) => {
+    if (permission === "media" || permission === "microphone") {
+      return true;
+    }
+    return false;
+  });
+
   // Поиск и саджест
   ipcMain.handle("iskatel:search", (_e, params) => doSearch(params || {}));
   ipcMain.handle("iskatel:suggest", async (_e, params) => {

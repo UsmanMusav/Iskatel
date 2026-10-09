@@ -6,8 +6,10 @@
   <title>Proton — Быстрый браузер</title>
   <style>
 /* ==========================================================================
-   PROTON BROWSER v2.8.0
-   - Без эмодзи (строгий минималистичный дизайн с SVG-иконками)
+   PROTON BROWSER v2.8.1
+   - Полный отказ от эмодзи (строгий минималистичный дизайн с SVG-иконками)
+   - Голосовой ввод (Voice Search) с пульсирующей анимацией записи
+   - Исправленное и полноценное обновление через приложение (In-App Updater)
    - Черно-белый лаконичный стиль по умолчанию (Monochrome Dark)
    - Мягкий не слепящий темный фон (#16171d)
    - Пользовательский фон (собственное фото, масштабирование, размытие, затемнение)
@@ -392,6 +394,17 @@ body.has-custom-bg .hero-sub {
   to { opacity: 1; transform: scale(1) translateY(0); }
 }
 
+@keyframes pulseVoice {
+  0%, 100% {
+    box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7);
+    transform: scale(1.06);
+  }
+  50% {
+    box-shadow: 0 0 0 8px rgba(239, 68, 68, 0);
+    transform: scale(1.12);
+  }
+}
+
 /* ФОНОВЫЕ СВЕТОВЫЕ СФЕРЫ */
 .ambient {
   position: fixed;
@@ -618,7 +631,7 @@ body.has-custom-bg .ambient {
   border-radius: 999px;
   height: 34px;
   padding: 0 6px 0 12px;
-  gap: 8px;
+  gap: 6px;
   transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
 }
 .chrome-omnibox:focus-within {
@@ -642,6 +655,30 @@ body.has-custom-bg .ambient {
 }
 .chrome-omnibox input::placeholder {
   color: var(--text-3);
+}
+
+/* Кнопка голосового ввода в Omnibox */
+.voice-search-btn-mini {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  border: 0;
+  background: transparent;
+  color: var(--text-2);
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  flex-shrink: 0;
+}
+.voice-search-btn-mini:hover {
+  background: var(--card);
+  color: var(--text);
+}
+.voice-search-btn-mini.listening {
+  background: #ef4444;
+  color: #ffffff;
+  animation: pulseVoice 1.2s infinite ease-in-out;
 }
 
 .chrome-omnibox-submit {
@@ -956,7 +993,7 @@ body.has-custom-bg .ambient {
   border-radius: 999px;
   height: 52px;
   padding: 0 8px 0 20px;
-  gap: 12px;
+  gap: 10px;
   box-shadow: var(--shadow);
   transition: border-color 0.22s ease, box-shadow 0.22s ease, background 0.22s ease, transform 0.22s ease;
 }
@@ -982,6 +1019,31 @@ body.has-custom-bg .ambient {
 }
 .search-box-lg input::placeholder {
   color: var(--text-3);
+}
+
+/* Кнопка голосового ввода на главной */
+.voice-search-btn {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: 0;
+  background: transparent;
+  color: var(--text-2);
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+  flex-shrink: 0;
+}
+.voice-search-btn:hover {
+  background: var(--card);
+  color: var(--text);
+  transform: scale(1.08);
+}
+.voice-search-btn.listening {
+  background: #ef4444;
+  color: #ffffff;
+  animation: pulseVoice 1.2s infinite ease-in-out;
 }
 
 .search-submit-btn {
@@ -1329,7 +1391,7 @@ body.has-custom-bg .ambient {
   border-radius: 18px;
   box-shadow: var(--shadow-lg);
   width: 100%;
-  max-width: 600px;
+  max-width: 620px;
   max-height: 85vh;
   display: flex;
   flex-direction: column;
@@ -1517,6 +1579,16 @@ body.has-custom-bg .ambient {
   padding: 14px;
 }
 
+/* КАРТОЧКА ОБНОВЛЕНИЯ В НАСТРОЙКАХ */
+.update-found-box {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 16px;
+  margin-top: 16px;
+  text-align: left;
+}
+
 .modal-footer {
   display: flex;
   justify-content: flex-end;
@@ -1528,6 +1600,7 @@ body.has-custom-bg .ambient {
 .btn-secondary {
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: 7px;
   padding: 8px 18px;
   border-radius: 8px;
@@ -1557,8 +1630,12 @@ body.has-custom-bg .ambient {
   cursor: pointer;
   transition: opacity 0.15s ease;
 }
-.btn-primary:hover {
+.btn-primary:hover:not(:disabled) {
   opacity: 0.9;
+}
+.btn-primary:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
 /* Форма авторизации */
@@ -1691,6 +1768,10 @@ body.has-custom-bg .ambient {
           <input type="search" id="omniboxInput" name="q" placeholder="Поиск в интернете или веб-адрес…" aria-label="Адрес или поисковый запрос" spellcheck="false">
           <button type="button" class="clear-btn" id="omniboxClear" aria-label="Очистить" hidden>
             <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+          </button>
+          <!-- Кнопка голосового ввода в Omnibox -->
+          <button type="button" class="voice-search-btn-mini" id="omniVoiceBtn" title="Голосовой ввод" aria-label="Голосовой ввод">
+            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>
           </button>
           <button type="submit" class="chrome-omnibox-submit" id="omniboxSubmitBtn" aria-label="Перейти">
             <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
@@ -1825,6 +1906,10 @@ body.has-custom-bg .ambient {
             <button type="button" class="clear-btn" id="homeClear" aria-label="Очистить" hidden>
               <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
             </button>
+            <!-- Кнопка голосового поиска на главной -->
+            <button type="button" class="voice-search-btn" id="homeVoiceBtn" title="Голосовой ввод" aria-label="Голосовой ввод">
+              <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>
+            </button>
             <button type="submit" class="search-submit-btn" id="homeSubmitBtn" aria-label="Найти">
               <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                 <line x1="5" y1="12" x2="19" y2="12"></line>
@@ -1910,7 +1995,7 @@ body.has-custom-bg .ambient {
 
   <!-- ПОДВАЛ -->
   <footer class="footer">
-    <span>Proton Browser &copy; 2026 · Версия 2.8.0 · Без рекламы и трекеров</span>
+    <span>Proton Browser &copy; 2026 · Версия 2.8.1 · Без рекламы и трекеров</span>
   </footer>
 
   <!-- МОДАЛЬНОЕ ОКНО НАСТРОЕК -->
@@ -1919,7 +2004,7 @@ body.has-custom-bg .ambient {
       <div class="modal-header">
         <div class="modal-title-wrap">
           <h2 class="modal-title" id="settingsTitle">Настройки Proton</h2>
-          <span class="badge-version" id="settingsVersionBadge">v2.8.0</span>
+          <span class="badge-version" id="settingsVersionBadge">v2.8.1</span>
         </div>
         <button type="button" class="modal-close" id="settingsCloseBtn" aria-label="Закрыть">
           <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
@@ -2081,18 +2166,57 @@ body.has-custom-bg .ambient {
           </div>
         </div>
 
-        <!-- Вкладка: Обновления -->
+        <!-- Вкладка: Обновления (ПОЛНОЦЕННОЕ ИСПРАВЛЕННОЕ ОБНОВЛЕНИЕ ЧЕРЕЗ ПРИЛОЖЕНИЕ) -->
         <div class="tab-panel" id="tabUpdates" role="tabpanel">
-          <div style="text-align:center; padding:16px 0;">
-            <div style="display:inline-flex; align-items:center; justify-content:center; width:56px; height:56px; border-radius:50%; background:var(--accent-soft); color:var(--accent); margin-bottom:12px;">
-              <svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+          <div style="text-align:center; padding:10px 0 16px;">
+            <div style="display:inline-flex; align-items:center; justify-content:center; width:52px; height:52px; border-radius:50%; background:var(--accent-soft); color:var(--accent); margin-bottom:12px;">
+              <svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
             </div>
-            <h3>Proton Desktop v2.8.0</h3>
-            <p style="color:var(--text-3); font-size:13px; margin:6px 0 16px;">
-              Черно-белый лаконичный браузер с вкладками в стиле Chrome и поддержкой своих обоев.
+            <h3 style="font-size:18px; margin-bottom:4px;">Proton Desktop</h3>
+            <p style="color:var(--text-3); font-size:12.5px; margin-bottom:16px;">
+              Текущая установленная версия: <b style="color:var(--text);">v2.8.1</b>
             </p>
-            <button class="btn-primary" id="checkUpdatesBtn">Проверить обновления</button>
-            <div id="updateStatusText" style="margin-top:14px; font-size:13px; color:var(--text-2);"></div>
+            <button class="btn-primary" id="checkUpdatesBtn" style="margin:0 auto;">
+              <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/></svg>
+              <span>Проверить наличие обновлений</span>
+            </button>
+            <div id="updateStatusText" style="margin-top:12px; font-size:13px; color:var(--text-2);"></div>
+          </div>
+
+          <!-- КАРТОЧКА НАЙДЕННОГО ОБНОВЛЕНИЯ -->
+          <div id="updateFoundCard" class="update-found-box" style="display:none;">
+            <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:10px;">
+              <div>
+                <span class="badge-version" style="background:#10b981; color:#ffffff; font-size:12px;">Доступно обновление</span>
+                <h4 id="updateNewVersionTitle" style="font-size:16px; margin-top:6px;">Proton v...</h4>
+              </div>
+              <span id="updateFileSizeText" style="font-size:12px; color:var(--text-3);"></span>
+            </div>
+
+            <div id="updateReleaseNotesBox" style="font-size:12.5px; color:var(--text-2); background:var(--card-solid); border:1px solid var(--border); border-radius:8px; padding:10px 12px; max-height:120px; overflow-y:auto; margin-bottom:12px; line-height:1.45;"></div>
+
+            <!-- ПРОГРЕСС-БАР СКАЧИВАНИЯ -->
+            <div id="updateProgressWrap" style="display:none; margin-bottom:12px;">
+              <div style="display:flex; justify-content:space-between; font-size:12px; margin-bottom:4px;">
+                <span id="updateProgressLabel" style="color:var(--text-2);">Загрузка обновления…</span>
+                <span id="updateProgressPercent" style="color:var(--accent); font-weight:600;">0%</span>
+              </div>
+              <div style="height:8px; background:var(--input-bg); border-radius:999px; overflow:hidden; border:1px solid var(--border);">
+                <div id="updateProgressBar" style="height:100%; width:0%; background:var(--accent); transition:width 0.15s ease;"></div>
+              </div>
+            </div>
+
+            <!-- КНОПКИ ДЕЙСТВИЙ ОБНОВЛЕНИЯ -->
+            <div style="display:flex; flex-wrap:wrap; gap:8px;">
+              <button type="button" class="btn-primary" id="startUpdateBtn" style="flex:1;">
+                <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                <span id="startUpdateBtnText">Скачать и установить обновление</span>
+              </button>
+              <button type="button" class="btn-secondary" id="openReleasePageBtn">
+                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+                <span>GitHub</span>
+              </button>
+            </div>
           </div>
         </div>
       </div>
@@ -2187,8 +2311,8 @@ body.has-custom-bg .ambient {
   </div>
 
   <!-- ==========================================================================
-       JAVASCRIPT ЛОГИКА PROTON v2.8.0
-       ========================================================================== -->
+       JAVASCRIPT ЛОГИКА PROTON v2.8.1
+       ========================================================================== */
   <script>
 "use strict";
 
@@ -2378,7 +2502,6 @@ const WallpaperManager = {
     const blurInput = $("customBgBlur");
     const blurVal = $("customBgBlurVal");
 
-    // Инициализация значений в форме настроек
     if (sizeSelect) sizeSelect.value = this.config.size || "cover";
     if (posSelect) posSelect.value = this.config.position || "center center";
     if (dimmingInput) dimmingInput.value = this.config.dimming != null ? this.config.dimming : 40;
@@ -2456,6 +2579,87 @@ const WallpaperManager = {
     }
   }
 };
+
+/* ==========================================================================
+   ГОЛОСОВОЙ ВВОД (VOICE SEARCH)
+   ========================================================================== */
+function initVoiceSearch() {
+  const SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition;
+  const homeVoiceBtn = $("homeVoiceBtn");
+  const omniVoiceBtn = $("omniVoiceBtn");
+
+  if (!SpeechRec) {
+    if (homeVoiceBtn) homeVoiceBtn.title = "Голосовой ввод не поддерживается вашей системой";
+    if (omniVoiceBtn) omniVoiceBtn.title = "Голосовой ввод не поддерживается вашей системой";
+    return;
+  }
+
+  let recognition = null;
+  let isListening = false;
+
+  function stopVoice() {
+    if (recognition && isListening) {
+      try { recognition.stop(); } catch (_) {}
+    }
+    isListening = false;
+    if (homeVoiceBtn) homeVoiceBtn.classList.remove("listening");
+    if (omniVoiceBtn) omniVoiceBtn.classList.remove("listening");
+    if ($("homeInput")) $("homeInput").placeholder = "Поиск в интернете или веб-адрес…";
+    if ($("omniboxInput")) $("omniboxInput").placeholder = "Поиск в интернете или веб-адрес…";
+  }
+
+  function startVoice(targetInput) {
+    if (isListening) {
+      stopVoice();
+      return;
+    }
+
+    try {
+      recognition = new SpeechRec();
+      const region = (localStorage.getItem("proton-region") || "ru-ru");
+      recognition.lang = region.startsWith("us") ? "en-US" : (region.startsWith("de") ? "de-DE" : "ru-RU");
+      recognition.interimResults = true;
+      recognition.maxAlternatives = 1;
+
+      recognition.onstart = () => {
+        isListening = true;
+        if (homeVoiceBtn) homeVoiceBtn.classList.add("listening");
+        if (omniVoiceBtn) omniVoiceBtn.classList.add("listening");
+        if (targetInput) targetInput.placeholder = "Слушаю вас… говорите";
+      };
+
+      recognition.onresult = (e) => {
+        const transcript = Array.from(e.results)
+          .map(r => r[0].transcript)
+          .join("");
+        setInputs(transcript);
+        if (e.results[0] && e.results[0].isFinal) {
+          stopVoice();
+          runSearch(transcript);
+        }
+      };
+
+      recognition.onerror = () => {
+        stopVoice();
+      };
+
+      recognition.onend = () => {
+        stopVoice();
+      };
+
+      recognition.start();
+    } catch (_) {
+      stopVoice();
+    }
+  }
+
+  if (homeVoiceBtn) {
+    homeVoiceBtn.addEventListener("click", () => startVoice($("homeInput")));
+  }
+  if (omniVoiceBtn) {
+    omniVoiceBtn.addEventListener("click", () => startVoice($("omniboxInput")));
+  }
+}
 
 /* ==========================================================================
    СИСТЕМА CHROME-ВКЛАДОК И НАВИГАЦИИ (TAB MANAGER)
@@ -2591,10 +2795,7 @@ const TabManager = {
 
     document.title = (tab.query ? tab.query + " — " : "") + "Proton";
 
-    // Синхронизируем инпуты
     setInputs(tab.query || "");
-
-    // Обновляем навигационные кнопки
     updateNavButtons(tab);
 
     if (tab.view === "results") {
@@ -2603,7 +2804,6 @@ const TabManager = {
       $("resultsView").hidden = false;
       $("skeletons").hidden = true;
 
-      // Мгновенное восстановление DOM
       $("resultsList").innerHTML = tab.resultsHtml || "";
       $("resultsInfo").innerHTML = tab.resultsInfoHtml || "";
       $("answerCard").innerHTML = tab.answerHtml || "";
@@ -2613,7 +2813,6 @@ const TabManager = {
       $("moreWrap").hidden = !tab.canLoadMore;
       $("emptyState").hidden = (tab.resultsHtml && tab.resultsHtml.length > 0);
 
-      // Если вкладка была на результатах, но DOM пуст — запускаем поиск
       if (!tab.resultsHtml && tab.query) {
         runSearch(tab.query, { page: tab.page || 0, fromTab: true });
       }
@@ -2725,13 +2924,11 @@ const TabManager = {
         </button>
       `;
 
-      // Клик по вкладке
       tabEl.addEventListener("click", (e) => {
         if (e.target.closest(".chrome-tab-close")) return;
         this.switchTab(tab.id);
       });
 
-      // Средняя кнопка мыши закрывает вкладку
       tabEl.addEventListener("auxclick", (e) => {
         if (e.button === 1) {
           e.preventDefault();
@@ -2739,7 +2936,6 @@ const TabManager = {
         }
       });
 
-      // Клик по крестику
       const closeBtn = tabEl.querySelector(".chrome-tab-close");
       if (closeBtn) {
         closeBtn.addEventListener("click", (e) => {
@@ -2748,7 +2944,6 @@ const TabManager = {
         });
       }
 
-      // Правый клик — контекстное меню
       tabEl.addEventListener("contextmenu", (e) => {
         e.preventDefault();
         this.contextTabId = tab.id;
@@ -2758,7 +2953,6 @@ const TabManager = {
       track.appendChild(tabEl);
     });
 
-    // Автоскролл к активной вкладке
     const activeEl = track.querySelector(".chrome-tab.active");
     if (activeEl) {
       activeEl.scrollIntoView({ behavior: "smooth", block: "nearest", inline: "nearest" });
@@ -2788,7 +2982,6 @@ const TabManager = {
       fwdBtn.addEventListener("click", () => this.navForward());
     }
 
-    // Двойной клик по пустой полосе вкладок создает новую вкладку
     const strip = $("chromeTabStrip");
     if (strip) {
       strip.addEventListener("dblclick", (e) => {
@@ -2798,7 +2991,6 @@ const TabManager = {
       });
     }
 
-    // Горячие клавиши
     window.addEventListener("keydown", (e) => {
       const isCmdOrCtrl = e.ctrlKey || e.metaKey;
       if (isCmdOrCtrl && e.key.toLowerCase() === "t") {
@@ -2945,7 +3137,6 @@ async function apiFetch(path, query) {
     if (!res.ok) throw new Error("HTTP " + res.status);
     return res;
   } catch (_) {
-    // Автономный оффлайн-режим
     const demo = demoSearch(query || "");
     return {
       ok: true,
@@ -3038,7 +3229,6 @@ async function runSearch(query, { page = 0, append = false, fromTab = false } = 
     pushRecent(query);
     renderResults(data, append);
 
-    // Сохраняем состояние в активную вкладку
     const curTab = TabManager.getActiveTab();
     if (curTab) {
       curTab.query = query;
@@ -3082,12 +3272,10 @@ function renderResults(data, append) {
     return;
   }
 
-  // Мгновенный ответ
   if (!append && data.instant && data.instant.answer) {
     renderAnswer(data.instant);
   }
 
-  // Боковая колонка Википедии
   if (!append && data.wiki && data.wiki.title) {
     renderWiki(data.wiki);
   }
@@ -3114,7 +3302,6 @@ function renderResults(data, append) {
       </div>
     `;
 
-    // Копирование ссылки
     div.querySelector("[data-copy]").addEventListener("click", (e) => {
       const url = e.target.dataset.copy;
       navigator.clipboard.writeText(url).then(() => {
@@ -3123,7 +3310,6 @@ function renderResults(data, append) {
       });
     });
 
-    // Добавление в закладки
     const star = div.querySelector(".star-btn");
     star.addEventListener("click", () => {
       toggleBookmark({ url: item.url, title: item.title, domain });
@@ -3135,7 +3321,6 @@ function renderResults(data, append) {
     container.appendChild(div);
   });
 
-  // Кнопка пагинации
   $("moreWrap").hidden = results.length < 10;
 }
 
@@ -3400,7 +3585,6 @@ function initAuth() {
     if (e.target === $("bookmarksModal")) $("bookmarksModal").classList.remove("open");
   });
 
-  // Переключение вкладок входа / регистрации
   $("tabLoginBtn").addEventListener("click", () => {
     $("tabLoginBtn").classList.add("active");
     $("tabRegisterBtn").classList.remove("active");
@@ -3414,7 +3598,6 @@ function initAuth() {
     $("loginForm").style.display = "none";
   });
 
-  // Быстрый вход Google
   $("googleQuickSignInBtn").addEventListener("click", () => {
     const fakeUser = {
       name: "Пользователь Proton",
@@ -3425,7 +3608,6 @@ function initAuth() {
     closeAuth();
   });
 
-  // Форма входа
   $("loginForm").addEventListener("submit", (e) => {
     e.preventDefault();
     const email = $("loginEmail").value.trim();
@@ -3439,14 +3621,12 @@ function initAuth() {
     }
   });
 
-  // Выход
   $("menuLogoutBtn").addEventListener("click", () => {
     localStorage.removeItem("proton-user");
     updateUserUI(null);
     userDropdownMenu.style.display = "none";
   });
 
-  // Проверяем сохраненную сессию
   try {
     const savedUser = JSON.parse(localStorage.getItem("proton-user") || "null");
     updateUserUI(savedUser);
@@ -3478,7 +3658,7 @@ function updateUserUI(user) {
 }
 
 /* ==========================================================================
-   НАСТРОЙКИ (SETTINGS MODAL & UPDATER)
+   НАСТРОЙКИ И ПОЛНОЦЕННОЕ ОБНОВЛЕНИЕ ЧЕРЕЗ ПРИЛОЖЕНИЕ (UPDATER)
    ========================================================================== */
 function initSettings() {
   const modal = $("settingsModal");
@@ -3542,7 +3722,7 @@ function initSettings() {
       showInstant: $("settingShowInstant").checked,
       showSuggestions: $("settingShowSuggestions").checked,
       ambientBlobs: $("settingAmbientBlobs").checked,
-      showQuickTags: $("settingShowQuickTags").checked // По умолчанию выключено
+      showQuickTags: $("settingShowQuickTags").checked
     };
     try {
       localStorage.setItem("proton-settings", JSON.stringify(s));
@@ -3553,7 +3733,6 @@ function initSettings() {
     document.documentElement.setAttribute("data-density", s.density);
     document.documentElement.setAttribute("data-ambient", s.ambientBlobs ? "true" : "false");
 
-    // Применяем отображение быстрых категорий
     const quickTagsEl = $("quickTags");
     if (quickTagsEl) {
       quickTagsEl.hidden = !s.showQuickTags;
@@ -3564,27 +3743,149 @@ function initSettings() {
 
   if (saveBtn) saveBtn.addEventListener("click", saveSettings);
 
-  // Кнопка проверки обновлений
-  $("checkUpdatesBtn").addEventListener("click", async () => {
-    const statusText = $("updateStatusText");
-    statusText.textContent = "Проверяем обновления на GitHub…";
-    try {
-      if (window.iskatelAPI && window.iskatelAPI.checkForUpdates) {
-        const info = await window.iskatelAPI.checkForUpdates();
-        if (info && info.hasUpdate) {
-          statusText.innerHTML = `<span style="color:#10b981;">Доступна новая версия v${escapeHtml(info.latestVersion)}!</span>`;
+  /* ---------- ЛОГИКА ОБНОВЛЕНИЯ ЧЕРЕЗ ПРИЛОЖЕНИЕ ---------- */
+  let updateInfo = null;
+  let downloadedInstallerPath = null;
+
+  const checkUpdatesBtn = $("checkUpdatesBtn");
+  const updateStatusText = $("updateStatusText");
+  const updateFoundCard = $("updateFoundCard");
+  const updateNewVersionTitle = $("updateNewVersionTitle");
+  const updateFileSizeText = $("updateFileSizeText");
+  const updateReleaseNotesBox = $("updateReleaseNotesBox");
+  const updateProgressWrap = $("updateProgressWrap");
+  const updateProgressBar = $("updateProgressBar");
+  const updateProgressPercent = $("updateProgressPercent");
+  const updateProgressLabel = $("updateProgressLabel");
+  const startUpdateBtn = $("startUpdateBtn");
+  const startUpdateBtnText = $("startUpdateBtnText");
+  const openReleasePageBtn = $("openReleasePageBtn");
+
+  if (checkUpdatesBtn) {
+    checkUpdatesBtn.addEventListener("click", async () => {
+      updateStatusText.textContent = "Проверяем наличие обновлений на GitHub…";
+      updateFoundCard.style.display = "none";
+      checkUpdatesBtn.disabled = true;
+
+      try {
+        if (window.iskatelAPI && window.iskatelAPI.checkForUpdates) {
+          const info = await window.iskatelAPI.checkForUpdates();
+          checkUpdatesBtn.disabled = false;
+
+          if (info && info.hasUpdate) {
+            updateInfo = info;
+            updateStatusText.innerHTML = `<span style="color:#10b981;">Доступно новое обновление: Proton v${escapeHtml(info.latestVersion)}!</span>`;
+            updateNewVersionTitle.textContent = "Proton " + (info.latestTag || ("v" + info.latestVersion));
+            
+            if (info.asset && info.asset.size) {
+              const mb = (info.asset.size / (1024 * 1024)).toFixed(1);
+              updateFileSizeText.textContent = `${info.asset.name} (${mb} МБ)`;
+            } else if (info.expectedAsset) {
+              updateFileSizeText.textContent = info.expectedAsset;
+            } else {
+              updateFileSizeText.textContent = "";
+            }
+
+            updateReleaseNotesBox.textContent = info.releaseNotes || "Улучшения производительности и исправления ошибок.";
+            startUpdateBtnText.textContent = "Скачать и установить обновление";
+            startUpdateBtn.disabled = false;
+            updateProgressWrap.style.display = "none";
+            updateFoundCard.style.display = "block";
+          } else {
+            updateStatusText.innerHTML = `<span style="color:#10b981;">У вас установлена самая последняя версия Proton (v2.8.1)!</span>`;
+          }
         } else {
-          statusText.innerHTML = `<span style="color:#10b981;">У вас установлена самая актуальная версия v2.8.0!</span>`;
+          checkUpdatesBtn.disabled = false;
+          updateStatusText.textContent = "В веб-режиме автообновление недоступно. Установите настольную версию Proton.";
         }
-      } else {
-        setTimeout(() => {
-          statusText.innerHTML = `<span style="color:#10b981;">У вас актуальная версия Proton v2.8.0</span>`;
-        }, 500);
+      } catch (err) {
+        checkUpdatesBtn.disabled = false;
+        updateStatusText.textContent = "Ошибка при проверке обновлений: " + err.message;
       }
-    } catch (e) {
-      statusText.textContent = "Ошибка проверки: " + e.message;
-    }
-  });
+    });
+  }
+
+  // Клик по кнопке "Скачать и установить" / "Запустить установку"
+  if (startUpdateBtn) {
+    startUpdateBtn.addEventListener("click", async () => {
+      if (downloadedInstallerPath) {
+        startUpdateBtnText.textContent = "Запуск установщика…";
+        startUpdateBtn.disabled = true;
+        try {
+          await window.iskatelAPI.installUpdate({ filePath: downloadedInstallerPath });
+        } catch (e) {
+          alert("Не удалось запустить установщик: " + e.message);
+          startUpdateBtn.disabled = false;
+          startUpdateBtnText.textContent = "Попробовать запустить снова";
+        }
+        return;
+      }
+
+      if (!updateInfo || !updateInfo.asset || !updateInfo.asset.downloadUrl) {
+        if (updateInfo && updateInfo.htmlUrl) {
+          if (window.iskatelAPI && window.iskatelAPI.openExternal) {
+            window.iskatelAPI.openExternal(updateInfo.htmlUrl);
+          } else {
+            window.open(updateInfo.htmlUrl, "_blank");
+          }
+        }
+        return;
+      }
+
+      startUpdateBtn.disabled = true;
+      startUpdateBtnText.textContent = "Загрузка обновления…";
+      updateProgressWrap.style.display = "block";
+      updateProgressBar.style.width = "0%";
+      updateProgressPercent.textContent = "0%";
+      updateProgressLabel.textContent = "Соединение с сервером GitHub…";
+
+      if (window.iskatelAPI.onDownloadProgress) {
+        window.iskatelAPI.onDownloadProgress((prog) => {
+          const pct = prog.percent || 0;
+          updateProgressBar.style.width = pct + "%";
+          updateProgressPercent.textContent = pct + "%";
+          if (prog.total > 0) {
+            const mbDone = (prog.downloaded / (1024 * 1024)).toFixed(1);
+            const mbTotal = (prog.total / (1024 * 1024)).toFixed(1);
+            updateProgressLabel.textContent = `Загружено: ${mbDone} из ${mbTotal} МБ…`;
+          }
+        });
+      }
+
+      try {
+        const res = await window.iskatelAPI.downloadUpdate({
+          url: updateInfo.asset.downloadUrl,
+          filename: updateInfo.asset.name
+        });
+
+        if (res && res.ok && res.filePath) {
+          downloadedInstallerPath = res.filePath;
+          updateProgressBar.style.width = "100%";
+          updateProgressPercent.textContent = "100%";
+          updateProgressLabel.textContent = "Обновление успешно загружено!";
+          startUpdateBtn.disabled = false;
+          startUpdateBtnText.textContent = "Запустить установку и обновить";
+        } else {
+          throw new Error(res.error || "Не удалось загрузить файл установщика");
+        }
+      } catch (err) {
+        startUpdateBtn.disabled = false;
+        startUpdateBtnText.textContent = "Попробовать скачать снова";
+        updateProgressLabel.textContent = "Ошибка загрузки: " + err.message;
+      }
+    });
+  }
+
+  if (openReleasePageBtn) {
+    openReleasePageBtn.addEventListener("click", () => {
+      const url = (updateInfo && updateInfo.htmlUrl) || "https://github.com/UsmanMusav/Iskatel/releases/latest";
+      if (window.iskatelAPI && window.iskatelAPI.openExternal) {
+        window.iskatelAPI.openExternal(url);
+      } else {
+        window.open(url, "_blank");
+      }
+    });
+  }
 }
 
 function getSettings() {
@@ -3602,22 +3903,20 @@ function init() {
   TabManager.init();
   initAuth();
   initSettings();
+  initVoiceSearch();
   updateBookmarksUI();
   renderRecent();
 
-  // Применяем сохраненные настройки
   const s = getSettings();
   if (s.fontSize) document.documentElement.setAttribute("data-font", s.fontSize);
   if (s.density) document.documentElement.setAttribute("data-density", s.density);
   if (s.ambientBlobs === false) document.documentElement.setAttribute("data-ambient", "false");
 
-  // Быстрые категории (по умолчанию выключены: showQuickTags === true)
   const quickTagsEl = $("quickTags");
   if (quickTagsEl) {
     quickTagsEl.hidden = (s.showQuickTags !== true);
   }
 
-  // Формы поиска
   const homeForm = $("homeForm");
   if (homeForm) {
     homeForm.addEventListener("submit", (e) => {
@@ -3634,11 +3933,9 @@ function init() {
     });
   }
 
-  // Саджесты
   bindSuggest($("homeInput"), $("homeSuggest"));
   bindSuggest($("omniboxInput"), $("omniboxSuggest"));
 
-  // Очистка инпутов
   $("homeClear").addEventListener("click", () => {
     $("homeInput").value = "";
     $("homeClear").hidden = true;
@@ -3650,19 +3947,16 @@ function init() {
     $("omniboxInput").focus();
   });
 
-  // Быстрые теги на главной
   document.querySelectorAll(".quick-chip[data-query]").forEach(chip => {
     chip.addEventListener("click", () => {
       runSearch(chip.dataset.query);
     });
   });
 
-  // Кнопка пагинации
   $("moreBtn").addEventListener("click", () => {
     runSearch(state.query, { page: state.page + 1, append: true });
   });
 
-  // Кнопка повтора при ошибке
   $("retryBtn").addEventListener("click", () => {
     runSearch(state.query, { page: state.page });
   });

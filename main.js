@@ -2,7 +2,7 @@
 /* «Proton» — десктопный браузер (Electron).
    Главный процесс: окно + встроенный поисковый движок, система вкладок,
    голосовой ввод, фоновые обои, настройки и надежное обновление через GitHub Releases.
-   Текущая версия: 2.8.1 (Исправленное обновление в приложении, голосовой поиск) */
+   Текущая версия: 2.8.2 (Комплексное исправление интерфейса, надежный поиск, кликабельность) */
 
 const { app, BrowserWindow, ipcMain, shell, session } = require("electron");
 const path = require("path");
@@ -14,7 +14,7 @@ const crypto = require("crypto");
 
 app.setName("Proton");
 
-const APP_VERSION = "2.8.1";
+const APP_VERSION = "2.8.2";
 const GITHUB_REPO = "UsmanMusav/Iskatel";
 const LATEST_RELEASE_URL = `https://api.github.com/repos/${GITHUB_REPO}/releases/latest`;
 
@@ -395,21 +395,25 @@ async function ddgSearch(query, page, region = "ru-ru") {
   let resp = null;
   const kl = region || "ru-ru";
   for (let i = 0; i < attempts.length; i++) {
-    if (i > 0) await sleep(1200 * i);
+    if (i > 0) await sleep(800 * i);
     const url = "https://html.duckduckgo.com/html/";
-    if (attempts[i] === "post") {
-      const body = new URLSearchParams({ q: query, kl: kl, s: String(offset), b: "" });
-      resp = await fetch(url, {
-        method: "POST",
-        headers: { ...NAV_HEADERS, "Content-Type": "application/x-www-form-urlencoded" },
-        body,
-      });
-    } else {
-      resp = await fetch(`${url}?q=${encodeURIComponent(query)}&kl=${kl}&s=${offset}`, {
-        headers: NAV_HEADERS,
-      });
-    }
-    if (resp.ok) break;
+    try {
+      if (attempts[i] === "post") {
+        const body = new URLSearchParams({ q: query, kl: kl, s: String(offset), b: "" });
+        resp = await fetch(url, {
+          method: "POST",
+          headers: { ...NAV_HEADERS, "Content-Type": "application/x-www-form-urlencoded" },
+          body,
+          signal: AbortSignal.timeout(4500),
+        });
+      } else {
+        resp = await fetch(`${url}?q=${encodeURIComponent(query)}&kl=${kl}&s=${offset}`, {
+          headers: NAV_HEADERS,
+          signal: AbortSignal.timeout(4500),
+        });
+      }
+      if (resp && resp.ok) break;
+    } catch (_) {}
   }
   if (!resp || !resp.ok || resp.status === 202) {
     throw new Error(`DuckDuckGo: HTTP ${resp ? resp.status : "0"}`);
@@ -446,7 +450,7 @@ async function ddgSuggest(query) {
   try {
     const r = await fetch(
       `https://duckduckgo.com/ac/?q=${encodeURIComponent(query)}&type=list`,
-      { headers: JSON_HEADERS }
+      { headers: JSON_HEADERS, signal: AbortSignal.timeout(2500) }
     );
     const data = await r.json();
     let out = [];
@@ -465,7 +469,7 @@ async function ddgInstant(query) {
   try {
     const r = await fetch(
       `https://api.duckduckgo.com/?q=${encodeURIComponent(query)}&format=json&no_html=1&skip_disambig=1`,
-      { headers: { "User-Agent": USER_AGENT, "Accept": "*/*" } }
+      { headers: { "User-Agent": USER_AGENT, "Accept": "*/*" }, signal: AbortSignal.timeout(3000) }
     );
     const d = await r.json();
     const out = {};
@@ -498,6 +502,7 @@ async function bingSearch(query, page, region = "ru-RU") {
         "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
         "Accept-Language": "ru-RU,ru;q=0.9,en;q=0.8",
       },
+      signal: AbortSignal.timeout(4500),
     }
   );
   if (!r.ok) throw new Error(`Bing: HTTP ${r.status}`);
@@ -536,7 +541,7 @@ const WIKI_PARAMS = {
 async function wikiApi(params) {
   const u = new URL("https://ru.wikipedia.org/w/api.php");
   for (const [k, v] of Object.entries({ ...WIKI_PARAMS, ...params })) u.searchParams.set(k, v);
-  const r = await fetch(u, { headers: { "User-Agent": USER_AGENT } });
+  const r = await fetch(u, { headers: { "User-Agent": USER_AGENT }, signal: AbortSignal.timeout(3000) });
   return (await r.json()).query?.pages || {};
 }
 
@@ -676,6 +681,38 @@ async function doSearch({ q, page = 0 }) {
     } catch (_) {}
   }
 
+  // Если оба внешних сервиса заблокированы или недоступны — формируем прямые навигационные карточки
+  if ((!results || results.length === 0) && page === 0) {
+    const qEnc = encodeURIComponent(query);
+    results = [
+      {
+        title: `${query} — Поиск в Яндекс`,
+        url: `https://yandex.ru/search/?text=${qEnc}`,
+        display_url: "yandex.ru",
+        snippet: `Перейти к результатам поиска «${query}» в поисковой системе Яндекс.`,
+      },
+      {
+        title: `${query} — Поиск в Google`,
+        url: `https://www.google.com/search?q=${qEnc}`,
+        display_url: "google.com",
+        snippet: `Открыть поисковую выдачу Google по запросу «${query}».`,
+      },
+      {
+        title: `Искать «${query}» в Русской Википедии`,
+        url: `https://ru.wikipedia.org/wiki/Special:Search?search=${qEnc}`,
+        display_url: "ru.wikipedia.org",
+        snippet: `Статьи, справочные материалы и исторические справки в свободной энциклопедии Википедия.`,
+      },
+      {
+        title: `${query} — Видео на YouTube`,
+        url: `https://www.youtube.com/results?search_query=${qEnc}`,
+        display_url: "youtube.com",
+        snippet: `Видеоролики, обзоры и обучающие материалы по теме «${query}».`,
+      },
+    ];
+    engineUsed = "Прямой веб-навигатор";
+  }
+
   // Карточки и справки (учитываем настройки пользователя)
   const showInstant = settings.showInstantAnswers !== false;
   const showWiki = settings.showWikiCards !== false;
@@ -747,9 +784,10 @@ async function checkForUpdates() {
   try {
     const res = await fetch(LATEST_RELEASE_URL, {
       headers: {
-        "User-Agent": `Iskatel/${APP_VERSION}`,
+        "User-Agent": `Proton/${APP_VERSION}`,
         "Accept": "application/vnd.github.v3+json",
       },
+      signal: AbortSignal.timeout(6000),
     });
 
     if (res.status === 404) {

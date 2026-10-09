@@ -6,8 +6,9 @@
   <title>Proton — Быстрый браузер</title>
   <style>
 /* ==========================================================================
-   PROTON BROWSER v2.8.1
-   - Полный отказ от эмодзи (строгий минималистичный дизайн с SVG-иконками)
+   PROTON BROWSER v2.8.2
+   - Полное устранение блокировки кликов (display: none для всех закрытых модалок)
+   - Гарантированный запуск init() независимо от document.readyState
    - Голосовой ввод (Voice Search) с пульсирующей анимацией записи
    - Исправленное и полноценное обновление через приложение (In-App Updater)
    - Черно-белый лаконичный стиль по умолчанию (Monochrome Dark)
@@ -16,7 +17,7 @@
    - Четкое, не сливающееся название Proton на всех темах и фотографиях
    - Отключаемые быстрые категории (по умолчанию выключены)
    - Chrome-вкладки и панель навигации (Назад, Вперёд, Перезагрузить, Omnibox)
-   - 7 надежных тем оформления
+   - 0 эмодзи, только строгий минималистичный дизайн с SVG-иконками
    ========================================================================== */
 
 /* 1. ПО УМОЛЧАНИЮ: MONOCHROME DARK (Мягкий темный графит) */
@@ -324,7 +325,7 @@ a:hover {
   position: fixed;
   inset: 0;
   z-index: 0;
-  pointer-events: none;
+  pointer-events: none !important;
   background-size: cover;
   background-position: center center;
   background-repeat: no-repeat;
@@ -335,7 +336,7 @@ a:hover {
   position: fixed;
   inset: 0;
   z-index: 0;
-  pointer-events: none;
+  pointer-events: none !important;
   background: rgba(0, 0, 0, 0.4);
   transition: background 0.3s ease;
   display: none;
@@ -409,7 +410,7 @@ body.has-custom-bg .hero-sub {
 .ambient {
   position: fixed;
   inset: 0;
-  pointer-events: none;
+  pointer-events: none !important;
   z-index: 0;
   overflow: hidden;
   opacity: var(--blob-opacity);
@@ -417,7 +418,7 @@ body.has-custom-bg .hero-sub {
 }
 [data-ambient="false"] .ambient,
 body.has-custom-bg .ambient {
-  display: none;
+  display: none !important;
 }
 .blob {
   position: absolute;
@@ -1367,13 +1368,14 @@ body.has-custom-bg .ambient {
 
 /* ==========================================================================
    МОДАЛЬНЫЕ ОКНА (НАСТРОЙКИ, АВТОРИЗАЦИЯ, ЗАКЛАДКИ)
+   ВАЖНО: display: none !important когда закрыты, чтобы не блокировать клики!
    ========================================================================== */
 .modal-backdrop {
   position: fixed;
   inset: 0;
   background: rgba(0, 0, 0, 0.65);
   backdrop-filter: blur(8px);
-  display: grid;
+  display: none !important;
   place-items: center;
   z-index: 300;
   padding: 16px;
@@ -1382,8 +1384,9 @@ body.has-custom-bg .ambient {
   transition: opacity 0.2s ease;
 }
 .modal-backdrop.open {
-  opacity: 1;
-  pointer-events: auto;
+  display: grid !important;
+  opacity: 1 !important;
+  pointer-events: auto !important;
 }
 .modal-card {
   background: var(--card-solid);
@@ -1397,6 +1400,7 @@ body.has-custom-bg .ambient {
   flex-direction: column;
   overflow: hidden;
   animation: modalIn 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+  pointer-events: auto;
 }
 .modal-header {
   display: flex;
@@ -1762,7 +1766,7 @@ body.has-custom-bg .ambient {
 
     <!-- Омнибокс (Адресная / Поисковая строка) -->
     <div class="chrome-omnibox-wrap">
-      <form class="chrome-omnibox-form" id="omniboxForm" autocomplete="off">
+      <form class="chrome-omnibox-form" id="omniboxForm" autocomplete="off" action="javascript:void(0);" onsubmit="return false;">
         <div class="chrome-omnibox" id="chromeOmnibox">
           <svg class="ico-search" viewBox="0 0 24 24" aria-hidden="true"><path d="M10.5 3a7.5 7.5 0 0 1 5.94 12.09l4.24 4.24a1 1 0 0 1-1.41 1.41l-4.24-4.24A7.5 7.5 0 1 1 10.5 3Zm0 2a5.5 5.5 0 1 0 0 11 5.5 5.5 0 0 0 0-11Z"/></svg>
           <input type="search" id="omniboxInput" name="q" placeholder="Поиск в интернете или веб-адрес…" aria-label="Адрес или поисковый запрос" spellcheck="false">
@@ -1832,7 +1836,7 @@ body.has-custom-bg .ambient {
       </div>
 
       <!-- Кнопка настроек -->
-      <button class="chrome-icon-btn" id="settingsBtn" aria-label="Настройки и обновления" title="Настройки">
+      <button type="button" class="chrome-icon-btn" id="settingsBtn" aria-label="Настройки и обновления" title="Настройки">
         <svg viewBox="0 0 24 24" aria-hidden="true" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <circle cx="12" cy="12" r="3"/>
           <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/>
@@ -1877,7 +1881,7 @@ body.has-custom-bg .ambient {
       <div class="hero">
 
         <!-- Квантовый логотип с орбитальными кольцами -->
-        <div class="hero-logo-wrap" title="Proton">
+        <div class="hero-logo-wrap" id="heroLogoBtn" title="Proton">
           <svg viewBox="0 0 54 54" aria-hidden="true">
             <defs>
               <linearGradient id="gProtonHero" x1="0" y1="0" x2="1" y2="1">
@@ -1899,7 +1903,7 @@ body.has-custom-bg .ambient {
         </div>
 
         <!-- Поисковая форма на главной -->
-        <form class="hero-form" id="homeForm" autocomplete="off">
+        <form class="hero-form" id="homeForm" autocomplete="off" action="javascript:void(0);" onsubmit="return false;">
           <div class="search-box-lg">
             <svg class="ico-search" viewBox="0 0 24 24" aria-hidden="true"><path d="M10.5 3a7.5 7.5 0 0 1 5.94 12.09l4.24 4.24a1 1 0 0 1-1.41 1.41l-4.24-4.24A7.5 7.5 0 1 1 10.5 3Zm0 2a5.5 5.5 0 1 0 0 11 5.5 5.5 0 0 0 0-11Z"/></svg>
             <input type="search" id="homeInput" name="q" placeholder="Поиск в интернете или веб-адрес…" aria-label="Поисковый запрос" spellcheck="false" autofocus>
@@ -1963,7 +1967,7 @@ body.has-custom-bg .ambient {
           <div id="errorCard" class="answer-card" hidden>
             <h3 style="color:var(--danger); margin-bottom:6px;">Не получилось выполнить поиск</h3>
             <p id="errorText" style="color:var(--text-2); margin-bottom:12px;"></p>
-            <button class="btn-primary" id="retryBtn">Попробовать снова</button>
+            <button type="button" class="btn-primary" id="retryBtn">Попробовать снова</button>
           </div>
 
           <!-- Список найденных сайтов -->
@@ -1971,7 +1975,7 @@ body.has-custom-bg .ambient {
 
           <!-- Кнопка "Загрузить ещё" -->
           <div class="more-wrap" id="moreWrap" hidden>
-            <button class="more-btn" id="moreBtn">Загрузить больше результатов</button>
+            <button type="button" class="more-btn" id="moreBtn">Загрузить больше результатов</button>
           </div>
 
           <!-- Пустое состояние -->
@@ -1995,16 +1999,16 @@ body.has-custom-bg .ambient {
 
   <!-- ПОДВАЛ -->
   <footer class="footer">
-    <span>Proton Browser &copy; 2026 · Версия 2.8.1 · Без рекламы и трекеров</span>
+    <span>Proton Browser &copy; 2026 · Версия 2.8.2 · Без рекламы и трекеров</span>
   </footer>
 
-  <!-- МОДАЛЬНОЕ ОКНО НАСТРОЕК -->
+  <!-- МОДАЛЬНОЕ ОКНО НАСТРОЕК (display: none !important когда закрыто) -->
   <div class="modal-backdrop" id="settingsModal" aria-hidden="true">
     <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="settingsTitle">
       <div class="modal-header">
         <div class="modal-title-wrap">
           <h2 class="modal-title" id="settingsTitle">Настройки Proton</h2>
-          <span class="badge-version" id="settingsVersionBadge">v2.8.1</span>
+          <span class="badge-version" id="settingsVersionBadge">v2.8.2</span>
         </div>
         <button type="button" class="modal-close" id="settingsCloseBtn" aria-label="Закрыть">
           <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
@@ -2082,7 +2086,7 @@ body.has-custom-bg .ambient {
               <div style="display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px;">
                 <input type="file" id="customBgFileInput" accept="image/*" style="display:none;">
                 <button type="button" class="btn-secondary" id="customBgUploadBtn">
-                  <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                  <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="12" x2="12" y2="15"/></svg>
                   <span>Загрузить фото с устройства</span>
                 </button>
                 <button type="button" class="btn-secondary" id="customBgResetBtn" style="color:var(--danger);">Удалить фон</button>
@@ -2166,7 +2170,7 @@ body.has-custom-bg .ambient {
           </div>
         </div>
 
-        <!-- Вкладка: Обновления (ПОЛНОЦЕННОЕ ИСПРАВЛЕННОЕ ОБНОВЛЕНИЕ ЧЕРЕЗ ПРИЛОЖЕНИЕ) -->
+        <!-- Вкладка: Обновления -->
         <div class="tab-panel" id="tabUpdates" role="tabpanel">
           <div style="text-align:center; padding:10px 0 16px;">
             <div style="display:inline-flex; align-items:center; justify-content:center; width:52px; height:52px; border-radius:50%; background:var(--accent-soft); color:var(--accent); margin-bottom:12px;">
@@ -2174,9 +2178,9 @@ body.has-custom-bg .ambient {
             </div>
             <h3 style="font-size:18px; margin-bottom:4px;">Proton Desktop</h3>
             <p style="color:var(--text-3); font-size:12.5px; margin-bottom:16px;">
-              Текущая установленная версия: <b style="color:var(--text);">v2.8.1</b>
+              Текущая установленная версия: <b style="color:var(--text);">v2.8.2</b>
             </p>
-            <button class="btn-primary" id="checkUpdatesBtn" style="margin:0 auto;">
+            <button type="button" class="btn-primary" id="checkUpdatesBtn" style="margin:0 auto;">
               <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/></svg>
               <span>Проверить наличие обновлений</span>
             </button>
@@ -2228,7 +2232,7 @@ body.has-custom-bg .ambient {
     </div>
   </div>
 
-  <!-- МОДАЛЬНОЕ ОКНО АВТОРИЗАЦИИ GOOGLE -->
+  <!-- МОДАЛЬНОЕ ОКНО АВТОРИЗАЦИИ GOOGLE (display: none !important когда закрыто) -->
   <div class="modal-backdrop" id="authModal" aria-hidden="true">
     <div class="modal-card" style="max-width:420px;">
       <div class="modal-header">
@@ -2255,29 +2259,29 @@ body.has-custom-bg .ambient {
           <button type="button" class="auth-tab" id="tabRegisterBtn">Регистрация</button>
         </div>
 
-        <form id="loginForm">
+        <form id="loginForm" action="javascript:void(0);" onsubmit="return false;">
           <div class="auth-input-group">
-            <label class="auth-label">Email / Gmail</label>
+            <label class="auth-label" for="loginEmail">Email / Gmail</label>
             <input type="email" class="auth-input" id="loginEmail" placeholder="your@gmail.com" required>
           </div>
           <div class="auth-input-group">
-            <label class="auth-label">Пароль</label>
+            <label class="auth-label" for="loginPassword">Пароль</label>
             <input type="password" class="auth-input" id="loginPassword" placeholder="••••••••" required>
           </div>
           <button type="submit" class="auth-submit-btn">Войти</button>
         </form>
 
-        <form id="registerForm" style="display:none;">
+        <form id="registerForm" action="javascript:void(0);" onsubmit="return false;" style="display:none;">
           <div class="auth-input-group">
-            <label class="auth-label">Ваше имя</label>
+            <label class="auth-label" for="regName">Ваше имя</label>
             <input type="text" class="auth-input" id="regName" placeholder="Александр" required>
           </div>
           <div class="auth-input-group">
-            <label class="auth-label">Gmail / Email</label>
+            <label class="auth-label" for="regEmail">Gmail / Email</label>
             <input type="email" class="auth-input" id="regEmail" placeholder="your@gmail.com" required>
           </div>
           <div class="auth-input-group">
-            <label class="auth-label">Пароль (от 6 символов)</label>
+            <label class="auth-label" for="regPassword">Пароль (от 6 символов)</label>
             <input type="password" class="auth-input" id="regPassword" placeholder="••••••••" minlength="6" required>
           </div>
           <button type="submit" class="auth-submit-btn">Зарегистрироваться</button>
@@ -2288,7 +2292,7 @@ body.has-custom-bg .ambient {
     </div>
   </div>
 
-  <!-- МОДАЛЬНОЕ ОКНО ЗАКЛАДОК -->
+  <!-- МОДАЛЬНОЕ ОКНО ЗАКЛАДОК (display: none !important когда закрыто) -->
   <div class="modal-backdrop" id="bookmarksModal" aria-hidden="true">
     <div class="modal-card" style="max-width:500px;">
       <div class="modal-header">
@@ -2311,12 +2315,64 @@ body.has-custom-bg .ambient {
   </div>
 
   <!-- ==========================================================================
-       JAVASCRIPT ЛОГИКА PROTON v2.8.1
-       ========================================================================== */
+       JAVASCRIPT ЛОГИКА PROTON v2.8.2
+       ========================================================================== -->
   <script>
 "use strict";
 
 const $ = (id) => document.getElementById(id);
+
+function escapeHtml(s) {
+  return String(s ?? "").replace(/[&<>"']/g, (c) => ({
+    "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;",
+  }[c]));
+}
+
+/* УПРАВЛЕНИЕ МОДАЛЬНЫМИ ОКНАМИ В ГЛОБАЛЬНОЙ ОБЛАСТИ ВИДИМОСТИ */
+function openModal(modalId) {
+  const m = $(modalId);
+  if (m) {
+    m.classList.add("open");
+    m.removeAttribute("aria-hidden");
+  }
+}
+
+function closeModal(modalId) {
+  const m = $(modalId);
+  if (m) {
+    m.classList.remove("open");
+    m.setAttribute("aria-hidden", "true");
+  }
+}
+
+function openSettings(tab = "general") {
+  openModal("settingsModal");
+  switchSettingsTab(tab);
+  loadSettings();
+}
+
+function closeSettings() {
+  closeModal("settingsModal");
+}
+
+function openAuth() {
+  openModal("authModal");
+}
+
+function closeAuth() {
+  closeModal("authModal");
+  const err = $("authErrorMsg");
+  if (err) err.style.display = "none";
+}
+
+function openBookmarks() {
+  openModal("bookmarksModal");
+  updateBookmarksUI();
+}
+
+function closeBookmarks() {
+  closeModal("bookmarksModal");
+}
 
 /* СТИЛИ ОФОРМЛЕНИЯ PROTON (БЕЗ ЭМОДЗИ) */
 const PROTON_STYLES = [
@@ -2768,13 +2824,13 @@ const TabManager = {
     cur.scrollPos = window.scrollY || 0;
     if (document.body.dataset.view === "results") {
       cur.view = "results";
-      cur.resultsHtml = $("resultsList").innerHTML;
-      cur.resultsInfoHtml = $("resultsInfo").innerHTML;
-      cur.answerHtml = $("answerCard").innerHTML;
-      cur.hasAnswer = !$("answerCard").hidden;
-      cur.wikiHtml = $("wikiCard").innerHTML;
-      cur.hasWiki = !$("sideCol").hidden;
-      cur.canLoadMore = !$("moreWrap").hidden;
+      cur.resultsHtml = $("resultsList") ? $("resultsList").innerHTML : "";
+      cur.resultsInfoHtml = $("resultsInfo") ? $("resultsInfo").innerHTML : "";
+      cur.answerHtml = $("answerCard") ? $("answerCard").innerHTML : "";
+      cur.hasAnswer = $("answerCard") ? !$("answerCard").hidden : false;
+      cur.wikiHtml = $("wikiCard") ? $("wikiCard").innerHTML : "";
+      cur.hasWiki = $("sideCol") ? !$("sideCol").hidden : false;
+      cur.canLoadMore = $("moreWrap") ? !$("moreWrap").hidden : false;
     } else {
       cur.view = "home";
     }
@@ -2800,18 +2856,20 @@ const TabManager = {
 
     if (tab.view === "results") {
       document.body.dataset.view = "results";
-      $("homeView").hidden = true;
-      $("resultsView").hidden = false;
-      $("skeletons").hidden = true;
+      if ($("homeView")) $("homeView").hidden = true;
+      if ($("resultsView")) $("resultsView").hidden = false;
+      if ($("skeletons")) $("skeletons").hidden = true;
 
-      $("resultsList").innerHTML = tab.resultsHtml || "";
-      $("resultsInfo").innerHTML = tab.resultsInfoHtml || "";
-      $("answerCard").innerHTML = tab.answerHtml || "";
-      $("answerCard").hidden = !tab.hasAnswer;
-      $("wikiCard").innerHTML = tab.wikiHtml || "";
-      $("sideCol").hidden = !tab.hasWiki;
-      $("moreWrap").hidden = !tab.canLoadMore;
-      $("emptyState").hidden = (tab.resultsHtml && tab.resultsHtml.length > 0);
+      if ($("resultsList")) $("resultsList").innerHTML = tab.resultsHtml || "";
+      if ($("resultsInfo")) $("resultsInfo").innerHTML = tab.resultsInfoHtml || "";
+      if ($("answerCard")) {
+        $("answerCard").innerHTML = tab.answerHtml || "";
+        $("answerCard").hidden = !tab.hasAnswer;
+      }
+      if ($("wikiCard")) $("wikiCard").innerHTML = tab.wikiHtml || "";
+      if ($("sideCol")) $("sideCol").hidden = !tab.hasWiki;
+      if ($("moreWrap")) $("moreWrap").hidden = !tab.canLoadMore;
+      if ($("emptyState")) $("emptyState").hidden = !!(tab.resultsHtml && tab.resultsHtml.length > 0);
 
       if (!tab.resultsHtml && tab.query) {
         runSearch(tab.query, { page: tab.page || 0, fromTab: true });
@@ -2820,8 +2878,8 @@ const TabManager = {
       window.scrollTo({ top: tab.scrollPos || 0 });
     } else {
       document.body.dataset.view = "home";
-      $("homeView").hidden = false;
-      $("resultsView").hidden = true;
+      if ($("homeView")) $("homeView").hidden = false;
+      if ($("resultsView")) $("resultsView").hidden = true;
       window.scrollTo({ top: 0 });
       if ($("homeInput")) $("homeInput").focus();
     }
@@ -2954,8 +3012,10 @@ const TabManager = {
     });
 
     const activeEl = track.querySelector(".chrome-tab.active");
-    if (activeEl) {
-      activeEl.scrollIntoView({ behavior: "smooth", block: "nearest", inline: "nearest" });
+    if (activeEl && typeof activeEl.scrollIntoView === "function") {
+      try {
+        activeEl.scrollIntoView({ behavior: "smooth", block: "nearest", inline: "nearest" });
+      } catch (_) {}
     }
   },
 
@@ -3068,23 +3128,6 @@ function openTabContextMenu(x, y) {
   menu.style.top = y + "px";
 }
 
-document.addEventListener("click", () => {
-  const menu = $("tabContextMenu");
-  if (menu) menu.style.display = "none";
-});
-
-$("ctxReload").addEventListener("click", () => TabManager.reloadActiveTab());
-$("ctxDuplicate").addEventListener("click", () => {
-  if (TabManager.contextTabId) TabManager.duplicateTab(TabManager.contextTabId);
-});
-$("ctxNewTab").addEventListener("click", () => TabManager.createTab({ activate: true }));
-$("ctxClose").addEventListener("click", () => {
-  if (TabManager.contextTabId) TabManager.closeTab(TabManager.contextTabId);
-});
-$("ctxCloseOthers").addEventListener("click", () => {
-  if (TabManager.contextTabId) TabManager.closeOtherTabs(TabManager.contextTabId);
-});
-
 /* ==========================================================================
    ОФЛАЙН ДЕМО-ИНДЕКС (НА СЛУЧАЙ АВТОНОМНОГО ТЕСТИРОВАНИЯ)
    ========================================================================== */
@@ -3122,15 +3165,19 @@ const state = {
 
 async function apiFetch(path, query) {
   if (window.iskatelAPI && window.iskatelAPI.search) {
-    const url = new URL(path, "http://localhost");
-    const q = url.searchParams.get("q") || "";
-    const page = parseInt(url.searchParams.get("page") || "0", 10);
-    const region = url.searchParams.get("region") || "ru-ru";
-    const res = await window.iskatelAPI.search({ q, page, region });
-    return {
-      ok: true,
-      json: async () => res,
-    };
+    try {
+      const url = new URL(path, "http://localhost");
+      const q = url.searchParams.get("q") || "";
+      const page = parseInt(url.searchParams.get("page") || "0", 10);
+      const region = url.searchParams.get("region") || "ru-ru";
+      const res = await window.iskatelAPI.search({ q, page, region });
+      return {
+        ok: true,
+        json: async () => res,
+      };
+    } catch (e) {
+      console.warn("iskatelAPI.search failed:", e);
+    }
   }
   try {
     const res = await fetch(path);
@@ -3145,12 +3192,6 @@ async function apiFetch(path, query) {
   }
 }
 
-function escapeHtml(s) {
-  return String(s ?? "").replace(/[&<>"']/g, (c) => ({
-    "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;",
-  }[c]));
-}
-
 function setInputs(q) {
   if ($("homeInput")) $("homeInput").value = q;
   if ($("omniboxInput")) $("omniboxInput").value = q;
@@ -3162,8 +3203,8 @@ function setInputs(q) {
 
 function showHome() {
   document.body.dataset.view = "home";
-  $("homeView").hidden = false;
-  $("resultsView").hidden = true;
+  if ($("homeView")) $("homeView").hidden = false;
+  if ($("resultsView")) $("resultsView").hidden = true;
   state.query = "";
   state.page = 0;
   setInputs("");
@@ -3173,8 +3214,8 @@ function showHome() {
 
 function showResults() {
   document.body.dataset.view = "results";
-  $("homeView").hidden = true;
-  $("resultsView").hidden = false;
+  if ($("homeView")) $("homeView").hidden = true;
+  if ($("resultsView")) $("resultsView").hidden = false;
 }
 
 async function runSearch(query, { page = 0, append = false, fromTab = false } = {}) {
@@ -3189,27 +3230,37 @@ async function runSearch(query, { page = 0, append = false, fromTab = false } = 
     TabManager.updateActiveTabSearch(query);
   }
 
-  if (state.busy) return;
+  if (state.busy) {
+    // Сбрасываем busy через таймаут если завис
+    return;
+  }
   state.busy = true;
   state.query = query;
   state.page = page;
   setInputs(query);
   hideSuggest();
 
+  // Watchdog таймаут для сброса state.busy гарантированно
+  const watchdog = setTimeout(() => {
+    state.busy = false;
+  }, 10000);
+
   if (!append) {
     showResults();
-    $("resultsList").innerHTML = "";
-    $("answerCard").hidden = true;
-    $("emptyState").hidden = true;
-    $("errorCard").hidden = true;
-    $("moreWrap").hidden = true;
-    $("sideCol").hidden = true;
-    $("skeletons").hidden = false;
-    $("resultsInfo").innerHTML = `Ищем <b>${escapeHtml(query)}</b>…`;
+    if ($("resultsList")) $("resultsList").innerHTML = "";
+    if ($("answerCard")) $("answerCard").hidden = true;
+    if ($("emptyState")) $("emptyState").hidden = true;
+    if ($("errorCard")) $("errorCard").hidden = true;
+    if ($("moreWrap")) $("moreWrap").hidden = true;
+    if ($("sideCol")) $("sideCol").hidden = true;
+    if ($("skeletons")) $("skeletons").hidden = false;
+    if ($("resultsInfo")) $("resultsInfo").innerHTML = `Ищем <b>${escapeHtml(query)}</b>…`;
     window.scrollTo({ top: 0 });
   } else {
-    $("moreBtn").disabled = true;
-    $("moreBtn").textContent = "Загрузка…";
+    if ($("moreBtn")) {
+      $("moreBtn").disabled = true;
+      $("moreBtn").textContent = "Загрузка…";
+    }
   }
 
   const region = (localStorage.getItem("proton-region") || "ru-ru");
@@ -3219,7 +3270,7 @@ async function runSearch(query, { page = 0, append = false, fromTab = false } = 
     const resp = await apiFetch(url, query);
     const data = await resp.json();
 
-    $("skeletons").hidden = true;
+    if ($("skeletons")) $("skeletons").hidden = true;
 
     if (!resp.ok || data.error) {
       if (!append) showError(data.error || "Неизвестная ошибка поиска");
@@ -3234,28 +3285,31 @@ async function runSearch(query, { page = 0, append = false, fromTab = false } = 
       curTab.query = query;
       curTab.title = query;
       curTab.view = "results";
-      curTab.resultsHtml = $("resultsList").innerHTML;
-      curTab.resultsInfoHtml = $("resultsInfo").innerHTML;
-      curTab.answerHtml = $("answerCard").innerHTML;
-      curTab.hasAnswer = !$("answerCard").hidden;
-      curTab.wikiHtml = $("wikiCard").innerHTML;
-      curTab.hasWiki = !$("sideCol").hidden;
-      curTab.canLoadMore = !$("moreWrap").hidden;
+      curTab.resultsHtml = $("resultsList") ? $("resultsList").innerHTML : "";
+      curTab.resultsInfoHtml = $("resultsInfo") ? $("resultsInfo").innerHTML : "";
+      curTab.answerHtml = $("answerCard") ? $("answerCard").innerHTML : "";
+      curTab.hasAnswer = $("answerCard") ? !$("answerCard").hidden : false;
+      curTab.wikiHtml = $("wikiCard") ? $("wikiCard").innerHTML : "";
+      curTab.hasWiki = $("sideCol") ? !$("sideCol").hidden : false;
+      curTab.canLoadMore = $("moreWrap") ? !$("moreWrap").hidden : false;
       TabManager.saveState();
     }
   } catch (err) {
-    $("skeletons").hidden = true;
+    if ($("skeletons")) $("skeletons").hidden = true;
     if (!append) showError(err.message || "Ошибка подключения к сети");
   } finally {
+    clearTimeout(watchdog);
     state.busy = false;
-    $("moreBtn").disabled = false;
-    $("moreBtn").textContent = "Загрузить больше результатов";
+    if ($("moreBtn")) {
+      $("moreBtn").disabled = false;
+      $("moreBtn").textContent = "Загрузить больше результатов";
+    }
   }
 }
 
 function showError(msg) {
-  $("errorCard").hidden = false;
-  $("errorText").textContent = msg;
+  if ($("errorCard")) $("errorCard").hidden = false;
+  if ($("errorText")) $("errorText").textContent = msg;
 }
 
 function renderResults(data, append) {
@@ -3263,12 +3317,12 @@ function renderResults(data, append) {
   const took = data.took_ms != null ? ` (${(data.took_ms / 1000).toFixed(2)} с)` : "";
   const engine = data.engine ? ` · Движок: ${escapeHtml(data.engine)}` : "";
 
-  if (!append) {
+  if (!append && $("resultsInfo")) {
     $("resultsInfo").innerHTML = `Найдено результатов по запросу <b>${escapeHtml(data.query || state.query)}</b>${took}${engine}`;
   }
 
   if (!append && results.length === 0) {
-    $("emptyState").hidden = false;
+    if ($("emptyState")) $("emptyState").hidden = false;
     return;
   }
 
@@ -3281,6 +3335,8 @@ function renderResults(data, append) {
   }
 
   const container = $("resultsList");
+  if (!container) return;
+
   results.forEach(item => {
     const div = document.createElement("div");
     div.className = "result-item";
@@ -3302,30 +3358,36 @@ function renderResults(data, append) {
       </div>
     `;
 
-    div.querySelector("[data-copy]").addEventListener("click", (e) => {
-      const url = e.target.dataset.copy;
-      navigator.clipboard.writeText(url).then(() => {
-        e.target.textContent = "Скопировано!";
-        setTimeout(() => e.target.textContent = "Копировать ссылку", 1500);
+    const copyBtn = div.querySelector("[data-copy]");
+    if (copyBtn) {
+      copyBtn.addEventListener("click", (e) => {
+        const url = e.target.dataset.copy;
+        navigator.clipboard.writeText(url).then(() => {
+          e.target.textContent = "Скопировано!";
+          setTimeout(() => { if (e.target) e.target.textContent = "Копировать ссылку"; }, 1500);
+        });
       });
-    });
+    }
 
     const star = div.querySelector(".star-btn");
-    star.addEventListener("click", () => {
-      toggleBookmark({ url: item.url, title: item.title, domain });
-      star.classList.add("active");
-      const poly = star.querySelector("polygon");
-      if (poly) poly.setAttribute("fill", "currentColor");
-    });
+    if (star) {
+      star.addEventListener("click", () => {
+        toggleBookmark({ url: item.url, title: item.title, domain });
+        star.classList.add("active");
+        const poly = star.querySelector("polygon");
+        if (poly) poly.setAttribute("fill", "currentColor");
+      });
+    }
 
     container.appendChild(div);
   });
 
-  $("moreWrap").hidden = results.length < 10;
+  if ($("moreWrap")) $("moreWrap").hidden = results.length < 10;
 }
 
 function renderAnswer(instant) {
   const card = $("answerCard");
+  if (!card) return;
   card.hidden = false;
   card.innerHTML = `
     <span class="answer-badge">Мгновенный ответ</span>
@@ -3337,6 +3399,7 @@ function renderAnswer(instant) {
 function renderWiki(wiki) {
   const card = $("wikiCard");
   const side = $("sideCol");
+  if (!card || !side) return;
   side.hidden = false;
   card.innerHTML = `
     <span class="answer-badge">Википедия</span>
@@ -3351,6 +3414,7 @@ function renderWiki(wiki) {
    ПОДСКАЗКИ ПРИ ВВОДЕ (AUTOCOMPLETE SUGGESTIONS)
    ========================================================================== */
 function bindSuggest(input, box) {
+  if (!input || !box) return;
   let timer = null;
   input.addEventListener("input", () => {
     clearTimeout(timer);
@@ -3428,12 +3492,6 @@ function hideSuggest() {
   if ($("omniboxSuggest")) $("omniboxSuggest").hidden = true;
 }
 
-document.addEventListener("click", (e) => {
-  if (!e.target.closest(".hero-form") && !e.target.closest(".chrome-omnibox-wrap")) {
-    hideSuggest();
-  }
-});
-
 /* ==========================================================================
    ИСТОРИЯ И НЕДАВНИЕ ЗАПРОСЫ
    ========================================================================== */
@@ -3471,11 +3529,6 @@ function renderRecent() {
   });
   block.hidden = false;
 }
-
-$("clearRecent").addEventListener("click", () => {
-  localStorage.removeItem("proton-recent");
-  renderRecent();
-});
 
 /* ==========================================================================
    ЗАКЛАДКИ ПОЛЬЗОВАТЕЛЯ (BOOKMARKS)
@@ -3526,106 +3579,109 @@ function updateBookmarksUI() {
         <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
       </button>
     `;
-    li.querySelector("[data-del]").addEventListener("click", () => {
-      let cur = getBookmarks().filter(x => x.id !== b.id);
-      localStorage.setItem("proton-bookmarks", JSON.stringify(cur));
-      updateBookmarksUI();
-    });
+    const delBtn = li.querySelector("[data-del]");
+    if (delBtn) {
+      delBtn.addEventListener("click", () => {
+        let cur = getBookmarks().filter(x => x.id !== b.id);
+        localStorage.setItem("proton-bookmarks", JSON.stringify(cur));
+        updateBookmarksUI();
+      });
+    }
     container.appendChild(li);
   });
 }
-
-$("menuBookmarksBtn").addEventListener("click", () => {
-  $("bookmarksModal").classList.add("open");
-  $("bookmarksModal").removeAttribute("aria-hidden");
-  updateBookmarksUI();
-  $("userDropdownMenu").style.display = "none";
-});
-$("bookmarksCloseBtn").addEventListener("click", () => {
-  $("bookmarksModal").classList.remove("open");
-  $("bookmarksModal").setAttribute("aria-hidden", "true");
-});
 
 /* ==========================================================================
    АВТОРИЗАЦИЯ И ПРОФИЛЬ (GOOGLE AUTH)
    ========================================================================== */
 function initAuth() {
   const authOpenBtn = $("authOpenBtn");
-  const authModal = $("authModal");
   const authCloseBtn = $("authCloseBtn");
   const userMenuTrigger = $("userMenuTrigger");
   const userDropdownMenu = $("userDropdownMenu");
 
-  function openAuth() {
-    authModal.classList.add("open");
-    authModal.removeAttribute("aria-hidden");
-  }
-  function closeAuth() {
-    authModal.classList.remove("open");
-    authModal.setAttribute("aria-hidden", "true");
-    $("authErrorMsg").style.display = "none";
-  }
+  if (authOpenBtn) authOpenBtn.addEventListener("click", () => openAuth());
+  if (authCloseBtn) authCloseBtn.addEventListener("click", () => closeAuth());
 
-  if (authOpenBtn) authOpenBtn.addEventListener("click", openAuth);
-  if (authCloseBtn) authCloseBtn.addEventListener("click", closeAuth);
-
-  if (userMenuTrigger) {
+  if (userMenuTrigger && userDropdownMenu) {
     userMenuTrigger.addEventListener("click", (e) => {
       e.stopPropagation();
       userDropdownMenu.style.display = (userDropdownMenu.style.display === "none") ? "block" : "none";
     });
   }
 
-  document.addEventListener("click", (e) => {
-    if (!e.target.closest("#userMenuWrap")) {
-      userDropdownMenu.style.display = "none";
-    }
-    if (e.target === authModal) closeAuth();
-    if (e.target === $("settingsModal")) closeSettings();
-    if (e.target === $("bookmarksModal")) $("bookmarksModal").classList.remove("open");
-  });
+  const tabLoginBtn = $("tabLoginBtn");
+  const tabRegisterBtn = $("tabRegisterBtn");
+  const loginForm = $("loginForm");
+  const registerForm = $("registerForm");
 
-  $("tabLoginBtn").addEventListener("click", () => {
-    $("tabLoginBtn").classList.add("active");
-    $("tabRegisterBtn").classList.remove("active");
-    $("loginForm").style.display = "block";
-    $("registerForm").style.display = "none";
-  });
-  $("tabRegisterBtn").addEventListener("click", () => {
-    $("tabRegisterBtn").classList.add("active");
-    $("tabLoginBtn").classList.remove("active");
-    $("registerForm").style.display = "block";
-    $("loginForm").style.display = "none";
-  });
+  if (tabLoginBtn && tabRegisterBtn && loginForm && registerForm) {
+    tabLoginBtn.addEventListener("click", () => {
+      tabLoginBtn.classList.add("active");
+      tabRegisterBtn.classList.remove("active");
+      loginForm.style.display = "block";
+      registerForm.style.display = "none";
+    });
+    tabRegisterBtn.addEventListener("click", () => {
+      tabRegisterBtn.classList.add("active");
+      tabLoginBtn.classList.remove("active");
+      registerForm.style.display = "block";
+      loginForm.style.display = "none";
+    });
+  }
 
-  $("googleQuickSignInBtn").addEventListener("click", () => {
-    const fakeUser = {
-      name: "Пользователь Proton",
-      email: "user.proton@gmail.com",
-      avatar: "P"
-    };
-    saveUserSession(fakeUser);
-    closeAuth();
-  });
-
-  $("loginForm").addEventListener("submit", (e) => {
-    e.preventDefault();
-    const email = $("loginEmail").value.trim();
-    if (email) {
-      saveUserSession({
-        name: email.split("@")[0],
-        email: email,
-        avatar: email.charAt(0).toUpperCase()
-      });
+  const googleBtn = $("googleQuickSignInBtn");
+  if (googleBtn) {
+    googleBtn.addEventListener("click", () => {
+      const fakeUser = {
+        name: "Пользователь Proton",
+        email: "user.proton@gmail.com",
+        avatar: "P"
+      };
+      saveUserSession(fakeUser);
       closeAuth();
-    }
-  });
+    });
+  }
 
-  $("menuLogoutBtn").addEventListener("click", () => {
-    localStorage.removeItem("proton-user");
-    updateUserUI(null);
-    userDropdownMenu.style.display = "none";
-  });
+  if (loginForm) {
+    loginForm.addEventListener("submit", (e) => {
+      e.preventDefault();
+      const email = $("loginEmail") ? $("loginEmail").value.trim() : "";
+      if (email) {
+        saveUserSession({
+          name: email.split("@")[0],
+          email: email,
+          avatar: email.charAt(0).toUpperCase()
+        });
+        closeAuth();
+      }
+    });
+  }
+
+  if (registerForm) {
+    registerForm.addEventListener("submit", (e) => {
+      e.preventDefault();
+      const email = $("regEmail") ? $("regEmail").value.trim() : "";
+      const name = $("regName") ? $("regName").value.trim() : "";
+      if (email) {
+        saveUserSession({
+          name: name || email.split("@")[0],
+          email: email,
+          avatar: (name || email).charAt(0).toUpperCase()
+        });
+        closeAuth();
+      }
+    });
+  }
+
+  const logoutBtn = $("menuLogoutBtn");
+  if (logoutBtn) {
+    logoutBtn.addEventListener("click", () => {
+      localStorage.removeItem("proton-user");
+      updateUserUI(null);
+      if (userDropdownMenu) userDropdownMenu.style.display = "none";
+    });
+  }
 
   try {
     const savedUser = JSON.parse(localStorage.getItem("proton-user") || "null");
@@ -3644,24 +3700,73 @@ function updateUserUI(user) {
   const authBtn = $("authOpenBtn");
   const userWrap = $("userMenuWrap");
   if (user) {
-    authBtn.style.display = "none";
-    userWrap.style.display = "block";
-    $("headerUserName").textContent = user.name;
-    $("headerUserAvatar").textContent = user.avatar || user.name.charAt(0).toUpperCase();
-    $("menuUserName").textContent = user.name;
-    $("menuUserEmail").textContent = user.email;
-    $("menuUserAvatar").textContent = user.avatar || user.name.charAt(0).toUpperCase();
+    if (authBtn) authBtn.style.display = "none";
+    if (userWrap) userWrap.style.display = "block";
+    if ($("headerUserName")) $("headerUserName").textContent = user.name;
+    if ($("headerUserAvatar")) $("headerUserAvatar").textContent = user.avatar || user.name.charAt(0).toUpperCase();
+    if ($("menuUserName")) $("menuUserName").textContent = user.name;
+    if ($("menuUserEmail")) $("menuUserEmail").textContent = user.email;
+    if ($("menuUserAvatar")) $("menuUserAvatar").textContent = user.avatar || user.name.charAt(0).toUpperCase();
   } else {
-    authBtn.style.display = "inline-flex";
-    userWrap.style.display = "none";
+    if (authBtn) authBtn.style.display = "inline-flex";
+    if (userWrap) userWrap.style.display = "none";
   }
 }
 
 /* ==========================================================================
    НАСТРОЙКИ И ПОЛНОЦЕННОЕ ОБНОВЛЕНИЕ ЧЕРЕЗ ПРИЛОЖЕНИЕ (UPDATER)
    ========================================================================== */
+function switchSettingsTab(name) {
+  const tabs = document.querySelectorAll(".modal-tab");
+  tabs.forEach(t => t.classList.toggle("active", t.dataset.tab === name));
+  if ($("tabGeneral")) $("tabGeneral").classList.toggle("active", name === "general");
+  if ($("tabAppearance")) $("tabAppearance").classList.toggle("active", name === "appearance");
+  if ($("tabUpdates")) $("tabUpdates").classList.toggle("active", name === "updates");
+}
+
+function loadSettings() {
+  const s = getSettings();
+  if ($("settingEngine")) $("settingEngine").value = s.engine || "auto";
+  if ($("settingRegion")) $("settingRegion").value = s.region || "ru-ru";
+  if ($("settingFontSize")) $("settingFontSize").value = s.fontSize || "medium";
+  if ($("settingDensity")) $("settingDensity").value = s.density || "normal";
+  if ($("settingShowWiki")) $("settingShowWiki").checked = s.showWiki !== false;
+  if ($("settingShowInstant")) $("settingShowInstant").checked = s.showInstant !== false;
+  if ($("settingShowSuggestions")) $("settingShowSuggestions").checked = s.showSuggestions !== false;
+  if ($("settingAmbientBlobs")) $("settingAmbientBlobs").checked = s.ambientBlobs !== false;
+  if ($("settingShowQuickTags")) $("settingShowQuickTags").checked = s.showQuickTags === true;
+}
+
+function saveSettings() {
+  const s = {
+    engine: $("settingEngine") ? $("settingEngine").value : "auto",
+    region: $("settingRegion") ? $("settingRegion").value : "ru-ru",
+    fontSize: $("settingFontSize") ? $("settingFontSize").value : "medium",
+    density: $("settingDensity") ? $("settingDensity").value : "normal",
+    showWiki: $("settingShowWiki") ? $("settingShowWiki").checked : true,
+    showInstant: $("settingShowInstant") ? $("settingShowInstant").checked : true,
+    showSuggestions: $("settingShowSuggestions") ? $("settingShowSuggestions").checked : true,
+    ambientBlobs: $("settingAmbientBlobs") ? $("settingAmbientBlobs").checked : true,
+    showQuickTags: $("settingShowQuickTags") ? $("settingShowQuickTags").checked : false
+  };
+  try {
+    localStorage.setItem("proton-settings", JSON.stringify(s));
+    localStorage.setItem("proton-region", s.region);
+  } catch (_) {}
+
+  document.documentElement.setAttribute("data-font", s.fontSize);
+  document.documentElement.setAttribute("data-density", s.density);
+  document.documentElement.setAttribute("data-ambient", s.ambientBlobs ? "true" : "false");
+
+  const quickTagsEl = $("quickTags");
+  if (quickTagsEl) {
+    quickTagsEl.hidden = !s.showQuickTags;
+  }
+
+  closeSettings();
+}
+
 function initSettings() {
-  const modal = $("settingsModal");
   const openBtn = $("settingsBtn");
   const menuBtn = $("menuSettingsBtn");
   const closeBtn = $("settingsCloseBtn");
@@ -3669,79 +3774,18 @@ function initSettings() {
   const saveBtn = $("settingsSaveBtn");
   const tabs = document.querySelectorAll(".modal-tab");
 
-  function openSettings(tab = "general") {
-    modal.classList.add("open");
-    modal.removeAttribute("aria-hidden");
-    switchSettingsTab(tab);
-    loadSettings();
-  }
-  function closeSettings() {
-    modal.classList.remove("open");
-    modal.setAttribute("aria-hidden", "true");
-  }
-
   if (openBtn) openBtn.addEventListener("click", () => openSettings("general"));
   if (menuBtn) menuBtn.addEventListener("click", () => {
     openSettings("appearance");
-    $("userDropdownMenu").style.display = "none";
+    if ($("userDropdownMenu")) $("userDropdownMenu").style.display = "none";
   });
-  if (closeBtn) closeBtn.addEventListener("click", closeSettings);
-  if (cancelBtn) cancelBtn.addEventListener("click", closeSettings);
-
-  function switchSettingsTab(name) {
-    tabs.forEach(t => t.classList.toggle("active", t.dataset.tab === name));
-    $("tabGeneral").classList.toggle("active", name === "general");
-    $("tabAppearance").classList.toggle("active", name === "appearance");
-    $("tabUpdates").classList.toggle("active", name === "updates");
-  }
+  if (closeBtn) closeBtn.addEventListener("click", () => closeSettings());
+  if (cancelBtn) cancelBtn.addEventListener("click", () => closeSettings());
+  if (saveBtn) saveBtn.addEventListener("click", () => saveSettings());
 
   tabs.forEach(t => {
     t.addEventListener("click", () => switchSettingsTab(t.dataset.tab));
   });
-
-  function loadSettings() {
-    const s = getSettings();
-    if ($("settingEngine")) $("settingEngine").value = s.engine || "auto";
-    if ($("settingRegion")) $("settingRegion").value = s.region || "ru-ru";
-    if ($("settingFontSize")) $("settingFontSize").value = s.fontSize || "medium";
-    if ($("settingDensity")) $("settingDensity").value = s.density || "normal";
-    if ($("settingShowWiki")) $("settingShowWiki").checked = s.showWiki !== false;
-    if ($("settingShowInstant")) $("settingShowInstant").checked = s.showInstant !== false;
-    if ($("settingShowSuggestions")) $("settingShowSuggestions").checked = s.showSuggestions !== false;
-    if ($("settingAmbientBlobs")) $("settingAmbientBlobs").checked = s.ambientBlobs !== false;
-    if ($("settingShowQuickTags")) $("settingShowQuickTags").checked = s.showQuickTags === true;
-  }
-
-  function saveSettings() {
-    const s = {
-      engine: $("settingEngine").value,
-      region: $("settingRegion").value,
-      fontSize: $("settingFontSize").value,
-      density: $("settingDensity").value,
-      showWiki: $("settingShowWiki").checked,
-      showInstant: $("settingShowInstant").checked,
-      showSuggestions: $("settingShowSuggestions").checked,
-      ambientBlobs: $("settingAmbientBlobs").checked,
-      showQuickTags: $("settingShowQuickTags").checked
-    };
-    try {
-      localStorage.setItem("proton-settings", JSON.stringify(s));
-      localStorage.setItem("proton-region", s.region);
-    } catch (_) {}
-
-    document.documentElement.setAttribute("data-font", s.fontSize);
-    document.documentElement.setAttribute("data-density", s.density);
-    document.documentElement.setAttribute("data-ambient", s.ambientBlobs ? "true" : "false");
-
-    const quickTagsEl = $("quickTags");
-    if (quickTagsEl) {
-      quickTagsEl.hidden = !s.showQuickTags;
-    }
-
-    closeSettings();
-  }
-
-  if (saveBtn) saveBtn.addEventListener("click", saveSettings);
 
   /* ---------- ЛОГИКА ОБНОВЛЕНИЯ ЧЕРЕЗ ПРИЛОЖЕНИЕ ---------- */
   let updateInfo = null;
@@ -3763,8 +3807,8 @@ function initSettings() {
 
   if (checkUpdatesBtn) {
     checkUpdatesBtn.addEventListener("click", async () => {
-      updateStatusText.textContent = "Проверяем наличие обновлений на GitHub…";
-      updateFoundCard.style.display = "none";
+      if (updateStatusText) updateStatusText.textContent = "Проверяем наличие обновлений на GitHub…";
+      if (updateFoundCard) updateFoundCard.style.display = "none";
       checkUpdatesBtn.disabled = true;
 
       try {
@@ -3774,49 +3818,48 @@ function initSettings() {
 
           if (info && info.hasUpdate) {
             updateInfo = info;
-            updateStatusText.innerHTML = `<span style="color:#10b981;">Доступно новое обновление: Proton v${escapeHtml(info.latestVersion)}!</span>`;
-            updateNewVersionTitle.textContent = "Proton " + (info.latestTag || ("v" + info.latestVersion));
+            if (updateStatusText) updateStatusText.innerHTML = `<span style="color:#10b981;">Доступно новое обновление: Proton v${escapeHtml(info.latestVersion)}!</span>`;
+            if (updateNewVersionTitle) updateNewVersionTitle.textContent = "Proton " + (info.latestTag || ("v" + info.latestVersion));
             
             if (info.asset && info.asset.size) {
               const mb = (info.asset.size / (1024 * 1024)).toFixed(1);
-              updateFileSizeText.textContent = `${info.asset.name} (${mb} МБ)`;
+              if (updateFileSizeText) updateFileSizeText.textContent = `${info.asset.name} (${mb} МБ)`;
             } else if (info.expectedAsset) {
-              updateFileSizeText.textContent = info.expectedAsset;
+              if (updateFileSizeText) updateFileSizeText.textContent = info.expectedAsset;
             } else {
-              updateFileSizeText.textContent = "";
+              if (updateFileSizeText) updateFileSizeText.textContent = "";
             }
 
-            updateReleaseNotesBox.textContent = info.releaseNotes || "Улучшения производительности и исправления ошибок.";
-            startUpdateBtnText.textContent = "Скачать и установить обновление";
-            startUpdateBtn.disabled = false;
-            updateProgressWrap.style.display = "none";
-            updateFoundCard.style.display = "block";
+            if (updateReleaseNotesBox) updateReleaseNotesBox.textContent = info.releaseNotes || "Улучшения производительности и исправления ошибок.";
+            if (startUpdateBtnText) startUpdateBtnText.textContent = "Скачать и установить обновление";
+            if (startUpdateBtn) startUpdateBtn.disabled = false;
+            if (updateProgressWrap) updateProgressWrap.style.display = "none";
+            if (updateFoundCard) updateFoundCard.style.display = "block";
           } else {
-            updateStatusText.innerHTML = `<span style="color:#10b981;">У вас установлена самая последняя версия Proton (v2.8.1)!</span>`;
+            if (updateStatusText) updateStatusText.innerHTML = `<span style="color:#10b981;">У вас установлена самая последняя версия Proton (v2.8.2)!</span>`;
           }
         } else {
           checkUpdatesBtn.disabled = false;
-          updateStatusText.textContent = "В веб-режиме автообновление недоступно. Установите настольную версию Proton.";
+          if (updateStatusText) updateStatusText.textContent = "В веб-режиме автообновление недоступно. Установите настольную версию Proton.";
         }
       } catch (err) {
         checkUpdatesBtn.disabled = false;
-        updateStatusText.textContent = "Ошибка при проверке обновлений: " + err.message;
+        if (updateStatusText) updateStatusText.textContent = "Ошибка при проверке обновлений: " + err.message;
       }
     });
   }
 
-  // Клик по кнопке "Скачать и установить" / "Запустить установку"
   if (startUpdateBtn) {
     startUpdateBtn.addEventListener("click", async () => {
       if (downloadedInstallerPath) {
-        startUpdateBtnText.textContent = "Запуск установщика…";
+        if (startUpdateBtnText) startUpdateBtnText.textContent = "Запуск установщика…";
         startUpdateBtn.disabled = true;
         try {
           await window.iskatelAPI.installUpdate({ filePath: downloadedInstallerPath });
         } catch (e) {
           alert("Не удалось запустить установщик: " + e.message);
           startUpdateBtn.disabled = false;
-          startUpdateBtnText.textContent = "Попробовать запустить снова";
+          if (startUpdateBtnText) startUpdateBtnText.textContent = "Попробовать запустить снова";
         }
         return;
       }
@@ -3833,18 +3876,18 @@ function initSettings() {
       }
 
       startUpdateBtn.disabled = true;
-      startUpdateBtnText.textContent = "Загрузка обновления…";
-      updateProgressWrap.style.display = "block";
-      updateProgressBar.style.width = "0%";
-      updateProgressPercent.textContent = "0%";
-      updateProgressLabel.textContent = "Соединение с сервером GitHub…";
+      if (startUpdateBtnText) startUpdateBtnText.textContent = "Загрузка обновления…";
+      if (updateProgressWrap) updateProgressWrap.style.display = "block";
+      if (updateProgressBar) updateProgressBar.style.width = "0%";
+      if (updateProgressPercent) updateProgressPercent.textContent = "0%";
+      if (updateProgressLabel) updateProgressLabel.textContent = "Соединение с сервером GitHub…";
 
       if (window.iskatelAPI.onDownloadProgress) {
         window.iskatelAPI.onDownloadProgress((prog) => {
           const pct = prog.percent || 0;
-          updateProgressBar.style.width = pct + "%";
-          updateProgressPercent.textContent = pct + "%";
-          if (prog.total > 0) {
+          if (updateProgressBar) updateProgressBar.style.width = pct + "%";
+          if (updateProgressPercent) updateProgressPercent.textContent = pct + "%";
+          if (prog.total > 0 && updateProgressLabel) {
             const mbDone = (prog.downloaded / (1024 * 1024)).toFixed(1);
             const mbTotal = (prog.total / (1024 * 1024)).toFixed(1);
             updateProgressLabel.textContent = `Загружено: ${mbDone} из ${mbTotal} МБ…`;
@@ -3860,18 +3903,18 @@ function initSettings() {
 
         if (res && res.ok && res.filePath) {
           downloadedInstallerPath = res.filePath;
-          updateProgressBar.style.width = "100%";
-          updateProgressPercent.textContent = "100%";
-          updateProgressLabel.textContent = "Обновление успешно загружено!";
+          if (updateProgressBar) updateProgressBar.style.width = "100%";
+          if (updateProgressPercent) updateProgressPercent.textContent = "100%";
+          if (updateProgressLabel) updateProgressLabel.textContent = "Обновление успешно загружено!";
           startUpdateBtn.disabled = false;
-          startUpdateBtnText.textContent = "Запустить установку и обновить";
+          if (startUpdateBtnText) startUpdateBtnText.textContent = "Запустить установку и обновить";
         } else {
           throw new Error(res.error || "Не удалось загрузить файл установщика");
         }
       } catch (err) {
         startUpdateBtn.disabled = false;
-        startUpdateBtnText.textContent = "Попробовать скачать снова";
-        updateProgressLabel.textContent = "Ошибка загрузки: " + err.message;
+        if (startUpdateBtnText) startUpdateBtnText.textContent = "Попробовать скачать снова";
+        if (updateProgressLabel) updateProgressLabel.textContent = "Ошибка загрузки: " + err.message;
       }
     });
   }
@@ -3898,14 +3941,14 @@ function getSettings() {
    ИНИЦИАЛИЗАЦИЯ И СВЯЗЫВАНИЕ ЭЛЕМЕНТОВ
    ========================================================================== */
 function init() {
-  initThemeStyles();
-  WallpaperManager.init();
-  TabManager.init();
-  initAuth();
-  initSettings();
-  initVoiceSearch();
-  updateBookmarksUI();
-  renderRecent();
+  try { initThemeStyles(); } catch (e) { console.error("initThemeStyles error:", e); }
+  try { WallpaperManager.init(); } catch (e) { console.error("WallpaperManager error:", e); }
+  try { TabManager.init(); } catch (e) { console.error("TabManager error:", e); }
+  try { initAuth(); } catch (e) { console.error("initAuth error:", e); }
+  try { initSettings(); } catch (e) { console.error("initSettings error:", e); }
+  try { initVoiceSearch(); } catch (e) { console.error("initVoiceSearch error:", e); }
+  try { updateBookmarksUI(); } catch (e) { console.error("updateBookmarksUI error:", e); }
+  try { renderRecent(); } catch (e) { console.error("renderRecent error:", e); }
 
   const s = getSettings();
   if (s.fontSize) document.documentElement.setAttribute("data-font", s.fontSize);
@@ -3917,11 +3960,18 @@ function init() {
     quickTagsEl.hidden = (s.showQuickTags !== true);
   }
 
+  // Клик по логотипу — переход на домашнюю страницу
+  const heroLogoBtn = $("heroLogoBtn");
+  if (heroLogoBtn) {
+    heroLogoBtn.addEventListener("click", () => showHome());
+  }
+
+  // Поисковые формы
   const homeForm = $("homeForm");
   if (homeForm) {
     homeForm.addEventListener("submit", (e) => {
       e.preventDefault();
-      runSearch($("homeInput").value);
+      runSearch($("homeInput") ? $("homeInput").value : "");
     });
   }
 
@@ -3929,23 +3979,34 @@ function init() {
   if (omniboxForm) {
     omniboxForm.addEventListener("submit", (e) => {
       e.preventDefault();
-      runSearch($("omniboxInput").value);
+      runSearch($("omniboxInput") ? $("omniboxInput").value : "");
     });
   }
 
-  bindSuggest($("homeInput"), $("homeSuggest"));
-  bindSuggest($("omniboxInput"), $("omniboxSuggest"));
+  if ($("homeInput") && $("homeSuggest")) bindSuggest($("homeInput"), $("homeSuggest"));
+  if ($("omniboxInput") && $("omniboxSuggest")) bindSuggest($("omniboxInput"), $("omniboxSuggest"));
 
-  $("homeClear").addEventListener("click", () => {
-    $("homeInput").value = "";
-    $("homeClear").hidden = true;
-    $("homeInput").focus();
-  });
-  $("omniboxClear").addEventListener("click", () => {
-    $("omniboxInput").value = "";
-    $("omniboxClear").hidden = true;
-    $("omniboxInput").focus();
-  });
+  const homeClear = $("homeClear");
+  if (homeClear) {
+    homeClear.addEventListener("click", () => {
+      if ($("homeInput")) {
+        $("homeInput").value = "";
+        $("homeInput").focus();
+      }
+      homeClear.hidden = true;
+    });
+  }
+
+  const omniClear = $("omniboxClear");
+  if (omniClear) {
+    omniClear.addEventListener("click", () => {
+      if ($("omniboxInput")) {
+        $("omniboxInput").value = "";
+        $("omniboxInput").focus();
+      }
+      omniClear.hidden = true;
+    });
+  }
 
   document.querySelectorAll(".quick-chip[data-query]").forEach(chip => {
     chip.addEventListener("click", () => {
@@ -3953,16 +4014,85 @@ function init() {
     });
   });
 
-  $("moreBtn").addEventListener("click", () => {
-    runSearch(state.query, { page: state.page + 1, append: true });
+  const clearRecentBtn = $("clearRecent");
+  if (clearRecentBtn) {
+    clearRecentBtn.addEventListener("click", () => {
+      localStorage.removeItem("proton-recent");
+      renderRecent();
+    });
+  }
+
+  const menuBookmarksBtn = $("menuBookmarksBtn");
+  if (menuBookmarksBtn) {
+    menuBookmarksBtn.addEventListener("click", () => {
+      openBookmarks();
+      if ($("userDropdownMenu")) $("userDropdownMenu").style.display = "none";
+    });
+  }
+
+  const bookmarksCloseBtn = $("bookmarksCloseBtn");
+  if (bookmarksCloseBtn) {
+    bookmarksCloseBtn.addEventListener("click", () => closeBookmarks());
+  }
+
+  const moreBtn = $("moreBtn");
+  if (moreBtn) {
+    moreBtn.addEventListener("click", () => {
+      runSearch(state.query, { page: state.page + 1, append: true });
+    });
+  }
+
+  const retryBtn = $("retryBtn");
+  if (retryBtn) {
+    retryBtn.addEventListener("click", () => {
+      runSearch(state.query, { page: state.page });
+    });
+  }
+
+  // Контекстное меню вкладок
+  const ctxReload = $("ctxReload");
+  if (ctxReload) ctxReload.addEventListener("click", () => TabManager.reloadActiveTab());
+  const ctxDuplicate = $("ctxDuplicate");
+  if (ctxDuplicate) ctxDuplicate.addEventListener("click", () => {
+    if (TabManager.contextTabId) TabManager.duplicateTab(TabManager.contextTabId);
+  });
+  const ctxNewTab = $("ctxNewTab");
+  if (ctxNewTab) ctxNewTab.addEventListener("click", () => TabManager.createTab({ activate: true }));
+  const ctxClose = $("ctxClose");
+  if (ctxClose) ctxClose.addEventListener("click", () => {
+    if (TabManager.contextTabId) TabManager.closeTab(TabManager.contextTabId);
+  });
+  const ctxCloseOthers = $("ctxCloseOthers");
+  if (ctxCloseOthers) ctxCloseOthers.addEventListener("click", () => {
+    if (TabManager.contextTabId) TabManager.closeOtherTabs(TabManager.contextTabId);
   });
 
-  $("retryBtn").addEventListener("click", () => {
-    runSearch(state.query, { page: state.page });
+  // Закрытие меню и модалок по клику вне области
+  document.addEventListener("click", (e) => {
+    const ctxMenu = $("tabContextMenu");
+    if (ctxMenu) ctxMenu.style.display = "none";
+
+    const userDropdown = $("userDropdownMenu");
+    if (userDropdown && !e.target.closest("#userMenuWrap")) {
+      userDropdown.style.display = "none";
+    }
+
+    if (!e.target.closest(".hero-form") && !e.target.closest(".chrome-omnibox-wrap")) {
+      hideSuggest();
+    }
+
+    if (e.target === $("authModal")) closeAuth();
+    if (e.target === $("settingsModal")) closeSettings();
+    if (e.target === $("bookmarksModal")) closeBookmarks();
   });
 }
 
-document.addEventListener("DOMContentLoaded", init);
+// Запуск инициализации гарантированно: и если загружается, и если уже загружен
+if (document.readyState === "loading") {
+  document.addEventListener("DOMContentLoaded", init);
+} else {
+  init();
+}
   </script>
 </body>
 </html>

@@ -140,7 +140,7 @@ jobs:
       - name: Подготовка директории релиза
         run: |
           mkdir -p release-assets
-          find all-artifacts -type f \( -name "iskatel-win64-setup.exe" -o -name "iskatel-linux-amd64.deb" -o -name "iskatel-mac-arm64.dmg" -o -name "iskatel-mac-intel.dmg" \) -exec cp {} release-assets/ \;
+          find all-artifacts -type f \( -name "iskatel-win64-setup.exe" -o -name "iskatel-win64-portable.exe" -o -name "iskatel-linux-amd64.deb" -o -name "iskatel-mac-arm64.dmg" -o -name "iskatel-mac-intel.dmg" \) -exec cp {} release-assets/ \;
           echo "=== Готовые к загрузке файлы ==="
           ls -lh release-assets/
 

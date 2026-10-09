@@ -110,6 +110,8 @@ input { font-family: inherit; }
 
 /* ---- верхняя панель ---- */
 .topbar {
+  z-index: 100;
+  pointer-events: auto;
   position: sticky;
   top: 0;
   z-index: 50;
@@ -125,6 +127,8 @@ input { font-family: inherit; }
 }
 
 body[data-view="results"] .topbar {
+  z-index: 100;
+  pointer-events: auto;
   border-bottom-color: var(--border);
   padding: 12px 22px;
 }
@@ -150,7 +154,10 @@ body[data-view="results"] .topbar {
 
 body[data-view="home"] .top-search { opacity: 0; pointer-events: none; }
 
-.top-actions { display: flex; gap: 8px; flex-shrink: 0; }
+.top-actions {
+  position: relative;
+  z-index: 110;
+  pointer-events: auto; display: flex; gap: 8px; flex-shrink: 0; }
 
 .icon-btn {
   width: 40px;
@@ -771,7 +778,9 @@ mark {
 }
 
 @media (max-width: 640px) {
-  .topbar { padding: 10px 12px; gap: 10px; }
+  .topbar {
+  z-index: 100;
+  pointer-events: auto; padding: 10px 12px; gap: 10px; }
   .brand-name { display: none; }
   .search-box { height: 46px; padding: 0 14px; }
   .search-box-lg { height: 54px; }
@@ -791,20 +800,27 @@ mark {
   .modal-backdrop {
     position: fixed;
     inset: 0;
-    background: rgba(15, 23, 42, 0.45);
+    background: rgba(15, 23, 42, 0.55);
     backdrop-filter: blur(8px);
     -webkit-backdrop-filter: blur(8px);
-    display: flex;
+    display: none !important;
     align-items: center;
     justify-content: center;
     padding: 20px;
-    z-index: 1000;
+    z-index: 2000;
     opacity: 0;
     pointer-events: none;
     transition: opacity 0.2s ease;
   }
   .modal-backdrop.open {
-    opacity: 1;
+    display: flex !important;
+    opacity: 1 !important;
+    pointer-events: auto !important;
+  }
+  .modal-backdrop.open .modal-card {
+    pointer-events: auto !important;
+  }
+  .modal-card {
     pointer-events: auto;
   }
   .modal-card {
@@ -1193,6 +1209,8 @@ mark {
 
   /* ---------- Угловой бейдж версии (v2.5) ---------- */
   .corner-version {
+    z-index: 1500 !important;
+    pointer-events: auto !important;
     position: fixed;
     bottom: 20px;
     right: 20px;
@@ -3174,22 +3192,46 @@ window.addEventListener("popstate", () => {
   }
 
   // Вход через Google (Gmail)
-  if (googleAuthBtn) {
-    googleAuthBtn.addEventListener("click", async () => {
-      showError("");
-      // Диалог выбора / ввода аккаунта Google
-      const promptEmail = prompt("Введите ваш адрес Gmail (например, usman@gmail.com):", "user@gmail.com");
-      if (!promptEmail) return;
+  const googleChoiceBlock = $("googleChoiceBlock");
+  const googleInputBlock = $("googleInputBlock");
+  const googleEmailField = $("googleEmailField");
+  const googleBackBtn = $("googleBackBtn");
+  const googleSubmitBtn = $("googleSubmitBtn");
 
-      const clean = promptEmail.trim().toLowerCase();
-      if (!clean.includes("@")) {
-        alert("Пожалуйста, введите корректный адрес электронной почты.");
+  if (googleAuthBtn) {
+    googleAuthBtn.addEventListener("click", () => {
+      showError("");
+      if (googleChoiceBlock) googleChoiceBlock.style.display = "none";
+      if (googleInputBlock) {
+        googleInputBlock.style.display = "block";
+        if (googleEmailField) {
+          googleEmailField.focus();
+        }
+      }
+    });
+  }
+
+  if (googleBackBtn) {
+    googleBackBtn.addEventListener("click", () => {
+      showError("");
+      if (googleChoiceBlock) googleChoiceBlock.style.display = "block";
+      if (googleInputBlock) googleInputBlock.style.display = "none";
+    });
+  }
+
+  if (googleSubmitBtn) {
+    googleSubmitBtn.addEventListener("click", async () => {
+      showError("");
+      const val = (googleEmailField ? googleEmailField.value : "").trim().toLowerCase();
+      if (!val || !val.includes("@")) {
+        showError("Пожалуйста, введите корректный адрес электронной почты (Gmail).");
         return;
       }
 
-      const defaultName = clean.split("@")[0];
+      const cleanEmail = val.endsWith("@gmail.com") || val.includes("@") ? val : val + "@gmail.com";
+      const defaultName = cleanEmail.split("@")[0];
       const gUser = {
-        email: clean,
+        email: cleanEmail,
         name: defaultName.charAt(0).toUpperCase() + defaultName.slice(1),
         avatar: "",
       };
@@ -3203,8 +3245,9 @@ window.addEventListener("popstate", () => {
           showError(res.error || "Ошибка входа через Google");
         }
       } else {
-        localStorage.setItem("iskatel_active_user", JSON.stringify({ ...gUser, bookmarks: [] }));
-        renderUserState({ ...gUser, bookmarks: [] });
+        const fullUser = { ...gUser, bookmarks: [] };
+        localStorage.setItem("iskatel_active_user", JSON.stringify(fullUser));
+        renderUserState(fullUser);
         closeAuthModal();
       }
     });
@@ -3379,16 +3422,38 @@ window.addEventListener("popstate", () => {
       </div>
 
       <div class="modal-body">
-        <!-- Кнопка быстрого входа Google / Gmail -->
-        <button type="button" class="btn-google-sign-in" id="googleAuthBtn">
-          <svg class="ico-google" viewBox="0 0 24 24" width="20" height="20">
-            <path fill="#4285F4" d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.8-2.4 3.65v3.05h3.88c2.27-2.09 3.66-5.17 3.66-9.14z"/>
-            <path fill="#34A853" d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.05c-1.08.72-2.45 1.16-4.05 1.16-3.12 0-5.77-2.1-6.72-4.93H1.25v3.15C3.27 21.43 7.35 24 12 24z"/>
-            <path fill="#FBBC05" d="M5.28 14.27c-.25-.72-.38-1.49-.38-2.27s.13-1.55.38-2.27V6.58H1.25C.45 8.18 0 9.99 0 12s.45 3.82 1.25 5.42l4.03-3.15z"/>
-            <path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.35 0 3.27 2.57 1.25 6.58l4.03 3.15c.95-2.83 3.6-4.98 6.72-4.98z"/>
-          </svg>
-          <span>Продолжить с Google (Gmail)</span>
-        </button>
+        <!-- Блок входа Google / Gmail -->
+        <div id="googleChoiceBlock">
+          <button type="button" class="btn-google-sign-in" id="googleAuthBtn">
+            <svg class="ico-google" viewBox="0 0 24 24" width="20" height="20">
+              <path fill="#4285F4" d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.8-2.4 3.65v3.05h3.88c2.27-2.09 3.66-5.17 3.66-9.14z"/>
+              <path fill="#34A853" d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.05c-1.08.72-2.45 1.16-4.05 1.16-3.12 0-5.77-2.1-6.72-4.93H1.25v3.15C3.27 21.43 7.35 24 12 24z"/>
+              <path fill="#FBBC05" d="M5.28 14.27c-.25-.72-.38-1.49-.38-2.27s.13-1.55.38-2.27V6.58H1.25C.45 8.18 0 9.99 0 12s.45 3.82 1.25 5.42l4.03-3.15z"/>
+              <path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.35 0 3.27 2.57 1.25 6.58l4.03 3.15c.95-2.83 3.6-4.98 6.72-4.98z"/>
+            </svg>
+            <span>Продолжить с Google (Gmail)</span>
+          </button>
+        </div>
+
+        <div id="googleInputBlock" style="display:none; background:var(--bg); border:1px solid var(--border); border-radius:14px; padding:16px; margin-bottom:14px;">
+          <div style="display:flex; align-items:center; gap:8px; margin-bottom:8px;">
+            <svg class="ico-google" viewBox="0 0 24 24" width="18" height="18">
+              <path fill="#4285F4" d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.8-2.4 3.65v3.05h3.88c2.27-2.09 3.66-5.17 3.66-9.14z"/>
+              <path fill="#34A853" d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.05c-1.08.72-2.45 1.16-4.05 1.16-3.12 0-5.77-2.1-6.72-4.93H1.25v3.15C3.27 21.43 7.35 24 12 24z"/>
+              <path fill="#FBBC05" d="M5.28 14.27c-.25-.72-.38-1.49-.38-2.27s.13-1.55.38-2.27V6.58H1.25C.45 8.18 0 9.99 0 12s.45 3.82 1.25 5.42l4.03-3.15z"/>
+              <path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.35 0 3.27 2.57 1.25 6.58l4.03 3.15c.95-2.83 3.6-4.98 6.72-4.98z"/>
+            </svg>
+            <strong style="font-size:13px; color:var(--text);">Вход через Google Account</strong>
+          </div>
+          <p style="font-size:12px; color:var(--text-2); margin:0 0 10px 0;">Укажите ваш Gmail адрес для синхронизации закладок и настроек:</p>
+          <div class="auth-input-group" style="margin-bottom:10px;">
+            <input type="email" class="auth-input" id="googleEmailField" placeholder="username@gmail.com" style="background:var(--card);">
+          </div>
+          <div style="display:flex; gap:8px;">
+            <button type="button" class="btn-secondary" id="googleBackBtn" style="flex:1; padding:8px 12px; font-size:12px;">Отмена</button>
+            <button type="button" class="btn-primary" id="googleSubmitBtn" style="flex:2; padding:8px 12px; font-size:12px; background:#4285F4;">Войти через Gmail</button>
+          </div>
+        </div>
 
         <div class="auth-divider">
           <span>или через почту и пароль</span>

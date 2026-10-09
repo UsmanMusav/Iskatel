@@ -1,8 +1,8 @@
 {
   "name": "proton",
   "productName": "Proton",
-  "version": "2.7.0",
-  "description": "Быстрый, ультра-минималистичный черный браузер с вкладками без слежки и рекламы",
+  "version": "2.7.1",
+  "description": "Быстрый, ультра-минималистичный черно-белый браузер с вкладками в стиле Chrome без слежки и рекламы",
   "main": "main.js",
   "author": "UsmanMusav <usmanmusaev003@gmail.com>",
   "license": "MIT",

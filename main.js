@@ -2,7 +2,7 @@
 /* «Proton» — десктопный браузер (Electron).
    Главный процесс: окно + встроенный поисковый движок, система вкладок,
    подсказки, Википедия, мгновенные ответы, настройки и проверка обновлений через GitHub Releases.
-   Текущая версия: 2.7.0 (Вкладки, черный лаконичный стиль OLED, стили оформления) */
+   Текущая версия: 2.7.1 (Вкладки, черный лаконичный стиль OLED, стили оформления) */
 
 const { app, BrowserWindow, ipcMain, shell } = require("electron");
 const path = require("path");
@@ -14,7 +14,7 @@ const crypto = require("crypto");
 
 app.setName("Proton");
 
-const APP_VERSION = "2.7.0";
+const APP_VERSION = "2.7.1";
 const GITHUB_REPO = "UsmanMusav/Iskatel";
 const LATEST_RELEASE_URL = `https://api.github.com/repos/${GITHUB_REPO}/releases/latest`;
 
@@ -888,7 +888,7 @@ function createWindow() {
     minWidth: 720,
     minHeight: 560,
     title: "Proton",
-    backgroundColor: "#f4f6fb",
+    backgroundColor: "#16171d",
     autoHideMenuBar: true,
     webPreferences: {
       preload: path.join(__dirname, "preload.js"),

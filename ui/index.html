@@ -6,7 +6,7 @@
   <title>Proton — Быстрый браузер</title>
   <style>
 /* ==========================================================================
-   PROTON BROWSER v2.8.2
+   PROTON BROWSER v2.9.0
    - Полное устранение блокировки кликов (display: none для всех закрытых модалок)
    - Гарантированный запуск init() независимо от document.readyState
    - Голосовой ввод (Voice Search) с пульсирующей анимацией записи
@@ -1319,6 +1319,285 @@ body.has-custom-bg .ambient {
   line-height: 1.5;
 }
 
+/* ==========================================================================
+   ИИ-АССИСТЕНТ (GOOGLE ASSISTANT / AI OVERVIEW СТИЛЬ)
+   ========================================================================== */
+.ai-card {
+  position: relative;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 18px 22px;
+  margin-bottom: 20px;
+  overflow: hidden;
+  box-shadow: var(--shadow);
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  animation: cardReveal 0.28s ease;
+}
+
+.ai-card:hover {
+  border-color: var(--border-hover);
+}
+
+.ai-card-accent-bar {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, #8b5cf6, #3b82f6, #06b6d4, #10b981, #f59e0b);
+}
+
+.ai-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.ai-card-brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.ai-spark-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 9px;
+  background: var(--accent-soft);
+  color: var(--accent);
+  flex-shrink: 0;
+}
+
+.ai-card-title-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.ai-card-title {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--text);
+  letter-spacing: -0.2px;
+}
+
+.ai-card-badge {
+  font-size: 11px;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 12px;
+  background: var(--accent-soft);
+  color: var(--accent);
+  letter-spacing: 0.2px;
+}
+
+.ai-card-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.ai-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border-radius: 8px;
+  background: var(--bg-soft);
+  border: 1px solid var(--border);
+  color: var(--text-2);
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  user-select: none;
+}
+
+.ai-btn:hover {
+  background: var(--tab-hover-bg);
+  border-color: var(--border-hover);
+  color: var(--text);
+}
+
+.ai-btn.ai-btn-icon {
+  padding: 6px 8px;
+}
+
+.ai-btn.speaking {
+  background: var(--accent-soft);
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+/* Анимация эквалайзера при озвучке ответа */
+.ai-eq-bars {
+  display: inline-flex;
+  align-items: flex-end;
+  gap: 2px;
+  height: 13px;
+}
+
+.ai-eq-bar {
+  width: 2.5px;
+  background: currentColor;
+  border-radius: 1px;
+  animation: aiEqBounce 0.7s ease infinite alternate;
+}
+.ai-eq-bar:nth-child(1) { height: 5px; animation-delay: 0.1s; }
+.ai-eq-bar:nth-child(2) { height: 13px; animation-delay: 0.3s; }
+.ai-eq-bar:nth-child(3) { height: 8px; animation-delay: 0.2s; }
+
+@keyframes aiEqBounce {
+  0% { height: 3px; }
+  100% { height: 13px; }
+}
+
+/* Скелетон загрузки ИИ */
+.ai-skeleton {
+  padding: 10px 0;
+}
+
+.ai-sk-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--text-2);
+  font-size: 13px;
+  margin-bottom: 12px;
+}
+
+.ai-sk-pulse-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--accent);
+  animation: aiPulse 1.2s ease-in-out infinite;
+}
+
+@keyframes aiPulse {
+  0%, 100% { transform: scale(0.85); opacity: 0.4; }
+  50% { transform: scale(1.25); opacity: 1; }
+}
+
+.ai-sk-line {
+  height: 12px;
+  background: linear-gradient(90deg, rgba(255,255,255,0.04) 25%, rgba(255,255,255,0.12) 50%, rgba(255,255,255,0.04) 75%);
+  background-size: 200% 100%;
+  border-radius: 6px;
+  margin-bottom: 10px;
+  animation: aiShimmer 1.5s infinite;
+}
+
+[data-theme-style="classic"] .ai-sk-line {
+  background: linear-gradient(90deg, rgba(0,0,0,0.04) 25%, rgba(0,0,0,0.09) 50%, rgba(0,0,0,0.04) 75%);
+  background-size: 200% 100%;
+}
+
+@keyframes aiShimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+/* Контент ответа */
+.ai-card-content {
+  transition: opacity 0.2s ease;
+}
+
+.ai-card-content.collapsed {
+  display: none;
+}
+
+.ai-summary {
+  font-size: 14.5px;
+  line-height: 1.6;
+  color: var(--text);
+  margin-bottom: 14px;
+}
+
+.ai-key-points {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.ai-point-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  font-size: 13.5px;
+  line-height: 1.5;
+  color: var(--text);
+}
+
+.ai-point-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--accent);
+  margin-top: 7px;
+  flex-shrink: 0;
+}
+
+/* Источники */
+.ai-sources-section {
+  padding-top: 12px;
+  border-top: 1px dashed var(--border);
+}
+
+.ai-sources-label {
+  font-size: 11.5px;
+  font-weight: 600;
+  text-transform: uppercase;
+  color: var(--text-3);
+  letter-spacing: 0.5px;
+  margin-bottom: 8px;
+}
+
+.ai-sources-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.ai-source-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: 14px;
+  background: var(--bg-soft);
+  border: 1px solid var(--border);
+  color: var(--text-2);
+  font-size: 12px;
+  text-decoration: none;
+  transition: all 0.15s ease;
+  max-width: 240px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ai-source-chip:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+  transform: translateY(-1px);
+}
+
+.ai-source-favicon {
+  width: 13px;
+  height: 13px;
+  border-radius: 2px;
+  flex-shrink: 0;
+}
+
 /* Скелетоны загрузки */
 .skeletons {
   margin-bottom: 20px;
@@ -1953,6 +2232,67 @@ body.has-custom-bg .ambient {
 
       <div class="results-layout">
         <div class="results-col">
+          <!-- ИИ-Ассистент (AI Overview / Google Assistant стиль) -->
+          <div id="aiOverviewCard" class="ai-card" hidden>
+            <div class="ai-card-accent-bar"></div>
+            <div class="ai-card-header">
+              <div class="ai-card-brand">
+                <div class="ai-spark-icon">
+                  <svg viewBox="0 0 24 24" width="18" height="18" fill="none">
+                    <path d="M12 2L14.4 8.6L21 11L14.4 13.4L12 20L9.6 13.4L3 11L9.6 8.6L12 2Z" fill="url(#aiSparkGrad)" stroke="currentColor" stroke-width="1.2"/>
+                    <defs>
+                      <linearGradient id="aiSparkGrad" x1="3" y1="2" x2="21" y2="20" gradientUnits="userSpaceOnUse">
+                        <stop stop-color="#8b5cf6"/>
+                        <stop offset="0.5" stop-color="#3b82f6"/>
+                        <stop offset="1" stop-color="#06b6d4"/>
+                      </linearGradient>
+                    </defs>
+                  </svg>
+                </div>
+                <div class="ai-card-title-group">
+                  <span class="ai-card-title">ИИ-обзор</span>
+                  <span class="ai-card-badge" id="aiCardBadge">Нейросинтез</span>
+                </div>
+              </div>
+              <div class="ai-card-actions">
+                <button type="button" class="ai-btn ai-speak-btn" id="aiSpeakBtn" title="Озвучить ответ (Google Assistant)">
+                  <span class="ai-speak-icon-wrap" id="aiSpeakIconWrap">
+                    <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/></svg>
+                  </span>
+                  <span id="aiSpeakText">Озвучить</span>
+                </button>
+                <button type="button" class="ai-btn" id="aiCopyBtn" title="Копировать ответ">
+                  <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+                  <span id="aiCopyText">Копировать</span>
+                </button>
+                <button type="button" class="ai-btn ai-btn-icon" id="aiCollapseBtn" title="Свернуть / Развернуть" aria-label="Свернуть">
+                  <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+                </button>
+              </div>
+            </div>
+
+            <!-- Скелетон во время формирования -->
+            <div id="aiSkeleton" class="ai-skeleton" hidden>
+              <div class="ai-sk-header">
+                <div class="ai-sk-pulse-dot"></div>
+                <span>ИИ формирует структурированный ответ...</span>
+              </div>
+              <div class="ai-sk-line" style="width:90%;"></div>
+              <div class="ai-sk-line" style="width:75%;"></div>
+              <div class="ai-sk-line" style="width:60%;"></div>
+            </div>
+
+            <!-- Тело ответа -->
+            <div id="aiCardContent" class="ai-card-content">
+              <div class="ai-summary" id="aiSummary"></div>
+              <div class="ai-key-points" id="aiKeyPoints"></div>
+              <div class="ai-sources-section" id="aiSourcesSection" hidden>
+                <div class="ai-sources-label">Проверенные источники:</div>
+                <div class="ai-sources-list" id="aiSourcesList"></div>
+              </div>
+            </div>
+          </div>
+
           <!-- Мгновенный ответ -->
           <div id="answerCard" class="answer-card" hidden></div>
 
@@ -1999,7 +2339,7 @@ body.has-custom-bg .ambient {
 
   <!-- ПОДВАЛ -->
   <footer class="footer">
-    <span>Proton Browser &copy; 2026 · Версия 2.8.2 · Без рекламы и трекеров</span>
+    <span>Proton Browser &copy; 2026 · Версия 2.9.0 · Без рекламы и трекеров</span>
   </footer>
 
   <!-- МОДАЛЬНОЕ ОКНО НАСТРОЕК (display: none !important когда закрыто) -->
@@ -2008,7 +2348,7 @@ body.has-custom-bg .ambient {
       <div class="modal-header">
         <div class="modal-title-wrap">
           <h2 class="modal-title" id="settingsTitle">Настройки Proton</h2>
-          <span class="badge-version" id="settingsVersionBadge">v2.8.2</span>
+          <span class="badge-version" id="settingsVersionBadge">v2.9.0</span>
         </div>
         <button type="button" class="modal-close" id="settingsCloseBtn" aria-label="Закрыть">
           <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
@@ -2017,6 +2357,7 @@ body.has-custom-bg .ambient {
 
       <div class="modal-tabs" role="tablist">
         <button type="button" class="modal-tab active" data-tab="general" role="tab">Поиск</button>
+        <button type="button" class="modal-tab" data-tab="ai" role="tab">ИИ-помощник</button>
         <button type="button" class="modal-tab" data-tab="appearance" role="tab">Оформление и фон</button>
         <button type="button" class="modal-tab" data-tab="updates" role="tab">Обновления</button>
       </div>
@@ -2071,6 +2412,81 @@ body.has-custom-bg .ambient {
               <input type="checkbox" id="settingShowSuggestions" checked>
               <span>Подсказки при вводе в поисковую строку</span>
             </label>
+          </div>
+        </div>
+
+        <!-- Вкладка: ИИ-помощник (Google Assistant / AI Overview) -->
+        <div class="tab-panel" id="tabAi" role="tabpanel">
+          <div class="setting-group">
+            <label class="setting-checkbox-label">
+              <input type="checkbox" id="settingAiEnabled" checked>
+              <span>Включить умный ИИ-помощник в результатах поиска</span>
+            </label>
+            <p class="setting-desc">Формирует ёмкую структурированную выжимку, факты и ссылки на проверенные источники над органической выдачей в стиле Google Assistant / AI Overviews.</p>
+          </div>
+
+          <div class="setting-group">
+            <label class="setting-checkbox-label">
+              <input type="checkbox" id="settingAiAutoSpeak">
+              <span>Автоматически озвучивать ответ голосом при поиске</span>
+            </label>
+            <p class="setting-desc">Если включено, голосовой ассистент начнет зачитывать ответ сразу после завершения поиска, как Google Assistant.</p>
+          </div>
+
+          <div class="setting-group">
+            <label class="setting-label" for="settingAiProvider">Модель / Движок ИИ</label>
+            <p class="setting-desc">Используйте мгновенный встроенный нейросинтез без ключей либо подключите внешнюю LLM нейросеть.</p>
+            <select class="setting-select" id="settingAiProvider">
+              <option value="builtin" selected>Встроенный нейросинтез (Быстро, 0 ключей, бесплатно)</option>
+              <option value="groq">Groq Cloud (Llama 3.3 70B / сверхбыстрый)</option>
+              <option value="openai">OpenAI (GPT-4o-mini / GPT-4o)</option>
+              <option value="deepseek">DeepSeek (DeepSeek V3 / R1)</option>
+              <option value="ollama">Ollama (Локальная модель на компьютере)</option>
+              <option value="custom">Пользовательский (OpenAI-совместимый API)</option>
+            </select>
+          </div>
+
+          <!-- Блок настроек внешнего провайдера -->
+          <div id="aiExternalConfigWrap" style="display:none; padding:12px; background:var(--bg-soft); border:1px solid var(--border); border-radius:var(--radius); margin-bottom:16px;">
+            <div class="setting-group" id="aiApiKeyGroup" style="margin-bottom:12px;">
+              <label class="setting-label" for="settingAiApiKey">API-ключ</label>
+              <input type="password" class="setting-select" id="settingAiApiKey" placeholder="Вставьте ваш API-ключ (sk-...)">
+            </div>
+
+            <div class="setting-group" style="margin-bottom:12px;">
+              <label class="setting-label" for="settingAiModel">Название модели</label>
+              <input type="text" class="setting-select" id="settingAiModel" placeholder="По умолчанию для выбранного провайдера">
+            </div>
+
+            <div class="setting-group" id="aiEndpointGroup" style="margin-bottom:12px;">
+              <label class="setting-label" for="settingAiEndpoint">URL эндпоинта API</label>
+              <input type="url" class="setting-select" id="settingAiEndpoint" placeholder="http://127.0.0.1:11434/v1/chat/completions">
+            </div>
+
+            <div style="display:flex; align-items:center; gap:10px;">
+              <button type="button" class="btn-secondary" id="aiTestBtn">Проверить подключение</button>
+              <span id="aiTestStatus" style="font-size:12px; color:var(--text-2);"></span>
+            </div>
+          </div>
+
+          <!-- Настройки голосового синтезатора (Google Assistant TTS) -->
+          <div class="setting-group">
+            <label class="setting-label" for="settingAiVoice">Голос озвучивания (Speech Synthesis)</label>
+            <p class="setting-desc">Системный голосовой движок для зачитывания ответов в стиле Google Assistant.</p>
+            <select class="setting-select" id="settingAiVoice">
+              <option value="">Автовыбор лучшего русского голоса</option>
+            </select>
+          </div>
+
+          <div class="setting-group">
+            <label class="setting-label" for="settingAiSpeechRate">Скорость речи: <span id="settingAiSpeechRateVal">1.05x</span></label>
+            <input type="range" id="settingAiSpeechRate" min="0.8" max="1.4" step="0.05" value="1.05" style="width:100%;">
+            <div style="margin-top:8px;">
+              <button type="button" class="btn-secondary" id="aiTestVoiceBtn">
+                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" style="margin-right:6px;"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/></svg>
+                <span>Прослушать образец</span>
+              </button>
+            </div>
           </div>
         </div>
 
@@ -2178,7 +2594,7 @@ body.has-custom-bg .ambient {
             </div>
             <h3 style="font-size:18px; margin-bottom:4px;">Proton Desktop</h3>
             <p style="color:var(--text-3); font-size:12.5px; margin-bottom:16px;">
-              Текущая установленная версия: <b style="color:var(--text);">v2.8.2</b>
+              Текущая установленная версия: <b style="color:var(--text);">v2.9.0</b>
             </p>
             <button type="button" class="btn-primary" id="checkUpdatesBtn" style="margin:0 auto;">
               <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/></svg>
@@ -2315,7 +2731,7 @@ body.has-custom-bg .ambient {
   </div>
 
   <!-- ==========================================================================
-       JAVASCRIPT ЛОГИКА PROTON v2.8.2
+       JAVASCRIPT ЛОГИКА PROTON v2.9.0
        ========================================================================== -->
   <script>
 "use strict";
@@ -2826,6 +3242,10 @@ const TabManager = {
       cur.view = "results";
       cur.resultsHtml = $("resultsList") ? $("resultsList").innerHTML : "";
       cur.resultsInfoHtml = $("resultsInfo") ? $("resultsInfo").innerHTML : "";
+      cur.aiHtml = $("aiOverviewCard") ? $("aiOverviewCard").innerHTML : "";
+      cur.hasAi = $("aiOverviewCard") ? !$("aiOverviewCard").hidden : false;
+      cur.currentAIText = currentAIText;
+      cur.currentAIVoiceText = currentAIVoiceText;
       cur.answerHtml = $("answerCard") ? $("answerCard").innerHTML : "";
       cur.hasAnswer = $("answerCard") ? !$("answerCard").hidden : false;
       cur.wikiHtml = $("wikiCard") ? $("wikiCard").innerHTML : "";
@@ -2838,6 +3258,7 @@ const TabManager = {
 
   switchTab(tabId) {
     if (this.activeTabId === tabId) return;
+    stopSpeaking();
     this.saveCurrentTabDOM();
     this.activeTabId = tabId;
     this.renderTabs();
@@ -2849,6 +3270,7 @@ const TabManager = {
     const tab = this.tabs.find(t => t.id === tabId);
     if (!tab) return;
 
+    stopSpeaking();
     document.title = (tab.query ? tab.query + " — " : "") + "Proton";
 
     setInputs(tab.query || "");
@@ -2862,6 +3284,13 @@ const TabManager = {
 
       if ($("resultsList")) $("resultsList").innerHTML = tab.resultsHtml || "";
       if ($("resultsInfo")) $("resultsInfo").innerHTML = tab.resultsInfoHtml || "";
+      if ($("aiOverviewCard")) {
+        $("aiOverviewCard").innerHTML = tab.aiHtml || "";
+        $("aiOverviewCard").hidden = !tab.hasAi;
+        currentAIText = tab.currentAIText || "";
+        currentAIVoiceText = tab.currentAIVoiceText || "";
+        if (tab.hasAi) bindAICardEvents();
+      }
       if ($("answerCard")) {
         $("answerCard").innerHTML = tab.answerHtml || "";
         $("answerCard").hidden = !tab.hasAnswer;
@@ -2886,6 +3315,7 @@ const TabManager = {
   },
 
   closeTab(tabId) {
+    stopSpeaking();
     const idx = this.tabs.findIndex(t => t.id === tabId);
     if (idx === -1) return;
 
@@ -3202,6 +3632,7 @@ function setInputs(q) {
 }
 
 function showHome() {
+  stopSpeaking();
   document.body.dataset.view = "home";
   if ($("homeView")) $("homeView").hidden = false;
   if ($("resultsView")) $("resultsView").hidden = true;
@@ -3247,7 +3678,9 @@ async function runSearch(query, { page = 0, append = false, fromTab = false } = 
 
   if (!append) {
     showResults();
+    stopSpeaking();
     if ($("resultsList")) $("resultsList").innerHTML = "";
+    if ($("aiOverviewCard")) $("aiOverviewCard").hidden = true;
     if ($("answerCard")) $("answerCard").hidden = true;
     if ($("emptyState")) $("emptyState").hidden = true;
     if ($("errorCard")) $("errorCard").hidden = true;
@@ -3287,6 +3720,10 @@ async function runSearch(query, { page = 0, append = false, fromTab = false } = 
       curTab.view = "results";
       curTab.resultsHtml = $("resultsList") ? $("resultsList").innerHTML : "";
       curTab.resultsInfoHtml = $("resultsInfo") ? $("resultsInfo").innerHTML : "";
+      curTab.aiHtml = $("aiOverviewCard") ? $("aiOverviewCard").innerHTML : "";
+      curTab.hasAi = $("aiOverviewCard") ? !$("aiOverviewCard").hidden : false;
+      curTab.currentAIText = currentAIText;
+      curTab.currentAIVoiceText = currentAIVoiceText;
       curTab.answerHtml = $("answerCard") ? $("answerCard").innerHTML : "";
       curTab.hasAnswer = $("answerCard") ? !$("answerCard").hidden : false;
       curTab.wikiHtml = $("wikiCard") ? $("wikiCard").innerHTML : "";
@@ -3323,7 +3760,18 @@ function renderResults(data, append) {
 
   if (!append && results.length === 0) {
     if ($("emptyState")) $("emptyState").hidden = false;
+    if ($("aiOverviewCard")) $("aiOverviewCard").hidden = true;
     return;
+  }
+
+  // Отрисовка ИИ-ассистента в стиле Google Assistant / AI Overview
+  if (!append) {
+    if (data.ai && data.ai.summary) {
+      renderAIAssistant(data.ai, data.query);
+      upgradeAIAssistantWithLLM(data);
+    } else {
+      checkAndQueryAIAssistant(data);
+    }
   }
 
   if (!append && data.instant && data.instant.answer) {
@@ -3408,6 +3856,393 @@ function renderWiki(wiki) {
     <p class="answer-text" style="font-size:13px;">${escapeHtml(wiki.extract)}</p>
     <a href="${escapeHtml(wiki.url)}" target="_blank" style="display:inline-block; margin-top:10px; font-size:12.5px; font-weight:600;">Читать в Википедии →</a>
   `;
+}
+
+/* ==========================================================================
+   ИИ-АССИСТЕНТ (GOOGLE ASSISTANT / AI OVERVIEW СТИЛЬ)
+   ========================================================================== */
+let currentAIText = "";
+let currentAIVoiceText = "";
+let isSpeaking = false;
+
+function stopSpeaking() {
+  if (window.speechSynthesis) {
+    try {
+      window.speechSynthesis.cancel();
+    } catch (_) {}
+  }
+  isSpeaking = false;
+  updateSpeakButtonUI(false);
+}
+
+function updateSpeakButtonUI(speaking) {
+  const btn = $("aiSpeakBtn");
+  const iconWrap = $("aiSpeakIconWrap");
+  const textEl = $("aiSpeakText");
+  if (!btn || !iconWrap || !textEl) return;
+
+  if (speaking) {
+    btn.classList.add("speaking");
+    btn.title = "Остановить озвучивание";
+    textEl.textContent = "Остановить";
+    iconWrap.innerHTML = `
+      <span class="ai-eq-bars">
+        <span class="ai-eq-bar"></span>
+        <span class="ai-eq-bar"></span>
+        <span class="ai-eq-bar"></span>
+      </span>
+    `;
+  } else {
+    btn.classList.remove("speaking");
+    btn.title = "Озвучить ответ (Google Assistant)";
+    textEl.textContent = "Озвучить";
+    iconWrap.innerHTML = `
+      <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/></svg>
+    `;
+  }
+}
+
+function speakText(text) {
+  if (!window.speechSynthesis) return;
+
+  if (isSpeaking) {
+    stopSpeaking();
+    return;
+  }
+
+  stopSpeaking();
+
+  const clean = String(text || "")
+    .replace(/<[^>]+>/g, " ")
+    .replace(/[•\*\-]/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+
+  if (!clean) return;
+
+  const utter = new SpeechSynthesisUtterance(clean);
+  const s = getSettings();
+
+  const voices = window.speechSynthesis.getVoices() || [];
+  let chosenVoice = null;
+
+  if (s.aiVoice) {
+    chosenVoice = voices.find(v => v.name === s.aiVoice || v.voiceURI === s.aiVoice);
+  }
+
+  if (!chosenVoice) {
+    chosenVoice = voices.find(v => (v.lang === "ru-RU" || v.lang === "ru") && /google/i.test(v.name)) ||
+                  voices.find(v => (v.lang === "ru-RU" || v.lang === "ru") && /(irina|pavel|dariya|tatyana|yandex|milena)/i.test(v.name)) ||
+                  voices.find(v => v.lang && v.lang.startsWith("ru")) ||
+                  voices[0];
+  }
+
+  if (chosenVoice) {
+    utter.voice = chosenVoice;
+    utter.lang = chosenVoice.lang || "ru-RU";
+  }
+
+  utter.rate = parseFloat(s.aiSpeechRate) || 1.05;
+  utter.pitch = 1.0;
+
+  utter.onstart = () => {
+    isSpeaking = true;
+    updateSpeakButtonUI(true);
+  };
+
+  utter.onend = () => {
+    isSpeaking = false;
+    updateSpeakButtonUI(false);
+  };
+
+  utter.onerror = () => {
+    isSpeaking = false;
+    updateSpeakButtonUI(false);
+  };
+
+  try {
+    window.speechSynthesis.speak(utter);
+  } catch (_) {
+    isSpeaking = false;
+    updateSpeakButtonUI(false);
+  }
+}
+
+function bindAICardEvents() {
+  const speakBtn = $("aiSpeakBtn");
+  if (speakBtn && !speakBtn._bound) {
+    speakBtn._bound = true;
+    speakBtn.addEventListener("click", () => {
+      speakText(currentAIVoiceText || currentAIText);
+    });
+  }
+
+  const copyBtn = $("aiCopyBtn");
+  if (copyBtn && !copyBtn._bound) {
+    copyBtn._bound = true;
+    copyBtn.addEventListener("click", () => {
+      if (!currentAIText) return;
+      navigator.clipboard.writeText(currentAIText).then(() => {
+        const copyTextEl = $("aiCopyText");
+        if (copyTextEl) copyTextEl.textContent = "Скопировано!";
+        setTimeout(() => {
+          if (copyTextEl) copyTextEl.textContent = "Копировать";
+        }, 1500);
+      });
+    });
+  }
+
+  const collapseBtn = $("aiCollapseBtn");
+  if (collapseBtn && !collapseBtn._bound) {
+    collapseBtn._bound = true;
+    collapseBtn.addEventListener("click", () => {
+      const content = $("aiCardContent");
+      if (!content) return;
+      const isCollapsed = content.classList.toggle("collapsed");
+      collapseBtn.title = isCollapsed ? "Развернуть ответ" : "Свернуть ответ";
+      collapseBtn.innerHTML = isCollapsed
+        ? `<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 15 12 9 18 15"/></svg>`
+        : `<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>`;
+    });
+  }
+}
+
+function renderAIAssistant(ai, query) {
+  const card = $("aiOverviewCard");
+  if (!card) return;
+
+  const s = getSettings();
+  if (s.aiEnabled === false) {
+    card.hidden = true;
+    return;
+  }
+
+  card.hidden = false;
+  if ($("aiSkeleton")) $("aiSkeleton").hidden = true;
+  if ($("aiCardContent")) {
+    $("aiCardContent").hidden = false;
+    $("aiCardContent").classList.remove("collapsed");
+  }
+
+  if ($("aiCardBadge")) {
+    $("aiCardBadge").textContent = ai.provider || "Нейросинтез";
+  }
+
+  if ($("aiSummary")) {
+    $("aiSummary").textContent = ai.summary || "";
+  }
+
+  const pointsEl = $("aiKeyPoints");
+  if (pointsEl) {
+    pointsEl.innerHTML = "";
+    if (Array.isArray(ai.keyPoints) && ai.keyPoints.length > 0) {
+      ai.keyPoints.forEach(pt => {
+        const item = document.createElement("div");
+        item.className = "ai-point-item";
+        item.innerHTML = `<span class="ai-point-dot"></span><span>${escapeHtml(pt)}</span>`;
+        pointsEl.appendChild(item);
+      });
+      pointsEl.hidden = false;
+    } else {
+      pointsEl.hidden = true;
+    }
+  }
+
+  const sec = $("aiSourcesSection");
+  const list = $("aiSourcesList");
+  if (sec && list) {
+    if (Array.isArray(ai.sources) && ai.sources.length > 0) {
+      list.innerHTML = "";
+      ai.sources.forEach(src => {
+        const domain = src.domain || "";
+        const fav = `https://www.google.com/s2/favicons?domain=${encodeURIComponent(domain)}&sz=32`;
+        const a = document.createElement("a");
+        a.className = "ai-source-chip";
+        a.href = src.url || "#";
+        a.target = "_blank";
+        a.rel = "noopener noreferrer";
+        a.title = src.title || domain;
+        a.innerHTML = `
+          <img class="ai-source-favicon" src="${fav}" alt="" onerror="this.style.display='none'">
+          <span>${escapeHtml(domain || src.title)}</span>
+          <svg viewBox="0 0 24 24" width="10" height="10" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+        `;
+        list.appendChild(a);
+      });
+      sec.hidden = false;
+    } else {
+      sec.hidden = true;
+    }
+  }
+
+  currentAIText = `${ai.summary || ""}\n\n${(ai.keyPoints || []).map(p => "• " + p).join("\n")}`.trim();
+  currentAIVoiceText = ai.voiceText || `${ai.summary || ""} ${(ai.keyPoints || []).join(". ")}`.trim();
+
+  updateSpeakButtonUI(false);
+  bindAICardEvents();
+
+  if (s.aiAutoSpeak === true && currentAIVoiceText) {
+    setTimeout(() => {
+      speakText(currentAIVoiceText);
+    }, 450);
+  }
+}
+
+async function checkAndQueryAIAssistant(data) {
+  const s = getSettings();
+  if (s.aiEnabled === false) return;
+  if (!window.iskatelAPI || !window.iskatelAPI.askAI) return;
+
+  const card = $("aiOverviewCard");
+  if (!card) return;
+
+  card.hidden = false;
+  if ($("aiSkeleton")) $("aiSkeleton").hidden = false;
+  if ($("aiCardContent")) $("aiCardContent").hidden = true;
+
+  try {
+    const res = await window.iskatelAPI.askAI({
+      query: data.query,
+      results: data.results,
+      wiki: data.wiki,
+      instant: data.instant,
+      provider: s.aiProvider || "builtin",
+      apiKey: s.aiApiKey,
+      model: s.aiModel,
+      customEndpoint: s.aiEndpoint
+    });
+
+    if (res && res.ok && res.summary) {
+      renderAIAssistant(res, data.query);
+      const curTab = TabManager.getActiveTab();
+      if (curTab && curTab.view === "results") {
+        curTab.aiHtml = $("aiOverviewCard") ? $("aiOverviewCard").innerHTML : "";
+        curTab.hasAi = true;
+        curTab.currentAIText = currentAIText;
+        curTab.currentAIVoiceText = currentAIVoiceText;
+        TabManager.saveState();
+      }
+    } else {
+      card.hidden = true;
+    }
+  } catch (err) {
+    card.hidden = true;
+  }
+}
+
+async function upgradeAIAssistantWithLLM(data) {
+  const s = getSettings();
+  if (s.aiEnabled === false || !s.aiProvider || s.aiProvider === "builtin") return;
+  if (!window.iskatelAPI || !window.iskatelAPI.askAI) return;
+
+  const badge = $("aiCardBadge");
+  if (badge) badge.textContent = `${s.aiProvider.toUpperCase()}...`;
+
+  try {
+    const res = await window.iskatelAPI.askAI({
+      query: data.query,
+      results: data.results,
+      wiki: data.wiki,
+      instant: data.instant,
+      provider: s.aiProvider,
+      apiKey: s.aiApiKey,
+      model: s.aiModel,
+      customEndpoint: s.aiEndpoint
+    });
+
+    if (res && res.ok && res.summary) {
+      renderAIAssistant(res, data.query);
+      const curTab = TabManager.getActiveTab();
+      if (curTab && curTab.view === "results") {
+        curTab.aiHtml = $("aiOverviewCard") ? $("aiOverviewCard").innerHTML : "";
+        curTab.hasAi = true;
+        curTab.currentAIText = currentAIText;
+        curTab.currentAIVoiceText = currentAIVoiceText;
+        TabManager.saveState();
+      }
+    }
+  } catch (err) {
+    console.warn("External LLM upgrade failed, retained built-in response:", err);
+    if (badge) badge.textContent = "Нейросинтез";
+  }
+}
+
+function populateVoiceList() {
+  const select = $("settingAiVoice");
+  if (!select || !window.speechSynthesis) return;
+
+  const voices = window.speechSynthesis.getVoices() || [];
+  const currentSetting = getSettings().aiVoice || "";
+
+  select.innerHTML = '<option value="">Автовыбор лучшего голоса (Google / Система)</option>';
+
+  const ruVoices = voices.filter(v => v.lang && v.lang.startsWith("ru"));
+  const otherVoices = voices.filter(v => !v.lang || !v.lang.startsWith("ru"));
+
+  if (ruVoices.length > 0) {
+    const group = document.createElement("optgroup");
+    group.label = "Русские голоса";
+    ruVoices.forEach(v => {
+      const opt = document.createElement("option");
+      opt.value = v.name;
+      opt.textContent = `${v.name} (${v.lang})`;
+      if (v.name === currentSetting) opt.selected = true;
+      group.appendChild(opt);
+    });
+    select.appendChild(group);
+  }
+
+  if (otherVoices.length > 0) {
+    const group = document.createElement("optgroup");
+    group.label = "Другие языки";
+    otherVoices.slice(0, 20).forEach(v => {
+      const opt = document.createElement("option");
+      opt.value = v.name;
+      opt.textContent = `${v.name} (${v.lang})`;
+      if (v.name === currentSetting) opt.selected = true;
+      group.appendChild(opt);
+    });
+    select.appendChild(group);
+  }
+}
+
+if (typeof window !== "undefined" && window.speechSynthesis) {
+  window.speechSynthesis.onvoiceschanged = () => {
+    populateVoiceList();
+  };
+}
+
+function updateAIConfigVisibility() {
+  const p = $("settingAiProvider") ? $("settingAiProvider").value : "builtin";
+  const wrap = $("aiExternalConfigWrap");
+  const keyGroup = $("aiApiKeyGroup");
+  const endpointGroup = $("aiEndpointGroup");
+  const modelInput = $("settingAiModel");
+
+  if (!wrap) return;
+
+  if (p === "builtin") {
+    wrap.style.display = "none";
+  } else {
+    wrap.style.display = "block";
+    if (p === "ollama") {
+      if (keyGroup) keyGroup.style.display = "none";
+      if (endpointGroup) endpointGroup.style.display = "block";
+      if (modelInput && !modelInput.value) modelInput.placeholder = "llama3.2";
+    } else if (p === "custom") {
+      if (keyGroup) keyGroup.style.display = "block";
+      if (endpointGroup) endpointGroup.style.display = "block";
+      if (modelInput && !modelInput.value) modelInput.placeholder = "gpt-3.5-turbo";
+    } else {
+      if (keyGroup) keyGroup.style.display = "block";
+      if (endpointGroup) endpointGroup.style.display = "none";
+      if (modelInput) {
+        if (p === "groq") modelInput.placeholder = "llama-3.3-70b-versatile";
+        else if (p === "openai") modelInput.placeholder = "gpt-4o-mini";
+        else if (p === "deepseek") modelInput.placeholder = "deepseek-chat";
+      }
+    }
+  }
 }
 
 /* ==========================================================================
@@ -3720,6 +4555,7 @@ function switchSettingsTab(name) {
   const tabs = document.querySelectorAll(".modal-tab");
   tabs.forEach(t => t.classList.toggle("active", t.dataset.tab === name));
   if ($("tabGeneral")) $("tabGeneral").classList.toggle("active", name === "general");
+  if ($("tabAi")) $("tabAi").classList.toggle("active", name === "ai");
   if ($("tabAppearance")) $("tabAppearance").classList.toggle("active", name === "appearance");
   if ($("tabUpdates")) $("tabUpdates").classList.toggle("active", name === "updates");
 }
@@ -3735,6 +4571,20 @@ function loadSettings() {
   if ($("settingShowSuggestions")) $("settingShowSuggestions").checked = s.showSuggestions !== false;
   if ($("settingAmbientBlobs")) $("settingAmbientBlobs").checked = s.ambientBlobs !== false;
   if ($("settingShowQuickTags")) $("settingShowQuickTags").checked = s.showQuickTags === true;
+
+  // ИИ-помощник
+  if ($("settingAiEnabled")) $("settingAiEnabled").checked = s.aiEnabled !== false;
+  if ($("settingAiAutoSpeak")) $("settingAiAutoSpeak").checked = s.aiAutoSpeak === true;
+  if ($("settingAiProvider")) $("settingAiProvider").value = s.aiProvider || "builtin";
+  if ($("settingAiApiKey")) $("settingAiApiKey").value = s.aiApiKey || "";
+  if ($("settingAiModel")) $("settingAiModel").value = s.aiModel || "";
+  if ($("settingAiEndpoint")) $("settingAiEndpoint").value = s.aiEndpoint || "";
+  if ($("settingAiSpeechRate")) {
+    $("settingAiSpeechRate").value = s.aiSpeechRate || "1.05";
+    if ($("settingAiSpeechRateVal")) $("settingAiSpeechRateVal").textContent = (s.aiSpeechRate || "1.05") + "x";
+  }
+  updateAIConfigVisibility();
+  populateVoiceList();
 }
 
 function saveSettings() {
@@ -3747,11 +4597,22 @@ function saveSettings() {
     showInstant: $("settingShowInstant") ? $("settingShowInstant").checked : true,
     showSuggestions: $("settingShowSuggestions") ? $("settingShowSuggestions").checked : true,
     ambientBlobs: $("settingAmbientBlobs") ? $("settingAmbientBlobs").checked : true,
-    showQuickTags: $("settingShowQuickTags") ? $("settingShowQuickTags").checked : false
+    showQuickTags: $("settingShowQuickTags") ? $("settingShowQuickTags").checked : false,
+    aiEnabled: $("settingAiEnabled") ? $("settingAiEnabled").checked : true,
+    aiAutoSpeak: $("settingAiAutoSpeak") ? $("settingAiAutoSpeak").checked : false,
+    aiProvider: $("settingAiProvider") ? $("settingAiProvider").value : "builtin",
+    aiApiKey: $("settingAiApiKey") ? $("settingAiApiKey").value.trim() : "",
+    aiModel: $("settingAiModel") ? $("settingAiModel").value.trim() : "",
+    aiEndpoint: $("settingAiEndpoint") ? $("settingAiEndpoint").value.trim() : "",
+    aiVoice: $("settingAiVoice") ? $("settingAiVoice").value : "",
+    aiSpeechRate: $("settingAiSpeechRate") ? $("settingAiSpeechRate").value : "1.05"
   };
   try {
     localStorage.setItem("proton-settings", JSON.stringify(s));
     localStorage.setItem("proton-region", s.region);
+    if (window.iskatelAPI && window.iskatelAPI.saveSettings) {
+      window.iskatelAPI.saveSettings(s);
+    }
   } catch (_) {}
 
   document.documentElement.setAttribute("data-font", s.fontSize);
@@ -3786,6 +4647,60 @@ function initSettings() {
   tabs.forEach(t => {
     t.addEventListener("click", () => switchSettingsTab(t.dataset.tab));
   });
+
+  const aiProviderSel = $("settingAiProvider");
+  if (aiProviderSel) {
+    aiProviderSel.addEventListener("change", updateAIConfigVisibility);
+  }
+
+  const aiRateInput = $("settingAiSpeechRate");
+  if (aiRateInput) {
+    aiRateInput.addEventListener("input", (e) => {
+      if ($("settingAiSpeechRateVal")) $("settingAiSpeechRateVal").textContent = e.target.value + "x";
+    });
+  }
+
+  const aiTestVoice = $("aiTestVoiceBtn");
+  if (aiTestVoice) {
+    aiTestVoice.addEventListener("click", () => {
+      speakText("Здравствуйте! Я голосовой ассистент браузера Proton. Готов находить ответы и зачитывать важные сведения.");
+    });
+  }
+
+  const aiTestProvider = $("aiTestBtn");
+  if (aiTestProvider) {
+    aiTestProvider.addEventListener("click", async () => {
+      const statusEl = $("aiTestStatus");
+      if (statusEl) {
+        statusEl.textContent = "Проверка связи...";
+        statusEl.style.color = "var(--text-2)";
+      }
+      const provider = $("settingAiProvider") ? $("settingAiProvider").value : "builtin";
+      const apiKey = $("settingAiApiKey") ? $("settingAiApiKey").value.trim() : "";
+      const model = $("settingAiModel") ? $("settingAiModel").value.trim() : "";
+      const customEndpoint = $("settingAiEndpoint") ? $("settingAiEndpoint").value.trim() : "";
+
+      try {
+        if (window.iskatelAPI && window.iskatelAPI.testAIProvider) {
+          const res = await window.iskatelAPI.testAIProvider({ provider, apiKey, model, customEndpoint });
+          if (statusEl) {
+            statusEl.textContent = res.message;
+            statusEl.style.color = res.ok ? "#10b981" : "var(--danger)";
+          }
+        } else {
+          if (statusEl) {
+            statusEl.textContent = "Встроенный ассистент готов к работе";
+            statusEl.style.color = "#10b981";
+          }
+        }
+      } catch (e) {
+        if (statusEl) {
+          statusEl.textContent = e.message;
+          statusEl.style.color = "var(--danger)";
+        }
+      }
+    });
+  }
 
   /* ---------- ЛОГИКА ОБНОВЛЕНИЯ ЧЕРЕЗ ПРИЛОЖЕНИЕ ---------- */
   let updateInfo = null;
@@ -3836,7 +4751,7 @@ function initSettings() {
             if (updateProgressWrap) updateProgressWrap.style.display = "none";
             if (updateFoundCard) updateFoundCard.style.display = "block";
           } else {
-            if (updateStatusText) updateStatusText.innerHTML = `<span style="color:#10b981;">У вас установлена самая последняя версия Proton (v2.8.2)!</span>`;
+            if (updateStatusText) updateStatusText.innerHTML = `<span style="color:#10b981;">У вас установлена самая последняя версия Proton (v2.9.0)!</span>`;
           }
         } else {
           checkUpdatesBtn.disabled = false;
@@ -3946,6 +4861,8 @@ function init() {
   try { TabManager.init(); } catch (e) { console.error("TabManager error:", e); }
   try { initAuth(); } catch (e) { console.error("initAuth error:", e); }
   try { initSettings(); } catch (e) { console.error("initSettings error:", e); }
+  try { bindAICardEvents(); } catch (e) { console.error("bindAICardEvents error:", e); }
+  try { populateVoiceList(); } catch (e) { console.error("populateVoiceList error:", e); }
   try { initVoiceSearch(); } catch (e) { console.error("initVoiceSearch error:", e); }
   try { updateBookmarksUI(); } catch (e) { console.error("updateBookmarksUI error:", e); }
   try { renderRecent(); } catch (e) { console.error("renderRecent error:", e); }

@@ -7,6 +7,10 @@ contextBridge.exposeInMainWorld("iskatelAPI", {
   search: (params) => ipcRenderer.invoke("iskatel:search", params),
   suggest: (params) => ipcRenderer.invoke("iskatel:suggest", params),
 
+  // ИИ-ассистент в стиле Google Assistant
+  askAI: (params) => ipcRenderer.invoke("iskatel:ai-ask", params),
+  testAIProvider: (params) => ipcRenderer.invoke("iskatel:ai-test-provider", params),
+
   // Платформа и приложение
   platform: process.platform,
   arch: process.arch,

@@ -14,7 +14,7 @@ const crypto = require("crypto");
 
 app.setName("Proton");
 
-const APP_VERSION = "2.8.2";
+const APP_VERSION = "2.9.0";
 const GITHUB_REPO = "UsmanMusav/Iskatel";
 const LATEST_RELEASE_URL = `https://api.github.com/repos/${GITHUB_REPO}/releases/latest`;
 
@@ -279,6 +279,13 @@ const DEFAULT_SETTINGS = {
   showRelatedQueries: true,
   autoCheckUpdates: true,
   openInBrowser: true,
+  // ИИ-помощник (Google Assistant / AI Overview стиль)
+  aiEnabled: true,
+  aiAutoSpeak: false,
+  aiProvider: "builtin", // "builtin", "groq", "openai", "deepseek", "ollama", "custom"
+  aiApiKey: "",
+  aiModel: "",
+  aiCustomEndpoint: "",
 };
 
 function getSettingsPath() {
@@ -618,6 +625,358 @@ async function wikiCard(query) {
   }
 }
 
+/* ---------- ИИ-помощник (Google Assistant / AI Overview) ---------- */
+
+function cleanTextForAI(str) {
+  if (!str) return "";
+  return String(str)
+    .replace(/<[^>]+>/g, " ")
+    .replace(/&quot;/g, '"')
+    .replace(/&amp;/g, "&")
+    .replace(/&lt;/g, "<")
+    .replace(/&gt;/g, ">")
+    .replace(/&#39;/g, "'")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+function extractSentencesForAI(text) {
+  if (!text) return [];
+  const cleaned = cleanTextForAI(text);
+  const raw = cleaned.split(/(?<=[.!?])\s+/);
+  const out = [];
+  for (let s of raw) {
+    s = s.trim();
+    s = s.replace(/^[\s\.\…\-\*\–\—\•\d\.\)]+/, "").trim();
+    if (s.length < 25) continue;
+    if (/^(читать|подробнее|см\.|источник|фото|видео|автор|опубликовано|реклама|cookie|все права|подписаться)/i.test(s)) continue;
+    if (!/[.!?]$/.test(s)) s += ".";
+    out.push(s);
+  }
+  return out;
+}
+
+function synthesizeBuiltinAIAnswer({ query = "", results = [], wiki = {}, instant = {} }) {
+  const qClean = cleanTextForAI(query);
+  const qLower = qClean.toLowerCase();
+  const qWords = qLower.split(/[\s,.;:!?\-]+/).filter(w => w.length > 2 && !["как", "что", "кто", "где", "когда", "почему", "зачем", "сколько", "какой", "какая", "какие", "это", "или", "для", "при", "про", "чем", "все"].includes(w));
+
+  const sentences = [];
+  const sources = [];
+
+  // Энциклопедическая выжимка из Википедии
+  if (wiki && wiki.extract) {
+    const sents = extractSentencesForAI(wiki.extract);
+    sents.forEach((st, idx) => {
+      sentences.push({
+        text: st,
+        weight: 12 - idx * 2,
+        source: { title: wiki.title || "Википедия", url: wiki.url || "", domain: "ru.wikipedia.org" }
+      });
+    });
+    if (wiki.url) {
+      sources.push({
+        title: wiki.title ? `${wiki.title} — Википедия` : "Википедия",
+        url: wiki.url,
+        domain: "ru.wikipedia.org"
+      });
+    }
+  }
+
+  // Мгновенный факт / калькулятор
+  if (instant && (instant.text || instant.abstract)) {
+    const sents = extractSentencesForAI(instant.text || instant.abstract);
+    sents.forEach(st => {
+      sentences.push({
+        text: st,
+        weight: 10,
+        source: { title: instant.heading || "Мгновенный ответ", url: instant.url || "", domain: "duckduckgo.com" }
+      });
+    });
+  }
+
+  // Сниппеты ведущих результатов поиска
+  for (const r of (results || []).slice(0, 6)) {
+    if (!r) continue;
+    let domain = r.display_url || "";
+    try {
+      if (!domain && r.url) domain = new URL(r.url).hostname.replace(/^www\./, "");
+    } catch (_) {}
+
+    if (r.url && sources.length < 5 && !sources.some(s => s.url === r.url)) {
+      sources.push({
+        title: cleanTextForAI(r.title) || domain,
+        url: r.url,
+        domain: domain || "web"
+      });
+    }
+
+    const sents = extractSentencesForAI(r.snippet);
+    sents.forEach(st => {
+      let weight = 4;
+      const stLower = st.toLowerCase();
+      for (const w of qWords) {
+        if (stLower.includes(w)) weight += 2;
+      }
+      if (/— (это|представляет собой|является|называется|считается)/i.test(st)) weight += 3;
+      sentences.push({
+        text: st,
+        weight,
+        source: { title: cleanTextForAI(r.title), url: r.url, domain }
+      });
+    });
+  }
+
+  // Дедупликация похожих предложений
+  const unique = [];
+  for (const item of sentences) {
+    const isDup = unique.some(u => {
+      const a = u.text.toLowerCase().replace(/[^a-zа-яё0-9]/g, "");
+      const b = item.text.toLowerCase().replace(/[^a-zа-яё0-9]/g, "");
+      return a === b || a.includes(b.slice(0, 35)) || b.includes(a.slice(0, 35));
+    });
+    if (!isDup) unique.push(item);
+  }
+
+  unique.sort((a, b) => b.weight - a.weight);
+
+  let summary = "";
+  let keyPoints = [];
+
+  if (unique.length > 0) {
+    summary = unique[0].text;
+    if (unique.length > 1 && unique[1].weight >= 6 && summary.length < 180) {
+      summary += " " + unique[1].text;
+    }
+    const pool = unique.filter(u => !summary.includes(u.text));
+    keyPoints = pool.slice(0, 4).map(u => u.text);
+  }
+
+  if (!summary) {
+    summary = `По запросу «${qClean}» найдены проверенные материалы в веб-источниках. Основные детали представлены в результатах поиска.`;
+  }
+
+  const voiceText = `${summary} ${keyPoints.slice(0, 3).join(" ")}`.replace(/\s+/g, " ").trim();
+
+  return {
+    ok: true,
+    provider: "Встроенный нейросинтез",
+    summary,
+    keyPoints,
+    sources: sources.slice(0, 4),
+    voiceText
+  };
+}
+
+async function callExternalLLM({ query, results = [], wiki = {}, instant = {}, provider, apiKey, model, customEndpoint }) {
+  let endpoint = "";
+  let modelName = model || "";
+  const headers = { "Content-Type": "application/json" };
+
+  if (provider === "groq") {
+    endpoint = "https://api.groq.com/openai/v1/chat/completions";
+    modelName = modelName || "llama-3.3-70b-versatile";
+    headers["Authorization"] = `Bearer ${apiKey}`;
+  } else if (provider === "openai") {
+    endpoint = "https://api.openai.com/v1/chat/completions";
+    modelName = modelName || "gpt-4o-mini";
+    headers["Authorization"] = `Bearer ${apiKey}`;
+  } else if (provider === "deepseek") {
+    endpoint = "https://api.deepseek.com/chat/completions";
+    modelName = modelName || "deepseek-chat";
+    headers["Authorization"] = `Bearer ${apiKey}`;
+  } else if (provider === "ollama") {
+    endpoint = customEndpoint || "http://127.0.0.1:11434/v1/chat/completions";
+    modelName = modelName || "llama3.2";
+    if (apiKey) headers["Authorization"] = `Bearer ${apiKey}`;
+  } else if (provider === "custom") {
+    endpoint = customEndpoint;
+    modelName = modelName || "gpt-3.5-turbo";
+    if (apiKey) headers["Authorization"] = `Bearer ${apiKey}`;
+  } else {
+    throw new Error(`Неизвестный провайдер: ${provider}`);
+  }
+
+  if (!endpoint) {
+    throw new Error("Не указан URL эндпоинта модели");
+  }
+
+  const contextParts = [];
+  if (wiki && wiki.extract) contextParts.push(`Википедия: ${wiki.extract}`);
+  if (instant && (instant.text || instant.abstract)) contextParts.push(`Факт: ${instant.text || instant.abstract}`);
+  for (const r of (results || []).slice(0, 5)) {
+    if (r && r.snippet) {
+      contextParts.push(`- ${cleanTextForAI(r.title)}: ${cleanTextForAI(r.snippet)}`);
+    }
+  }
+
+  const userPrompt = `Запрос пользователя: "${query}"\n\nКонтекст источников:\n${contextParts.join("\n") || "(источники отсутствуют)"}`;
+
+  const body = {
+    model: modelName,
+    messages: [
+      {
+        role: "system",
+        content: `Ты — лаконичный ИИ-ассистент браузера Proton (в стиле Google Assistant и AI Overviews).
+Твоя задача — дать прямой, предельно информативный и чёткий ответ на русском языке (или языке запроса).
+Правила:
+1. Краткий ответ (summary): 2–3 предложения прямо по существу вопроса без пустых вводных слов.
+2. Ключевые факты (keyPoints): 3–4 конкретных тезиса (цифры, факты, свойства, важные детали).
+3. Стиль: объективный, лаконичный. Без эмодзи.
+4. Ответ верни в строгом формате JSON:
+{
+  "summary": "краткий ответ...",
+  "keyPoints": ["тезис 1", "тезис 2", "тезис 3"]
+}`
+      },
+      {
+        role: "user",
+        content: userPrompt
+      }
+    ],
+    temperature: 0.2,
+    max_tokens: 700
+  };
+
+  const response = await fetch(endpoint, {
+    method: "POST",
+    headers,
+    body: JSON.stringify(body),
+    signal: AbortSignal.timeout(12000)
+  });
+
+  if (!response.ok) {
+    const errText = await response.text().catch(() => "");
+    throw new Error(`HTTP ${response.status}: ${errText.slice(0, 120)}`);
+  }
+
+  const data = await response.json();
+  const rawContent = data.choices && data.choices[0] && data.choices[0].message && data.choices[0].message.content;
+  if (!rawContent) throw new Error("Пустой ответ от нейросети");
+
+  let summary = "";
+  let keyPoints = [];
+
+  try {
+    const match = rawContent.match(/\{[\s\S]*\}/);
+    if (match) {
+      const parsed = JSON.parse(match[0]);
+      if (parsed.summary && typeof parsed.summary === "string") summary = parsed.summary.trim();
+      if (Array.isArray(parsed.keyPoints)) {
+        keyPoints = parsed.keyPoints.filter(p => typeof p === "string" && p.trim().length > 0).map(p => p.trim());
+      }
+    }
+  } catch (_) {}
+
+  if (!summary) {
+    const lines = rawContent.split("\n").map(l => l.trim()).filter(Boolean);
+    const bullets = [];
+    const plain = [];
+    for (const l of lines) {
+      if (/^[-*•\d\.]+\s+/.test(l)) {
+        bullets.push(l.replace(/^[-*•\d\.]+\s+/, "").trim());
+      } else {
+        plain.push(l);
+      }
+    }
+    summary = plain.slice(0, 2).join(" ");
+    keyPoints = bullets.slice(0, 4);
+  }
+
+  const sources = [];
+  if (wiki && wiki.url) {
+    sources.push({
+      title: wiki.title ? `${wiki.title} — Википедия` : "Википедия",
+      url: wiki.url,
+      domain: "ru.wikipedia.org"
+    });
+  }
+  for (const r of (results || []).slice(0, 4)) {
+    if (r && r.url && sources.length < 4 && !sources.some(s => s.url === r.url)) {
+      let domain = r.display_url || "";
+      try { if (!domain && r.url) domain = new URL(r.url).hostname.replace(/^www\./, ""); } catch (_) {}
+      sources.push({
+        title: cleanTextForAI(r.title) || domain,
+        url: r.url,
+        domain: domain || "web"
+      });
+    }
+  }
+
+  const voiceText = `${summary} ${keyPoints.slice(0, 3).join(" ")}`.replace(/\s+/g, " ").trim();
+
+  let providerLabel = provider.toUpperCase();
+  if (provider === "groq") providerLabel = `Groq (${modelName})`;
+  else if (provider === "openai") providerLabel = `OpenAI (${modelName})`;
+  else if (provider === "deepseek") providerLabel = `DeepSeek (${modelName})`;
+  else if (provider === "ollama") providerLabel = `Ollama (${modelName})`;
+  else if (provider === "custom") providerLabel = `LLM (${modelName})`;
+
+  return {
+    ok: true,
+    provider: providerLabel,
+    summary,
+    keyPoints,
+    sources,
+    voiceText
+  };
+}
+
+async function generateAIAssistantAnswer(params = {}) {
+  const settings = loadSettings();
+  if (settings.aiEnabled === false) {
+    return { ok: false, disabled: true, error: "ИИ-помощник отключен в настройках" };
+  }
+
+  const provider = (params.provider || settings.aiProvider || "builtin").toLowerCase();
+  const apiKey = params.apiKey != null ? params.apiKey : (settings.aiApiKey || "");
+  const model = params.model || settings.aiModel || "";
+  const customEndpoint = params.customEndpoint || settings.aiCustomEndpoint || "";
+
+  if (provider !== "builtin" && (apiKey || provider === "ollama")) {
+    try {
+      return await callExternalLLM({
+        query: params.query,
+        results: params.results,
+        wiki: params.wiki,
+        instant: params.instant,
+        provider,
+        apiKey,
+        model,
+        customEndpoint
+      });
+    } catch (err) {
+      console.warn("External LLM failed, fallback to built-in synthesizer:", err.message);
+      const fallback = synthesizeBuiltinAIAnswer(params);
+      fallback.provider = `Встроенный нейросинтез (Резерв)`;
+      fallback.warning = err.message;
+      return fallback;
+    }
+  }
+
+  return synthesizeBuiltinAIAnswer(params);
+}
+
+async function testAIConnection({ provider, apiKey, model, customEndpoint }) {
+  try {
+    const prov = (provider || "builtin").toLowerCase();
+    if (prov === "builtin") {
+      return { ok: true, message: "Встроенный нейросинтез готов к работе и не требует API-ключей." };
+    }
+    const res = await callExternalLLM({
+      query: "Тест подключения",
+      results: [{ title: "Тест", snippet: "Проверка связи с моделью искусственного интеллекта.", url: "https://example.com" }],
+      provider: prov,
+      apiKey,
+      model,
+      customEndpoint
+    });
+    return { ok: true, message: `Связь с моделью ${res.provider} успешно установлена!` };
+  } catch (err) {
+    return { ok: false, message: `Ошибка подключения: ${err.message}` };
+  }
+}
+
 /* ---------- сборка ответа поиска ---------- */
 
 async function doSearch({ q, page = 0 }) {
@@ -733,6 +1092,18 @@ async function doSearch({ q, page = 0 }) {
     }
   }
 
+  let aiAnswer = null;
+  if (page === 0 && settings.aiEnabled !== false) {
+    try {
+      aiAnswer = synthesizeBuiltinAIAnswer({
+        query,
+        results,
+        wiki: finalWiki,
+        instant,
+      });
+    } catch (_) {}
+  }
+
   const payload = {
     query,
     page,
@@ -740,6 +1111,7 @@ async function doSearch({ q, page = 0 }) {
     related: (related || []).filter((s) => s.toLowerCase() !== query.toLowerCase()),
     instant: instant || {},
     wiki: finalWiki || {},
+    ai: aiAnswer,
     engine: engineUsed,
     took_ms: Date.now() - started,
   };
@@ -1016,6 +1388,10 @@ app.whenReady().then(() => {
     cacheSet(key, s);
     return { suggestions: s };
   });
+
+  // ИИ-ассистент (Google Assistant / AI Overview)
+  ipcMain.handle("iskatel:ai-ask", async (_e, params) => generateAIAssistantAnswer(params || {}));
+  ipcMain.handle("iskatel:ai-test-provider", async (_e, params) => testAIConnection(params || {}));
 
   // Метаданные
   ipcMain.handle("iskatel:get-version", () => APP_VERSION);

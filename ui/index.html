@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Искатель — поиск в интернете</title>
+  <title>Искатель 2.6 — Минималистичный браузер</title>
   <meta name="description" content="Искатель — быстрый и чистый поисковик. Находите сайты, ответы и справочную информацию.">
   <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2048%2048%22%3E%0A%20%20%3Cdefs%3E%0A%20%20%20%20%3ClinearGradient%20id%3D%22g%22%20x1%3D%220%22%20y1%3D%220%22%20x2%3D%221%22%20y2%3D%221%22%3E%0A%20%20%20%20%20%20%3Cstop%20offset%3D%220%22%20stop-color%3D%22%236d5dfc%22%2F%3E%3Cstop%20offset%3D%221%22%20stop-color%3D%22%2338bdf8%22%2F%3E%0A%20%20%20%20%3C%2FlinearGradient%3E%0A%20%20%3C%2Fdefs%3E%0A%20%20%3Crect%20x%3D%222%22%20y%3D%222%22%20width%3D%2244%22%20height%3D%2244%22%20rx%3D%2213%22%20fill%3D%22url%28%23g%29%22%2F%3E%0A%20%20%3Ccircle%20cx%3D%2221%22%20cy%3D%2221%22%20r%3D%228.5%22%20fill%3D%22none%22%20stroke%3D%22%23fff%22%20stroke-width%3D%224%22%2F%3E%0A%20%20%3Crect%20x%3D%2227.5%22%20y%3D%2227.5%22%20width%3D%224%22%20height%3D%2213%22%20rx%3D%222%22%20transform%3D%22rotate%28-45%2029.5%2034%29%22%20fill%3D%22%23fff%22%2F%3E%0A%3C%2Fsvg%3E">
   <style>
@@ -234,6 +234,35 @@ body[data-view="home"] .top-search { opacity: 0; pointer-events: none; }
 }
 
 .clear-btn:hover { background: var(--accent); color: #fff; }
+
+.search-submit-btn {
+  border: 0;
+  background: var(--accent);
+  color: #fff;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  transition: transform 0.15s ease, background 0.2s ease, box-shadow 0.2s ease;
+  flex-shrink: 0;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+}
+
+.search-box-lg .search-submit-btn {
+  width: 38px;
+  height: 38px;
+}
+
+.search-submit-btn:hover {
+  transform: scale(1.08);
+  filter: brightness(1.1);
+}
+
+.search-submit-btn:active {
+  transform: scale(0.95);
+}
 
 .kbd-hint {
   font-size: 11px;
@@ -1208,7 +1237,7 @@ mark {
   }
 
   /* ---------- Угловой бейдж версии (v2.5) ---------- */
-  .corner-version {
+  .corner-version { display: none !important; 
     z-index: 1500 !important;
     pointer-events: auto !important;
     position: fixed;
@@ -1599,15 +1628,21 @@ mark {
       <form class="search-form" id="topForm" autocomplete="off">
         <div class="search-box">
           <svg class="ico-search" viewBox="0 0 24 24" aria-hidden="true"><path d="M10.5 3a7.5 7.5 0 0 1 5.94 12.09l4.24 4.24a1 1 0 0 1-1.41 1.41l-4.24-4.24A7.5 7.5 0 1 1 10.5 3Zm0 2a5.5 5.5 0 1 0 0 11 5.5 5.5 0 0 0 0-11Z"/></svg>
-          <input type="search" id="topInput" name="q" placeholder="Найти в интернете…" aria-label="Поисковый запрос" spellcheck="false">
+          <input type="search" id="topInput" name="q" placeholder="Поиск в интернете или веб-адрес…" aria-label="Поисковый запрос" spellcheck="false">
           <button type="button" class="clear-btn" id="topClear" aria-label="Очистить" hidden>×</button>
+          <button type="submit" class="search-submit-btn" id="topSubmitBtn" aria-label="Найти">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="5" y1="12" x2="19" y2="12"></line>
+              <polyline points="12 5 19 12 12 19"></polyline>
+            </svg>
+          </button>
         </div>
         <div class="suggest-box" id="topSuggest" role="listbox" hidden></div>
       </form>
     </div>
 
-        <div class="top-actions">
-      <!-- Кнопка входа / Профиль пользователя (v2.5) -->
+    <div class="top-actions">
+      <!-- Кнопка входа / Профиль пользователя (v2.6) -->
       <button type="button" class="btn-auth-pill" id="authOpenBtn">
         <svg class="ico-google" viewBox="0 0 24 24" width="16" height="16">
           <path fill="#4285F4" d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.8-2.4 3.65v3.05h3.88c2.27-2.09 3.66-5.17 3.66-9.14z"/>
@@ -1632,6 +1667,9 @@ mark {
             </div>
           </div>
           <div class="user-menu-divider"></div>
+          <button type="button" class="user-menu-item" id="menuThemeToggleBtn">
+            <span>🌓 Сменить тему (Светлая / Тёмная)</span>
+          </button>
           <button type="button" class="user-menu-item" id="menuBookmarksBtn">
             <span>⭐ Мои закладки</span>
             <span class="user-menu-count" id="menuBookmarksCount">0</span>
@@ -1650,10 +1688,6 @@ mark {
           <circle cx="12" cy="12" r="3"/>
           <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/>
         </svg>
-      </button>
-      <button class="icon-btn" id="themeBtn" aria-label="Сменить тему" title="Сменить тему">
-        <svg class="ico-moon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20.4 14.7A8.5 8.5 0 0 1 9.3 3.6 8.5 8.5 0 1 0 20.4 14.7Z"/></svg>
-        <svg class="ico-sun" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2.5M12 19.5V22M2 12h2.5M19.5 12H22M4.9 4.9l1.8 1.8M17.3 17.3l1.8 1.8M19.1 4.9l-1.8 1.8M6.7 17.3l-1.8 1.8" stroke-linecap="round"/></svg>
       </button>
     </div>
   </header>
@@ -1681,26 +1715,17 @@ mark {
         <form class="search-form hero-form" id="homeForm" autocomplete="off">
           <div class="search-box search-box-lg">
             <svg class="ico-search" viewBox="0 0 24 24" aria-hidden="true"><path d="M10.5 3a7.5 7.5 0 0 1 5.94 12.09l4.24 4.24a1 1 0 0 1-1.41 1.41l-4.24-4.24A7.5 7.5 0 1 1 10.5 3Zm0 2a5.5 5.5 0 1 0 0 11 5.5 5.5 0 0 0 0-11Z"/></svg>
-            <input type="search" id="homeInput" name="q" placeholder="Найти в интернете…" aria-label="Поисковый запрос" spellcheck="false" autofocus>
+            <input type="search" id="homeInput" name="q" placeholder="Поиск в интернете или веб-адрес…" aria-label="Поисковый запрос" spellcheck="false" autofocus>
             <button type="button" class="clear-btn" id="homeClear" aria-label="Очистить" hidden>×</button>
-            <kbd class="kbd-hint">Enter</kbd>
+            <button type="submit" class="search-submit-btn" id="homeSubmitBtn" aria-label="Найти">
+              <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="5" y1="12" x2="19" y2="12"></line>
+                <polyline points="12 5 19 12 12 19"></polyline>
+              </svg>
+            </button>
           </div>
           <div class="suggest-box" id="homeSuggest" role="listbox" hidden></div>
-          <div class="hero-actions">
-            <button type="submit" class="btn btn-primary">Найти</button>
-            <button type="button" class="btn btn-ghost" id="luckyBtn">Мне повезёт</button>
-          </div>
         </form>
-
-        <div class="quick-row" id="quickRow">
-          <span class="quick-label">Популярное:</span>
-          <button class="chip" type="button">погода в Астрахани</button>
-          <button class="chip" type="button">курс доллара</button>
-          <button class="chip" type="button">что посмотреть в Астрахани</button>
-          <button class="chip" type="button">рецепт борща</button>
-          <button class="chip" type="button">python для начинающих</button>
-          <button class="chip" type="button">последние новости</button>
-        </div>
 
         <div class="recent-block" id="recentBlock" hidden>
           <div class="recent-head">
@@ -1777,7 +1802,7 @@ mark {
       <div class="modal-header">
         <div class="modal-title-wrap">
           <h2 class="modal-title" id="settingsTitle">Настройки</h2>
-          <span class="badge-version" id="settingsVersionBadge">v2.5</span>
+          <span class="badge-version" id="settingsVersionBadge">v2.6</span>
         </div>
         <button type="button" class="icon-btn modal-close" id="settingsCloseBtn" aria-label="Закрыть">✕</button>
       </div>
@@ -1912,7 +1937,7 @@ mark {
               <h3 class="about-name">Искатель Desktop</h3>
               <p class="about-desc">Настольный поисковик без слежки, рекламы и сбора пользовательских данных.</p>
               <div class="about-meta">
-                <span>Версия: <strong id="aboutVersionText">2.5.0</strong></span>
+                <span>Версия: <strong id="aboutVersionText">2.6.0</strong></span>
                 <span class="dot">·</span>
                 <a href="https://github.com/UsmanMusav/Iskatel" target="_blank" rel="noopener" class="link-external" id="githubRepoLink">GitHub Репозиторий ↗</a>
               </div>
@@ -1970,11 +1995,7 @@ mark {
 
   <footer class="footer">
     <div class="footer-inner">
-      <span>© <span id="year"></span> Искатель</span>
-      <span class="dot">·</span>
-      <span>Результаты — DuckDuckGo и Bing, справки — Википедия</span>
-      <span class="dot">·</span>
-      <button class="link-btn" id="toTop">Наверх</button>
+      <span>© <span id="year"></span> Искатель · Конфиденциальный поиск · v2.6.0</span>
     </div>
   </footer>
 
@@ -2152,6 +2173,8 @@ const els = {
   themeBtn: $("themeBtn"),
   luckyBtn: $("luckyBtn"),
   quickRow: $("quickRow"),
+  topSubmitBtn: $("topSubmitBtn"),
+  homeSubmitBtn: $("homeSubmitBtn"),
   recentBlock: $("recentBlock"),
   recentRow: $("recentRow"),
   clearRecent: $("clearRecent"),
@@ -2176,10 +2199,12 @@ function applyTheme(theme) {
   applyTheme(saved);
 })();
 
-els.themeBtn.addEventListener("click", () => {
-  const cur = document.documentElement.getAttribute("data-theme");
-  applyTheme(cur === "dark" ? "light" : "dark");
-});
+if (els.themeBtn) {
+  els.themeBtn.addEventListener("click", () => {
+    const cur = document.documentElement.getAttribute("data-theme");
+    applyTheme(cur === "dark" ? "light" : "dark");
+  });
+}
 
 /* ---------- недавние запросы ---------- */
 function getRecent() {
@@ -2364,7 +2389,7 @@ els.brandLink.addEventListener("click", (e) => {
   showHome();
 });
 
-els.toTop.addEventListener("click", () => window.scrollTo({ top: 0, behavior: "smooth" }));
+if (els.toTop) els.toTop.addEventListener("click", () => window.scrollTo({ top: 0, behavior: "smooth" }));
 
 /* «Мне повезёт» — случайный интересный запрос */
 const LUCKY = [
@@ -2380,19 +2405,22 @@ const LUCKY = [
   "самые красивые места России",
 ];
 
-els.luckyBtn.addEventListener("click", () => {
-  const q = LUCKY[Math.floor(Math.random() * LUCKY.length)];
-  setInputs(q);
-  runSearch(q);
-});
-
-/* чипсы */
-els.quickRow.querySelectorAll(".chip").forEach((chip) => {
-  chip.addEventListener("click", () => {
-    setInputs(chip.textContent);
-    runSearch(chip.textContent);
+if (els.luckyBtn) {
+  els.luckyBtn.addEventListener("click", () => {
+    const q = LUCKY[Math.floor(Math.random() * LUCKY.length)];
+    setInputs(q);
+    runSearch(q);
   });
-});
+}
+
+if (els.quickRow) {
+  els.quickRow.querySelectorAll(".chip").forEach((chip) => {
+    chip.addEventListener("click", () => {
+      setInputs(chip.textContent);
+      runSearch(chip.textContent);
+    });
+  });
+}
 
 function showHome() {
   els.body.dataset.view = "home";
@@ -2491,9 +2519,7 @@ function renderResults(data, append) {
   /* статистика */
   els.resultsInfo.innerHTML =
     `<span>Результаты по запросу <b>${escapeHtml(data.query)}</b></span>` +
-    `<span class="dot">·</span><span>${(data.took_ms / 1000).toFixed(2)} сек</span>` +
-    `<span class="dot">·</span><span>стр. ${data.page + 1}</span>` +
-    (data.engine ? `<span class="dot">·</span><span>${escapeHtml(data.engine)}</span>` : "");
+    `<span class="dot">·</span><span>${results.length} найдено</span>`;
 
   /* мгновенный ответ */
   if (!append) {
@@ -3104,6 +3130,8 @@ window.addEventListener("popstate", () => {
     if (user) {
       if (authOpenBtn) authOpenBtn.style.display = "none";
       if (userMenuWrap) userMenuWrap.style.display = "inline-block";
+      const sBtn = $("settingsBtn");
+      if (sBtn) sBtn.style.display = "none";
 
       const initial = (user.name || user.email || "U")[0].toUpperCase();
       if (headerAvatar) headerAvatar.textContent = initial;
@@ -3118,6 +3146,8 @@ window.addEventListener("popstate", () => {
     } else {
       if (authOpenBtn) authOpenBtn.style.display = "inline-flex";
       if (userMenuWrap) userMenuWrap.style.display = "none";
+      const sBtn = $("settingsBtn");
+      if (sBtn) sBtn.style.display = "inline-flex";
       if (userDropdownMenu) userDropdownMenu.style.display = "none";
       userBookmarks = [];
       updateBookmarkStars();
@@ -3276,6 +3306,14 @@ window.addEventListener("popstate", () => {
     });
   }
 
+  const menuThemeToggleBtn = $("menuThemeToggleBtn");
+  if (menuThemeToggleBtn) {
+    menuThemeToggleBtn.addEventListener("click", () => {
+      const cur = document.documentElement.getAttribute("data-theme");
+      applyTheme(cur === "dark" ? "light" : "dark");
+    });
+  }
+
   if (menuSettingsBtn) {
     menuSettingsBtn.addEventListener("click", () => {
       if (userDropdownMenu) userDropdownMenu.style.display = "none";
@@ -3404,11 +3442,7 @@ window.addEventListener("popstate", () => {
 
 </script>
 
-  <!-- Угловой бейдж версии v2.5 в углу экрана -->
-  <button type="button" class="corner-version" id="cornerVersion" aria-label="Версия Искатель 2.5. Нажмите для открытия настроек">
-    <span class="corner-version-dot" aria-hidden="true"></span>
-    <span class="corner-version-label">v2.5</span>
-  </button>
+<!-- corner-version removed for minimalist UI v2.6 -->
 
 
   <!-- Модальное окно авторизации и регистрации (v2.5) -->

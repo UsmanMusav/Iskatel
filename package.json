@@ -1,8 +1,8 @@
 {
   "name": "iskatel",
   "productName": "Искатель",
-  "version": "2.5.0",
-  "description": "Быстрый и чистый поисковик в виде настольного приложения без слежки и рекламы",
+  "version": "2.6.0",
+  "description": "Быстрый, чистый и минималистичный браузер-поисковик без слежки, рекламы и лишних кнопок",
   "main": "main.js",
   "author": "UsmanMusav <usmanmusaev003@gmail.com>",
   "license": "MIT",
@@ -84,10 +84,11 @@
     "publish": null,
     "portable": {
       "artifactName": "iskatel-win64-portable.${ext}"
-    }
+    },
+    "electronVersion": "33.2.0"
   },
   "devDependencies": {
-    "electron": "^33.2.0",
+    "electron": "33.2.0",
     "electron-builder": "^25.1.8"
   }
 }

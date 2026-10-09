@@ -2,7 +2,7 @@
 /* «Искатель» — десктопное приложение (Electron).
    Главный процесс: окно + встроенный поисковый движок (DuckDuckGo + Bing),
    подсказки, Википедия, мгновенные ответы, настройки и проверка обновлений через GitHub Releases.
-   Текущая версия: 1.1.0 */
+   Текущая версия: 2.6.0 (Минималистичный дизайн) */
 
 const { app, BrowserWindow, ipcMain, shell } = require("electron");
 const path = require("path");
@@ -14,7 +14,7 @@ const crypto = require("crypto");
 
 app.setName("Искатель");
 
-const APP_VERSION = "2.5.0";
+const APP_VERSION = "2.6.0";
 const GITHUB_REPO = "UsmanMusav/Iskatel";
 const LATEST_RELEASE_URL = `https://api.github.com/repos/${GITHUB_REPO}/releases/latest`;
 

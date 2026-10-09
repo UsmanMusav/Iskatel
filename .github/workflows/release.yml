@@ -40,7 +40,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: windows-installer
-          path: dist/iskatel-win64-setup.exe
+          path: dist/iskatel-win64-*.exe
           if-no-files-found: error
 
   build-linux:
@@ -151,6 +151,7 @@ jobs:
           name: Искатель ${{ github.ref_name || inputs.tag_name }}
           files: |
             release-assets/iskatel-win64-setup.exe
+            release-assets/iskatel-win64-portable.exe
             release-assets/iskatel-linux-amd64.deb
             release-assets/iskatel-mac-arm64.dmg
             release-assets/iskatel-mac-intel.dmg

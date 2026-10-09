@@ -37,16 +37,25 @@
           "arch": [
             "x64"
           ]
+        },
+        {
+          "target": "portable",
+          "arch": [
+            "x64"
+          ]
         }
       ],
-      "artifactName": "iskatel-win64-setup.${ext}"
+      "requestedExecutionLevel": "asInvoker"
     },
     "nsis": {
       "oneClick": false,
+      "perMachine": false,
+      "allowElevation": true,
       "allowToChangeInstallationDirectory": true,
       "createDesktopShortcut": true,
       "createStartMenuShortcut": true,
-      "shortcutName": "Искатель"
+      "shortcutName": "Искатель",
+      "artifactName": "iskatel-win64-setup.${ext}"
     },
     "mac": {
       "target": [
@@ -72,7 +81,10 @@
       "category": "Network",
       "artifactName": "iskatel-linux-amd64.${ext}"
     },
-    "publish": null
+    "publish": null,
+    "portable": {
+      "artifactName": "iskatel-win64-portable.${ext}"
+    }
   },
   "devDependencies": {
     "electron": "^33.2.0",

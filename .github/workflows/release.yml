@@ -1,0 +1,153 @@
+name: Build & Release Desktop Installers
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+    inputs:
+      tag_name:
+        description: 'Имя тега (например, v1.1.0 или v1.1.1)'
+        required: true
+        default: 'v1.1.0'
+
+permissions:
+  contents: write
+
+jobs:
+  build-windows:
+    name: Сборка Windows (iskatel-win64-setup.exe)
+    runs-on: windows-latest
+    steps:
+      - name: Checkout кода
+        uses: actions/checkout@v4
+
+      - name: Установка Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+
+      - name: Установка зависимостей
+        run: npm ci || npm install
+
+      - name: Сборка установщика Windows
+        run: npx electron-builder --win --x64
+
+      - name: Сохранение артефакта Windows
+        uses: actions/upload-artifact@v4
+        with:
+          name: windows-installer
+          path: dist/iskatel-win64-setup.exe
+          if-no-files-found: error
+
+  build-linux:
+    name: Сборка Linux (iskatel-linux-amd64.deb)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout кода
+        uses: actions/checkout@v4
+
+      - name: Установка Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+
+      - name: Установка зависимостей
+        run: npm ci || npm install
+
+      - name: Сборка пакета Debian/Ubuntu
+        run: npx electron-builder --linux deb
+
+      - name: Проверка и нормализация имени .deb
+        run: |
+          DEB_FILE=$(ls dist/*.deb 2>/dev/null | head -1)
+          if [ -n "$DEB_FILE" ] && [ "$DEB_FILE" != "dist/iskatel-linux-amd64.deb" ]; then
+            cp "$DEB_FILE" dist/iskatel-linux-amd64.deb
+          fi
+          ls -lh dist/
+
+      - name: Сохранение артефакта Linux
+        uses: actions/upload-artifact@v4
+        with:
+          name: linux-deb
+          path: dist/iskatel-linux-amd64.deb
+          if-no-files-found: error
+
+  build-macos:
+    name: Сборка macOS (iskatel-mac-arm64.dmg и iskatel-mac-intel.dmg)
+    runs-on: macos-latest
+    steps:
+      - name: Checkout кода
+        uses: actions/checkout@v4
+
+      - name: Установка Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+
+      - name: Установка зависимостей
+        run: npm ci || npm install
+
+      - name: Сборка образов macOS (Apple Silicon + Intel)
+        run: |
+          npx electron-builder --mac dmg --arm64
+          npx electron-builder --mac dmg --x64
+
+      - name: Нормализация названий файлов macOS
+        run: |
+          mkdir -p mac-dist
+          # Apple Silicon DMG
+          ARM_DMG=$(ls dist/*arm64*.dmg dist/*-arm64.dmg 2>/dev/null | head -1)
+          if [ -n "$ARM_DMG" ]; then
+            cp "$ARM_DMG" mac-dist/iskatel-mac-arm64.dmg
+          fi
+          # Intel DMG
+          INTEL_DMG=$(ls dist/*x64*.dmg dist/*intel*.dmg 2>/dev/null | head -1)
+          if [ -n "$INTEL_DMG" ]; then
+            cp "$INTEL_DMG" mac-dist/iskatel-mac-intel.dmg
+          fi
+          ls -lh mac-dist/
+
+      - name: Сохранение артефактов macOS
+        uses: actions/upload-artifact@v4
+        with:
+          name: macos-dmg
+          path: mac-dist/*.dmg
+          if-no-files-found: error
+
+  publish-release:
+    name: Публикация релиза и прикрепление установщиков
+    needs: [build-windows, build-linux, build-macos]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Скачивание всех собранных установщиков
+        uses: actions/download-artifact@v4
+        with:
+          path: all-artifacts
+
+      - name: Подготовка директории релиза
+        run: |
+          mkdir -p release-assets
+          find all-artifacts -type f \( -name "iskatel-win64-setup.exe" -o -name "iskatel-linux-amd64.deb" -o -name "iskatel-mac-arm64.dmg" -o -name "iskatel-mac-intel.dmg" \) -exec cp {} release-assets/ \;
+          echo "=== Готовые к загрузке файлы ==="
+          ls -lh release-assets/
+
+      - name: Создание или обновление GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ github.ref_name || inputs.tag_name }}
+          name: Искатель ${{ github.ref_name || inputs.tag_name }}
+          files: |
+            release-assets/iskatel-win64-setup.exe
+            release-assets/iskatel-linux-amd64.deb
+            release-assets/iskatel-mac-arm64.dmg
+            release-assets/iskatel-mac-intel.dmg
+          draft: false
+          prerelease: false
+          generate_release_notes: true

@@ -1,0 +1,2382 @@
+<!DOCTYPE html>
+<html lang="ru" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Искатель — поиск в интернете</title>
+  <meta name="description" content="Искатель — быстрый и чистый поисковик. Находите сайты, ответы и справочную информацию.">
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2048%2048%22%3E%0A%20%20%3Cdefs%3E%0A%20%20%20%20%3ClinearGradient%20id%3D%22g%22%20x1%3D%220%22%20y1%3D%220%22%20x2%3D%221%22%20y2%3D%221%22%3E%0A%20%20%20%20%20%20%3Cstop%20offset%3D%220%22%20stop-color%3D%22%236d5dfc%22%2F%3E%3Cstop%20offset%3D%221%22%20stop-color%3D%22%2338bdf8%22%2F%3E%0A%20%20%20%20%3C%2FlinearGradient%3E%0A%20%20%3C%2Fdefs%3E%0A%20%20%3Crect%20x%3D%222%22%20y%3D%222%22%20width%3D%2244%22%20height%3D%2244%22%20rx%3D%2213%22%20fill%3D%22url%28%23g%29%22%2F%3E%0A%20%20%3Ccircle%20cx%3D%2221%22%20cy%3D%2221%22%20r%3D%228.5%22%20fill%3D%22none%22%20stroke%3D%22%23fff%22%20stroke-width%3D%224%22%2F%3E%0A%20%20%3Crect%20x%3D%2227.5%22%20y%3D%2227.5%22%20width%3D%224%22%20height%3D%2213%22%20rx%3D%222%22%20transform%3D%22rotate%28-45%2029.5%2034%29%22%20fill%3D%22%23fff%22%2F%3E%0A%3C%2Fsvg%3E">
+  <style>
+/* ============ «Искатель» ============ */
+
+:root {
+  --bg: #f4f6fb;
+  --bg-soft: #ffffff;
+  --text: #171a2b;
+  --text-2: #5b6178;
+  --text-3: #8b90a3;
+  --card: rgba(255, 255, 255, 0.82);
+  --card-solid: #ffffff;
+  --border: rgba(23, 26, 43, 0.10);
+  --accent: #5b4df0;
+  --accent-2: #38bdf8;
+  --accent-soft: rgba(91, 77, 240, 0.10);
+  --link: #4338ca;
+  --link-hover: #312e81;
+  --danger: #dc2626;
+  --shadow: 0 10px 30px rgba(23, 26, 43, 0.08);
+  --shadow-lg: 0 18px 50px rgba(23, 26, 43, 0.14);
+  --radius: 16px;
+  --mark-bg: rgba(250, 204, 21, 0.38);
+  --mark-text: inherit;
+  --blob-opacity: 0.55;
+  --input-bg: #ffffff;
+}
+
+[data-theme="dark"] {
+  --bg: #0c1020;
+  --bg-soft: #121832;
+  --text: #e9ebf5;
+  --text-2: #a6adc7;
+  --text-3: #6d7592;
+  --card: rgba(22, 28, 52, 0.72);
+  --card-solid: #161c34;
+  --border: rgba(233, 235, 245, 0.10);
+  --accent: #8b85ff;
+  --accent-2: #38bdf8;
+  --accent-soft: rgba(139, 133, 255, 0.14);
+  --link: #a5b4fc;
+  --link-hover: #c7d2fe;
+  --danger: #f87171;
+  --shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+  --shadow-lg: 0 18px 50px rgba(0, 0, 0, 0.5);
+  --mark-bg: rgba(250, 204, 21, 0.28);
+  --blob-opacity: 0.30;
+  --input-bg: rgba(18, 24, 50, 0.9);
+}
+
+* { box-sizing: border-box; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  margin: 0;
+  font-family: "Segoe UI", system-ui, -apple-system, Roboto, "Helvetica Neue", Arial, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  transition: background 0.3s ease, color 0.3s ease;
+}
+
+button { font-family: inherit; cursor: pointer; }
+input { font-family: inherit; }
+
+/* ---- фоновые пятна ---- */
+.ambient {
+  position: fixed;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.blob {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(70px);
+  opacity: var(--blob-opacity);
+  animation: drift 22s ease-in-out infinite alternate;
+}
+
+.blob-a { width: 46vw; height: 46vw; background: #b7a8ff; top: -12vw; left: -10vw; }
+.blob-b { width: 40vw; height: 40vw; background: #8ed7ff; bottom: -14vw; right: -8vw; animation-delay: -7s; }
+.blob-c { width: 30vw; height: 30vw; background: #ffb1d8; top: 30vh; left: 55vw; animation-delay: -13s; }
+
+[data-theme="dark"] .blob-a { background: #3d2f9e; }
+[data-theme="dark"] .blob-b { background: #0e5f8c; }
+[data-theme="dark"] .blob-c { background: #7c2d63; }
+
+@keyframes drift {
+  from { transform: translate3d(0, 0, 0) scale(1); }
+  to   { transform: translate3d(4vw, -3vh, 0) scale(1.12); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .blob { animation: none; }
+  * { transition-duration: 0.01ms !important; animation-duration: 0.01ms !important; }
+}
+
+/* ---- верхняя панель ---- */
+.topbar {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  padding: 14px 22px;
+  background: color-mix(in srgb, var(--bg) 72%, transparent);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border-bottom: 1px solid transparent;
+  transition: border-color 0.3s ease, background 0.3s ease;
+}
+
+body[data-view="results"] .topbar {
+  border-bottom-color: var(--border);
+  padding: 12px 22px;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  text-decoration: none;
+  color: var(--text);
+  flex-shrink: 0;
+}
+
+.brand-mark { width: 36px; height: 36px; display: block; }
+
+.brand-name {
+  font-size: 20px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+.top-search { flex: 1; display: flex; justify-content: center; opacity: 1; transition: opacity 0.25s ease; }
+
+body[data-view="home"] .top-search { opacity: 0; pointer-events: none; }
+
+.top-actions { display: flex; gap: 8px; flex-shrink: 0; }
+
+.icon-btn {
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  background: var(--card);
+  color: var(--text-2);
+  display: grid;
+  place-items: center;
+  transition: transform 0.15s ease, color 0.2s ease, background 0.2s ease;
+}
+
+.icon-btn:hover { color: var(--accent); transform: translateY(-1px); background: var(--card-solid); }
+.icon-btn svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 1.8; }
+.icon-btn .ico-moon { fill: currentColor; stroke: none; }
+.icon-btn .ico-sun { display: none; }
+[data-theme="dark"] .icon-btn .ico-moon { display: none; }
+[data-theme="dark"] .icon-btn .ico-sun { display: block; }
+
+/* ---- поиск ---- */
+.search-form { position: relative; width: min(640px, 100%); }
+
+.search-box {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: var(--input-bg);
+  border: 1.5px solid var(--border);
+  border-radius: 999px;
+  padding: 0 18px;
+  height: 50px;
+  box-shadow: var(--shadow);
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
+}
+
+.search-box:hover { box-shadow: var(--shadow-lg); }
+
+.search-box:focus-within {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 4px var(--accent-soft), var(--shadow-lg);
+}
+
+.search-box-lg { height: 60px; padding: 0 22px; }
+
+.ico-search { width: 20px; height: 20px; fill: var(--text-3); flex-shrink: 0; }
+
+.search-box input {
+  flex: 1;
+  border: 0;
+  outline: none;
+  background: transparent;
+  color: var(--text);
+  font-size: 16px;
+  min-width: 0;
+}
+
+.search-box-lg input { font-size: 19px; }
+
+.search-box input::placeholder { color: var(--text-3); }
+
+.clear-btn {
+  border: 0;
+  background: var(--accent-soft);
+  color: var(--text-2);
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  font-size: 18px;
+  line-height: 1;
+  display: grid;
+  place-items: center;
+  transition: background 0.2s ease, color 0.2s ease;
+}
+
+.clear-btn:hover { background: var(--accent); color: #fff; }
+
+.kbd-hint {
+  font-size: 11px;
+  color: var(--text-3);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 3px 7px;
+  background: var(--bg-soft);
+  user-select: none;
+}
+
+/* подсказки */
+.suggest-box {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 0;
+  right: 0;
+  background: var(--card-solid);
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  box-shadow: var(--shadow-lg);
+  overflow: hidden;
+  z-index: 60;
+  animation: pop 0.16s ease;
+}
+
+@keyframes pop {
+  from { opacity: 0; transform: translateY(-6px) scale(0.99); }
+  to   { opacity: 1; transform: none; }
+}
+
+.suggest-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  padding: 12px 18px;
+  border: 0;
+  background: transparent;
+  color: var(--text);
+  font-size: 15px;
+  text-align: left;
+  transition: background 0.12s ease;
+}
+
+.suggest-item:hover, .suggest-item.active {
+  background: var(--accent-soft);
+}
+
+.suggest-item .ico-search { width: 16px; height: 16px; opacity: 0.55; }
+.suggest-item .s-text { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.suggest-item .s-text b { color: var(--accent); font-weight: 600; }
+
+/* ---- главная ---- */
+.main {
+  position: relative;
+  z-index: 1;
+  flex: 1;
+  width: 100%;
+}
+
+.view { animation: viewIn 0.35s ease; }
+
+@keyframes viewIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: none; }
+}
+
+.view-home {
+  display: flex;
+  justify-content: center;
+  padding: 7vh 20px 40px;
+}
+
+.hero {
+  width: min(720px, 100%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.hero-logo svg {
+  width: 88px;
+  height: 88px;
+  filter: drop-shadow(0 12px 26px rgba(91, 77, 240, 0.35));
+  animation: floaty 5s ease-in-out infinite;
+}
+
+@keyframes floaty {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  50% { transform: translateY(-8px) rotate(-2deg); }
+}
+
+.hero-title {
+  margin: 18px 0 6px;
+  font-size: clamp(38px, 7vw, 56px);
+  letter-spacing: -0.035em;
+  font-weight: 800;
+  background: linear-gradient(100deg, var(--accent), var(--accent-2));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.hero-sub {
+  margin: 0 0 30px;
+  color: var(--text-2);
+  font-size: 17px;
+}
+
+.hero-form .search-form, .hero-form { width: min(640px, 100%); }
+
+.hero-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  margin-top: 22px;
+}
+
+/* кнопки */
+.btn {
+  border-radius: 999px;
+  border: 1.5px solid transparent;
+  padding: 12px 26px;
+  font-size: 15px;
+  font-weight: 600;
+  transition: transform 0.15s ease, box-shadow 0.2s ease, background 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+}
+
+.btn:active { transform: scale(0.97); }
+
+.btn-primary {
+  background: linear-gradient(120deg, var(--accent), #7c6cf9);
+  color: #fff;
+  box-shadow: 0 10px 24px rgba(91, 77, 240, 0.35);
+}
+
+.btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 16px 32px rgba(91, 77, 240, 0.45);
+}
+
+.btn-ghost {
+  background: var(--card);
+  color: var(--text-2);
+  border-color: var(--border);
+}
+
+.btn-ghost:hover {
+  color: var(--accent);
+  border-color: var(--accent);
+  background: var(--accent-soft);
+  transform: translateY(-2px);
+}
+
+.link-btn {
+  border: 0;
+  background: none;
+  color: var(--accent);
+  font-size: 13px;
+  padding: 0;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.link-btn:hover { color: var(--accent-2); }
+
+/* чипсы */
+.quick-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  justify-content: center;
+  margin-top: 26px;
+  align-items: center;
+}
+
+.quick-label {
+  color: var(--text-3);
+  font-size: 13px;
+  margin-right: 2px;
+}
+
+.chip {
+  border: 1px solid var(--border);
+  background: var(--card);
+  color: var(--text-2);
+  border-radius: 999px;
+  padding: 9px 16px;
+  font-size: 13.5px;
+  transition: all 0.18s ease;
+}
+
+.chip:hover {
+  color: var(--accent);
+  border-color: var(--accent);
+  background: var(--accent-soft);
+  transform: translateY(-2px);
+}
+
+.recent-block { width: 100%; margin-top: 18px; }
+.recent-head { display: flex; gap: 12px; justify-content: center; align-items: baseline; margin-top: 26px; }
+
+/* ---- результаты ---- */
+.view-results {
+  width: min(1080px, 100%);
+  margin: 0 auto;
+  padding: 10px 20px 60px;
+}
+
+.results-bar { margin: 8px 0 18px; }
+
+.demo-banner {
+  margin: 0 0 18px;
+  padding: 14px 18px;
+  border-radius: 14px;
+  border: 1.5px solid color-mix(in srgb, #f59e0b 45%, var(--border));
+  background: color-mix(in srgb, #f59e0b 12%, var(--card-solid));
+  color: var(--text);
+  font-size: 14px;
+  line-height: 1.55;
+  animation: viewIn 0.3s ease;
+}
+
+.demo-banner b { color: #b45309; }
+[data-theme="dark"] .demo-banner b { color: #fbbf24; }
+
+.results-info {
+  color: var(--text-3);
+  font-size: 13.5px;
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.results-info b { color: var(--text-2); font-weight: 600; }
+
+.results-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 28px;
+  align-items: start;
+}
+
+.results-layout.has-side {
+  grid-template-columns: minmax(0, 1fr) 320px;
+}
+
+.results-col { min-width: 0; }
+
+/* карточки */
+.card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 20px 22px;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  box-shadow: var(--shadow);
+}
+
+.answer-card { margin-bottom: 22px; animation: viewIn 0.3s ease; }
+
+.answer-card .a-label {
+  font-size: 11.5px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-3);
+  margin-bottom: 8px;
+}
+
+.answer-card .a-answer {
+  font-size: 22px;
+  font-weight: 700;
+  margin: 4px 0 8px;
+  color: var(--text);
+}
+
+.answer-card .a-text { color: var(--text-2); line-height: 1.65; font-size: 15px; margin: 6px 0; }
+
+.answer-card .a-source {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 10px;
+  font-size: 13px;
+  color: var(--link);
+  text-decoration: none;
+}
+
+.answer-card .a-source:hover { text-decoration: underline; }
+
+.answer-media {
+  display: flex;
+  gap: 16px;
+  align-items: flex-start;
+}
+
+.answer-media img {
+  width: 96px;
+  height: 96px;
+  object-fit: cover;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  flex-shrink: 0;
+}
+
+/* список результатов */
+.results-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 26px;
+}
+
+.result-item { animation: viewIn 0.35s ease backwards; }
+.result-item:nth-child(1) { animation-delay: 0.02s; }
+.result-item:nth-child(2) { animation-delay: 0.06s; }
+.result-item:nth-child(3) { animation-delay: 0.10s; }
+.result-item:nth-child(4) { animation-delay: 0.14s; }
+.result-item:nth-child(5) { animation-delay: 0.18s; }
+
+.result-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 4px;
+}
+
+.result-favicon {
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: var(--card-solid);
+  flex-shrink: 0;
+  overflow: hidden;
+  display: grid;
+  place-items: center;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--accent);
+}
+
+.result-favicon img { width: 18px; height: 18px; }
+
+.result-url {
+  font-size: 13px;
+  color: var(--text-2);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  direction: ltr;
+}
+
+.result-title {
+  font-size: 19px;
+  line-height: 1.35;
+  margin: 0 0 5px;
+  font-weight: 600;
+}
+
+.result-title a {
+  color: var(--link);
+  text-decoration: none;
+  transition: color 0.15s ease;
+}
+
+.result-title a:hover {
+  color: var(--link-hover);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.result-snippet {
+  margin: 0;
+  color: var(--text-2);
+  font-size: 14.8px;
+  line-height: 1.68;
+  overflow-wrap: anywhere;
+}
+
+mark {
+  background: var(--mark-bg);
+  color: var(--mark-text);
+  border-radius: 4px;
+  padding: 0 2px;
+  font-weight: 600;
+}
+
+/* скелетоны */
+.skeletons { display: flex; flex-direction: column; gap: 26px; }
+
+.sk-item {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 4px 0;
+}
+
+.sk-line {
+  height: 13px;
+  border-radius: 8px;
+  background: linear-gradient(90deg, var(--border) 25%, color-mix(in srgb, var(--accent) 12%, transparent) 50%, var(--border) 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.3s infinite linear;
+}
+
+.sk-line.w40 { width: 40%; height: 18px; }
+.sk-line.w90 { width: 92%; }
+.sk-line.w75 { width: 74%; }
+
+@keyframes shimmer {
+  from { background-position: 200% 0; }
+  to   { background-position: -200% 0; }
+}
+
+/* пусто / ошибка */
+.empty-state {
+  text-align: center;
+  padding: 60px 20px;
+  color: var(--text-2);
+}
+
+.empty-ico { font-size: 52px; opacity: 0.5; }
+.empty-state h3 { margin: 12px 0 6px; color: var(--text); }
+
+.error-card {
+  display: flex;
+  gap: 18px;
+  align-items: flex-start;
+  border-color: color-mix(in srgb, var(--danger) 35%, var(--border));
+}
+
+.error-card h3 { margin: 0 0 6px; font-size: 18px; }
+.error-card p { margin: 0 0 14px; color: var(--text-2); }
+
+.error-ico {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--danger) 16%, transparent);
+  color: var(--danger);
+  display: grid;
+  place-items: center;
+  font-size: 22px;
+  font-weight: 800;
+  flex-shrink: 0;
+}
+
+/* ещё / похожие */
+.more-wrap { display: flex; justify-content: center; margin: 36px 0 8px; }
+
+.related-wrap {
+  margin-top: 40px;
+  padding-top: 26px;
+  border-top: 1px solid var(--border);
+}
+
+.related-wrap h3 {
+  margin: 0 0 6px;
+  font-size: 16px;
+  color: var(--text);
+}
+
+.related-wrap .quick-row { justify-content: flex-start; margin-top: 14px; }
+
+/* панель знаний */
+.side-col { position: sticky; top: 92px; }
+
+.wiki-card { animation: viewIn 0.35s ease; }
+
+.wiki-card .w-label {
+  font-size: 11.5px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-3);
+  margin-bottom: 10px;
+}
+
+.wiki-card .w-title { margin: 0 0 10px; font-size: 19px; line-height: 1.35; }
+
+.wiki-card img {
+  width: 100%;
+  max-height: 180px;
+  object-fit: contain;
+  background: var(--bg-soft);
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  margin-bottom: 12px;
+}
+
+.wiki-card .w-text {
+  color: var(--text-2);
+  font-size: 14px;
+  line-height: 1.68;
+  margin: 0 0 12px;
+  overflow-wrap: anywhere;
+}
+
+.wiki-card .w-link {
+  color: var(--link);
+  font-size: 13.5px;
+  text-decoration: none;
+}
+
+.wiki-card .w-link:hover { text-decoration: underline; }
+
+/* ---- подвал ---- */
+.footer {
+  position: relative;
+  z-index: 1;
+  border-top: 1px solid var(--border);
+  padding: 18px 22px;
+  background: color-mix(in srgb, var(--bg) 72%, transparent);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+.footer-inner {
+  width: min(1080px, 100%);
+  margin: 0 auto;
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  color: var(--text-3);
+  font-size: 13px;
+}
+
+.dot { opacity: 0.5; }
+
+/* ---- адаптив ---- */
+@media (max-width: 900px) {
+  .results-layout.has-side { grid-template-columns: 1fr; }
+  .side-col { position: static; }
+}
+
+@media (max-width: 640px) {
+  .topbar { padding: 10px 12px; gap: 10px; }
+  .brand-name { display: none; }
+  .search-box { height: 46px; padding: 0 14px; }
+  .search-box-lg { height: 54px; }
+  .search-box-lg input { font-size: 16px; }
+  .kbd-hint { display: none; }
+  .view-home { padding: 5vh 14px 30px; }
+  .hero-title { font-size: 36px; }
+  .hero-sub { font-size: 15px; margin-bottom: 22px; }
+  .hero-actions { flex-wrap: wrap; }
+  .view-results { padding: 8px 14px 50px; }
+  .result-title { font-size: 17px; }
+  .answer-media { flex-direction: column; }
+}
+
+
+  /* ---------- Модальное окно настроек и обновлений ---------- */
+  .modal-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(15, 23, 42, 0.45);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    z-index: 1000;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s ease;
+  }
+  .modal-backdrop.open {
+    opacity: 1;
+    pointer-events: auto;
+  }
+  .modal-card {
+    background: var(--card-solid);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-lg);
+    width: 100%;
+    max-width: 620px;
+    max-height: 85vh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    transform: scale(0.96) translateY(10px);
+    transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .modal-backdrop.open .modal-card {
+    transform: scale(1) translateY(0);
+  }
+  .modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 18px 24px;
+    border-bottom: 1px solid var(--border);
+  }
+  .modal-title-wrap {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .modal-title {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--text);
+    margin: 0;
+  }
+  .badge-version {
+    font-size: 11px;
+    font-weight: 600;
+    padding: 3px 8px;
+    border-radius: 999px;
+    background: var(--accent-soft);
+    color: var(--accent);
+    border: 1px solid rgba(91, 77, 240, 0.2);
+  }
+  .modal-close {
+    background: transparent;
+    border: none;
+    font-size: 18px;
+    cursor: pointer;
+    color: var(--text-2);
+  }
+  .modal-tabs {
+    display: flex;
+    padding: 0 24px;
+    border-bottom: 1px solid var(--border);
+    background: var(--bg);
+    gap: 8px;
+  }
+  .modal-tab {
+    padding: 12px 14px;
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--text-2);
+    background: transparent;
+    border: none;
+    border-bottom: 2px solid transparent;
+    cursor: pointer;
+    transition: color 0.15s, border-color 0.15s;
+  }
+  .modal-tab:hover {
+    color: var(--text);
+  }
+  .modal-tab.active {
+    color: var(--accent);
+    border-bottom-color: var(--accent);
+    font-weight: 600;
+  }
+  .modal-body {
+    padding: 24px;
+    overflow-y: auto;
+    flex: 1;
+  }
+  .tab-panel {
+    display: none;
+  }
+  .tab-panel.active {
+    display: block;
+  }
+  .setting-group {
+    margin-bottom: 20px;
+  }
+  .setting-group:last-child {
+    margin-bottom: 0;
+  }
+  .setting-label {
+    display: block;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: 4px;
+  }
+  .setting-desc {
+    font-size: 12px;
+    color: var(--text-2);
+    margin: 0 0 8px 0;
+    line-height: 1.4;
+  }
+  .setting-select {
+    width: 100%;
+    padding: 10px 14px;
+    font-size: 14px;
+    color: var(--text);
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+  }
+  .setting-select:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px var(--accent-soft);
+  }
+  .setting-checkbox-label {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 13px;
+    color: var(--text);
+    cursor: pointer;
+  }
+  .setting-checkbox-label input[type="checkbox"] {
+    width: 17px;
+    height: 17px;
+    accent-color: var(--accent);
+    cursor: pointer;
+  }
+  .modal-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+    padding: 16px 24px;
+    border-top: 1px solid var(--border);
+    background: var(--bg);
+  }
+  .btn-primary, .btn-secondary {
+    padding: 10px 18px;
+    border-radius: 10px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.15s ease;
+  }
+  .btn-primary {
+    background: var(--accent);
+    color: #fff;
+    border: none;
+  }
+  .btn-primary:hover {
+    filter: brightness(1.1);
+  }
+  .btn-secondary {
+    background: var(--card);
+    color: var(--text);
+    border: 1px solid var(--border);
+  }
+  .btn-secondary:hover {
+    background: var(--bg);
+  }
+  /* карточка о приложении и обновлениях */
+  .about-card {
+    display: flex;
+    gap: 16px;
+    padding: 16px;
+    background: var(--bg);
+    border-radius: 12px;
+    border: 1px solid var(--border);
+    margin-bottom: 20px;
+    align-items: center;
+  }
+  .about-icon {
+    flex-shrink: 0;
+  }
+  .about-name {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--text);
+    margin: 0 0 4px 0;
+  }
+  .about-desc {
+    font-size: 12px;
+    color: var(--text-2);
+    margin: 0 0 8px 0;
+    line-height: 1.4;
+  }
+  .about-meta {
+    font-size: 12px;
+    color: var(--text-2);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .link-external {
+    color: var(--accent);
+    text-decoration: none;
+    font-weight: 500;
+  }
+  .link-external:hover {
+    text-decoration: underline;
+  }
+  .update-check-box {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 16px;
+  }
+  .update-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .update-btn svg {
+    transition: transform 0.5s ease;
+  }
+  .update-btn.loading svg {
+    animation: spin 1s linear infinite;
+  }
+  @keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+  }
+  .update-time {
+    font-size: 12px;
+    color: var(--text-3);
+  }
+  .update-status-card {
+    border-radius: 12px;
+    border: 1px solid var(--border);
+    padding: 16px;
+    background: var(--card);
+    margin-top: 14px;
+  }
+  .update-status-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-weight: 600;
+    font-size: 14px;
+    margin-bottom: 6px;
+  }
+  .update-status-body {
+    font-size: 13px;
+    color: var(--text-2);
+    line-height: 1.4;
+  }
+  .update-release-info {
+    margin-top: 14px;
+    padding-top: 14px;
+    border-top: 1px dashed var(--border);
+  }
+  .update-release-title {
+    font-weight: 700;
+    font-size: 14px;
+    color: var(--text);
+    margin-bottom: 6px;
+  }
+  .update-release-notes {
+    font-size: 12px;
+    color: var(--text-2);
+    background: var(--bg);
+    padding: 10px 12px;
+    border-radius: 8px;
+    max-height: 120px;
+    overflow-y: auto;
+    white-space: pre-wrap;
+    margin-bottom: 12px;
+  }
+  .update-asset-info {
+    font-size: 12px;
+    color: var(--text-3);
+    margin-bottom: 12px;
+  }
+  .update-progress-wrap {
+    margin: 14px 0;
+  }
+  .update-progress-bar {
+    width: 100%;
+    height: 8px;
+    background: var(--bg);
+    border-radius: 999px;
+    overflow: hidden;
+    border: 1px solid var(--border);
+  }
+  .update-progress-fill {
+    height: 100%;
+    width: 0%;
+    background: linear-gradient(90deg, var(--accent), var(--accent-2));
+    transition: width 0.2s ease;
+  }
+  .update-progress-text {
+    font-size: 12px;
+    color: var(--text-2);
+    text-align: right;
+    margin-top: 4px;
+  }
+  .update-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 10px;
+  }
+
+</style>
+</head>
+<body data-view="home">
+
+  <div class="ambient" aria-hidden="true">
+    <span class="blob blob-a"></span>
+    <span class="blob blob-b"></span>
+    <span class="blob blob-c"></span>
+  </div>
+
+  <!-- Верхняя панель -->
+  <header class="topbar" id="topbar">
+    <a class="brand" href="/" id="brandLink">
+      <svg class="brand-mark" viewBox="0 0 48 48" aria-hidden="true">
+        <defs>
+          <linearGradient id="gTop" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0" stop-color="#6d5dfc"/><stop offset="1" stop-color="#38bdf8"/>
+          </linearGradient>
+        </defs>
+        <rect x="2" y="2" width="44" height="44" rx="13" fill="url(#gTop)"/>
+        <circle cx="21" cy="21" r="8.5" fill="none" stroke="#fff" stroke-width="4"/>
+        <rect x="27.5" y="27.5" width="4" height="13" rx="2" transform="rotate(-45 29.5 34)" fill="#fff"/>
+      </svg>
+      <span class="brand-name">Искатель</span>
+    </a>
+
+    <div class="top-search" id="topSearch">
+      <form class="search-form" id="topForm" autocomplete="off">
+        <div class="search-box">
+          <svg class="ico-search" viewBox="0 0 24 24" aria-hidden="true"><path d="M10.5 3a7.5 7.5 0 0 1 5.94 12.09l4.24 4.24a1 1 0 0 1-1.41 1.41l-4.24-4.24A7.5 7.5 0 1 1 10.5 3Zm0 2a5.5 5.5 0 1 0 0 11 5.5 5.5 0 0 0 0-11Z"/></svg>
+          <input type="search" id="topInput" name="q" placeholder="Найти в интернете…" aria-label="Поисковый запрос" spellcheck="false">
+          <button type="button" class="clear-btn" id="topClear" aria-label="Очистить" hidden>×</button>
+        </div>
+        <div class="suggest-box" id="topSuggest" role="listbox" hidden></div>
+      </form>
+    </div>
+
+        <div class="top-actions">
+      <button class="icon-btn" id="settingsBtn" aria-label="Настройки и обновления" title="Настройки и обновления">
+        <svg viewBox="0 0 24 24" aria-hidden="true" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="3"/>
+          <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+        </svg>
+      </button>
+      <button class="icon-btn" id="themeBtn" aria-label="Сменить тему" title="Сменить тему">
+        <svg class="ico-moon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20.4 14.7A8.5 8.5 0 0 1 9.3 3.6 8.5 8.5 0 1 0 20.4 14.7Z"/></svg>
+        <svg class="ico-sun" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2.5M12 19.5V22M2 12h2.5M19.5 12H22M4.9 4.9l1.8 1.8M17.3 17.3l1.8 1.8M19.1 4.9l-1.8 1.8M6.7 17.3l-1.8 1.8" stroke-linecap="round"/></svg>
+      </button>
+    </div>
+  </header>
+
+  <main class="main">
+
+    <!-- ГЛАВНАЯ -->
+    <section class="view view-home" id="homeView">
+      <div class="hero">
+        <div class="hero-logo">
+          <svg viewBox="0 0 48 48" aria-hidden="true">
+            <defs>
+              <linearGradient id="gHero" x1="0" y1="0" x2="1" y2="1">
+                <stop offset="0" stop-color="#6d5dfc"/><stop offset="1" stop-color="#38bdf8"/>
+              </linearGradient>
+            </defs>
+            <rect x="2" y="2" width="44" height="44" rx="13" fill="url(#gHero)"/>
+            <circle cx="21" cy="21" r="8.5" fill="none" stroke="#fff" stroke-width="4"/>
+            <rect x="27.5" y="27.5" width="4" height="13" rx="2" transform="rotate(-45 29.5 34)" fill="#fff"/>
+          </svg>
+        </div>
+        <h1 class="hero-title">Искатель</h1>
+        <p class="hero-sub">Быстрый и чистый поиск по интернету</p>
+
+        <form class="search-form hero-form" id="homeForm" autocomplete="off">
+          <div class="search-box search-box-lg">
+            <svg class="ico-search" viewBox="0 0 24 24" aria-hidden="true"><path d="M10.5 3a7.5 7.5 0 0 1 5.94 12.09l4.24 4.24a1 1 0 0 1-1.41 1.41l-4.24-4.24A7.5 7.5 0 1 1 10.5 3Zm0 2a5.5 5.5 0 1 0 0 11 5.5 5.5 0 0 0 0-11Z"/></svg>
+            <input type="search" id="homeInput" name="q" placeholder="Найти в интернете…" aria-label="Поисковый запрос" spellcheck="false" autofocus>
+            <button type="button" class="clear-btn" id="homeClear" aria-label="Очистить" hidden>×</button>
+            <kbd class="kbd-hint">Enter</kbd>
+          </div>
+          <div class="suggest-box" id="homeSuggest" role="listbox" hidden></div>
+          <div class="hero-actions">
+            <button type="submit" class="btn btn-primary">Найти</button>
+            <button type="button" class="btn btn-ghost" id="luckyBtn">Мне повезёт</button>
+          </div>
+        </form>
+
+        <div class="quick-row" id="quickRow">
+          <span class="quick-label">Популярное:</span>
+          <button class="chip" type="button">погода в Астрахани</button>
+          <button class="chip" type="button">курс доллара</button>
+          <button class="chip" type="button">что посмотреть в Астрахани</button>
+          <button class="chip" type="button">рецепт борща</button>
+          <button class="chip" type="button">python для начинающих</button>
+          <button class="chip" type="button">последние новости</button>
+        </div>
+
+        <div class="recent-block" id="recentBlock" hidden>
+          <div class="recent-head">
+            <span class="quick-label">Недавние запросы:</span>
+            <button type="button" class="link-btn" id="clearRecent">очистить</button>
+          </div>
+          <div class="quick-row" id="recentRow"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- РЕЗУЛЬТАТЫ -->
+    <section class="view view-results" id="resultsView" hidden>
+      <div class="demo-banner" id="demoBanner" hidden></div>
+      <div class="results-bar">
+        <div class="results-info" id="resultsInfo"></div>
+      </div>
+
+      <div class="results-layout">
+        <div class="results-col">
+
+          <!-- Ответ / справка -->
+          <div id="answerCard" class="card answer-card" hidden></div>
+
+          <!-- Скелетоны -->
+          <div id="skeletons" class="skeletons" hidden>
+            <div class="sk-item"><div class="sk-line w40"></div><div class="sk-line w90"></div><div class="sk-line w75"></div></div>
+            <div class="sk-item"><div class="sk-line w40"></div><div class="sk-line w90"></div><div class="sk-line w75"></div></div>
+            <div class="sk-item"><div class="sk-line w40"></div><div class="sk-line w90"></div><div class="sk-line w75"></div></div>
+          </div>
+
+          <!-- Ошибка -->
+          <div id="errorCard" class="card error-card" hidden>
+            <div class="error-ico">!</div>
+            <div>
+              <h3>Не получилось выполнить поиск</h3>
+              <p id="errorText"></p>
+              <button class="btn btn-primary" id="retryBtn">Попробовать снова</button>
+            </div>
+          </div>
+
+          <!-- Список результатов -->
+          <ol class="results-list" id="resultsList"></ol>
+
+          <div class="empty-state" id="emptyState" hidden>
+            <div class="empty-ico">⌕</div>
+            <h3>Ничего не найдено</h3>
+            <p>Попробуйте изменить формулировку запроса или убрать лишние слова.</p>
+          </div>
+
+          <div class="more-wrap" id="moreWrap" hidden>
+            <button class="btn btn-ghost" id="moreBtn">Показать ещё</button>
+          </div>
+
+          <div class="related-wrap" id="relatedWrap" hidden>
+            <h3>Похожие запросы</h3>
+            <div class="quick-row" id="relatedRow"></div>
+          </div>
+        </div>
+
+        <!-- Панель знаний -->
+        <aside class="side-col" id="sideCol" hidden>
+          <div class="card wiki-card" id="wikiCard"></div>
+        </aside>
+      </div>
+    </section>
+
+  </main>
+
+  
+  <!-- Модальное окно настроек и обновлений -->
+  <div class="modal-backdrop" id="settingsModal" aria-hidden="true">
+    <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="settingsTitle">
+      <div class="modal-header">
+        <div class="modal-title-wrap">
+          <h2 class="modal-title" id="settingsTitle">Настройки</h2>
+          <span class="badge-version" id="settingsVersionBadge">v1.1.0</span>
+        </div>
+        <button type="button" class="icon-btn modal-close" id="settingsCloseBtn" aria-label="Закрыть">✕</button>
+      </div>
+
+      <div class="modal-tabs" role="tablist">
+        <button type="button" class="modal-tab active" data-tab="general" role="tab">Поиск</button>
+        <button type="button" class="modal-tab" data-tab="appearance" role="tab">Оформление</button>
+        <button type="button" class="modal-tab" data-tab="updates" role="tab">Обновления и о программе</button>
+      </div>
+
+      <div class="modal-body">
+        <!-- Вкладка: Поиск -->
+        <div class="tab-panel active" id="tabGeneral" role="tabpanel">
+          <div class="setting-group">
+            <label class="setting-label" for="settingEngine">Поисковый движок по умолчанию</label>
+            <p class="setting-desc">Автоматический режим опрашивает DuckDuckGo и переключается на Bing при необходимости.</p>
+            <select class="setting-select" id="settingEngine">
+              <option value="auto">Авто (DuckDuckGo с резервом Bing)</option>
+              <option value="duckduckgo">Только DuckDuckGo</option>
+              <option value="bing">Только Bing</option>
+            </select>
+          </div>
+
+          <div class="setting-group">
+            <label class="setting-label" for="settingRegion">Регион и язык поиска</label>
+            <p class="setting-desc">Определяет предпочтительный язык и приоритизацию местных веб-страниц.</p>
+            <select class="setting-select" id="settingRegion">
+              <option value="ru-ru">Россия / Русский (ru-ru)</option>
+              <option value="wt-wt">Весь мир (международная выдача)</option>
+              <option value="us-en">США / English (us-en)</option>
+              <option value="de-de">Германия / Deutsch (de-de)</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Вкладка: Оформление -->
+        <div class="tab-panel" id="tabAppearance" role="tabpanel">
+          <div class="setting-group">
+            <label class="setting-label" for="settingTheme">Цветовая тема</label>
+            <p class="setting-desc">Выберите оформление интерфейса или синхронизируйте его с системой.</p>
+            <select class="setting-select" id="settingTheme">
+              <option value="system">Как в операционной системе</option>
+              <option value="light">Светлая тема</option>
+              <option value="dark">Тёмная тема</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Вкладка: Обновления и о приложении -->
+        <div class="tab-panel" id="tabUpdates" role="tabpanel">
+          <div class="about-card">
+            <div class="about-icon">
+              <svg class="brand-mark" viewBox="0 0 48 48" aria-hidden="true" width="44" height="44">
+                <defs>
+                  <linearGradient id="gModalAbout" x1="0" y1="0" x2="1" y2="1">
+                    <stop offset="0" stop-color="#6d5dfc"/><stop offset="1" stop-color="#38bdf8"/>
+                  </linearGradient>
+                </defs>
+                <rect x="2" y="2" width="44" height="44" rx="13" fill="url(#gModalAbout)"/>
+                <circle cx="21" cy="21" r="8.5" fill="none" stroke="#fff" stroke-width="4"/>
+                <rect x="27.5" y="27.5" width="4" height="13" rx="2" transform="rotate(-45 29.5 34)" fill="#fff"/>
+              </svg>
+            </div>
+            <div class="about-info">
+              <h3 class="about-name">Искатель Desktop</h3>
+              <p class="about-desc">Настольный поисковик без слежки, рекламы и сбора пользовательских данных.</p>
+              <div class="about-meta">
+                <span>Версия: <strong id="aboutVersionText">1.1.0</strong></span>
+                <span class="dot">·</span>
+                <a href="https://github.com/UsmanMusav/Iskatel" target="_blank" rel="noopener" class="link-external" id="githubRepoLink">GitHub Репозиторий ↗</a>
+              </div>
+            </div>
+          </div>
+
+          <div class="setting-group">
+            <label class="setting-checkbox-label">
+              <input type="checkbox" id="settingAutoUpdate" checked>
+              <span>Проверять наличие обновлений автоматически при старте</span>
+            </label>
+          </div>
+
+          <div class="update-check-box">
+            <button type="button" class="btn-primary update-btn" id="checkUpdatesBtn">
+              <svg class="ico-refresh" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12a9 9 0 1 1-9-9c2.5 0 4.8 1 6.4 2.6L21 8"/><path d="M21 3v5h-5"/></svg>
+              <span>Проверить обновления</span>
+            </button>
+            <span class="update-time" id="lastCheckTime"></span>
+          </div>
+
+          <!-- Контейнер статуса обновления -->
+          <div class="update-status-card" id="updateStatusCard" style="display:none;">
+            <div class="update-status-header">
+              <span class="update-status-icon" id="updateStatusIcon"></span>
+              <div class="update-status-title" id="updateStatusTitle"></div>
+            </div>
+            <div class="update-status-body" id="updateStatusBody"></div>
+
+            <!-- Карточка найденного релиза -->
+            <div class="update-release-info" id="updateReleaseInfo" style="display:none;">
+              <div class="update-release-title" id="updateReleaseTitle"></div>
+              <div class="update-release-notes" id="updateReleaseNotes"></div>
+              <div class="update-asset-info" id="updateAssetInfo"></div>
+
+              <div class="update-progress-wrap" id="updateProgressWrap" style="display:none;">
+                <div class="update-progress-bar"><div class="update-progress-fill" id="updateProgressFill"></div></div>
+                <div class="update-progress-text" id="updateProgressText">0%</div>
+              </div>
+
+              <div class="update-actions" id="updateActions">
+                <button type="button" class="btn-primary" id="downloadUpdateBtn">Скачать и установить</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" class="btn-secondary" id="settingsCancelBtn">Закрыть</button>
+        <button type="button" class="btn-primary" id="settingsSaveBtn">Сохранить</button>
+      </div>
+    </div>
+  </div>
+
+  <footer class="footer">
+    <div class="footer-inner">
+      <span>© <span id="year"></span> Искатель</span>
+      <span class="dot">·</span>
+      <span>Результаты — DuckDuckGo и Bing, справки — Википедия</span>
+      <span class="dot">·</span>
+      <button class="link-btn" id="toTop">Наверх</button>
+    </div>
+  </footer>
+
+  <script>
+/* «Искатель» — логика фронтенда */
+"use strict";
+
+/* мост к встроенному движку приложения (или к серверу в веб-версии) */
+async function apiFetch(path) {
+  if (window.iskatelAPI) {
+    const params = Object.fromEntries(new URLSearchParams(path.split("?")[1] || ""));
+    try {
+      if (path.startsWith("/api/search")) {
+        const data = await window.iskatelAPI.search(params);
+        return { ok: !data.error, json: async () => data };
+      }
+      if (path.startsWith("/api/suggest")) {
+        const data = await window.iskatelAPI.suggest(params);
+        return { ok: true, json: async () => data };
+      }
+    } catch (e) {
+      return { ok: false, json: async () => ({ error: String(e) }) };
+    }
+  }
+  return fetch(path);
+}
+
+
+/* ---------- встроенная демо-база (когда нет связи с сервером) ---------- */
+const DEMO_INDEX = [
+  { title: "Погода в Астрахани — точный прогноз на 14 дней", url: "https://yandex.ru/pogoda/ru/astrahan", snippet: "Прогноз погоды в Астрахани: температура, осадки, ветер и УФ-индекс. Обновляется каждый час.", tags: "погода астрахань прогноз температура" },
+  { title: "Gismeteo: погода в Астрахани сегодня и завтра", url: "https://www.gismeteo.ru/weather-astrakhan-5130/", snippet: "Подробный прогноз погоды в Астрахани на сегодня, завтра и две недели вперёд от Gismeteo.", tags: "погода астрахань gismeteo" },
+  { title: "Погода в Астрахани сейчас — почасовой прогноз", url: "https://ru-meteo.ru/astrakhan/hour", snippet: "Текущая погода в Астрахани и почасовой прогноз: температура воздуха, давление, влажность.", tags: "погода астрахань сейчас" },
+  { title: "Курс доллара и евро ЦБ РФ на сегодня", url: "https://www.cbr.ru/currency_base/daily/", snippet: "Официальные курсы валют Центрального банка Российской Федерации на сегодня и завтра.", tags: "курс доллара евро валют цб рубль" },
+  { title: "Курс доллара к рублю — онлайн график", url: "https://finance.ru/currency/usd/", snippet: "Актуальный курс доллара к рублю, динамика за месяц и год, конвертер валют.", tags: "курс доллара рубль конвертер" },
+  { title: "Астрахань — Википедия", url: "https://ru.wikipedia.org/wiki/Астрахань", snippet: "Астрахань — город на юге России, административный центр Астраханской области, стоит на берегу Волги.", tags: "астрахань город волга википедия" },
+  { title: "Дельта Волги — Википедия", url: "https://ru.wikipedia.org/wiki/Дельта_Волги", snippet: "Дельта Волги — самая большая речная дельта в Европе. Начинается в месте отделения русел Волги.", tags: "дельта волги река природа" },
+  { title: "Волго-Ахтубинская пойма — Википедия", url: "https://ru.wikipedia.org/wiki/Волго-Ахтубинская_пойма", snippet: "Волго-Ахтубинская пойма — уникальная пойменная система в Астраханской и Волгоградской областях.", tags: "волга пойма природа астрахань" },
+  { title: "Что посмотреть в Астрахани: 15 лучших мест", url: "https://www.tripadvisor.ru/Tourism-g298473-Astrakhan_Astrakhan_Oblast_Volga_District.html", snippet: "Гид по Астрахани: Астраханский кремль, Красные казармы, Троицкий мост, плавни и музеи города.", tags: "астрахань достопримечательности туризм посмотреть" },
+  { title: "Астраханский кремль и другие памятники города", url: "https://www.culture.ru/places/16637/astrakhanskiy-kreml", snippet: "Историко-архитектурный музей-заповедник «Астраханский кремль» — главная достопримечательность юга России.", tags: "астрахань кремль музей культура" },
+  { title: "Борщ — рецепт классический пошагово", url: "https://www.russianfood.com/recipes/bytype/?fid=219", snippet: "Классический рецепт борща с мясом: сочные овощи, правильная зажарка и густой наваристый бульон.", tags: "борщ рецепт борща суп готовка еда" },
+  { title: "Самый вкусный борщ — пошаговый рецепт с фото", url: "https://eda.ru/recepty/supy/borsch", snippet: "Пошаговый рецепт борща: список ингредиентов, тайминг и секреты насыщенного вкуса красного борща.", tags: "борщ рецепт вкусный суп" },
+  { title: "Борщ — Википедия", url: "https://ru.wikipedia.org/wiki/Борщ", snippet: "Борщ — славянский суп на основе свёклы, придающей блюду красный цвет. Традиционное блюдо украинской кухни.", tags: "борщ суп кухня википедия" },
+  { title: "Плов — рецепт узбекский дома", url: "https://eda.ru/recepty/osnovnye-blyuda/plov", snippet: "Настоящий узбекский плов: рис, мясо, морковь и зира. Подробный рецепт с пояснениями по каждому шагу.", tags: "плов рецепт рис мясо готовка" },
+  { title: "Python для начинающих — полный курс", url: "https://docs.python.org/3/tutorial/", snippet: "Официальный учебник по Python: синтаксис, структуры данных, функции и модули. Python для начинающих с нуля.", tags: "python программирование обучение курс" },
+  { title: "Python.org — официальный сайт языка Python", url: "https://www.python.org/", snippet: "Python — высокоуровневый язык программирования общего назначения с акцентом на читаемость кода.", tags: "python официальный сайт программирование" },
+  { title: "Изучаем Python за 7 дней — интерактивный курс", url: "https://stepik.org/course/58852", snippet: "Бесплатный интерактивный курс Python: задания с проверкой, теория и практика с первого урока.", tags: "python курс обучение stepik" },
+  { title: "Эйфелева башня — Википедия", url: "https://ru.wikipedia.org/wiki/Эйфелева_башня", snippet: "Эйфелева башня — металлическая башня в центре Парижа, самая узнаваемая архитектурная достопримечательность Франции.", tags: "эйфелева башня париж франция" },
+  { title: "Париж — Википедия", url: "https://ru.wikipedia.org/wiki/Париж", snippet: "Париж — столица Франции, один из крупнейших и наиболее посещаемых городов мира на реке Сена.", tags: "париж столица франция город" },
+  { title: "Франция — Википедия", url: "https://ru.wikipedia.org/wiki/Франция", snippet: "Франция — государство в Западной Европе. Столица — Париж. Крупнейшая страна Европейского союза по площади.", tags: "франция европа страна париж столица" },
+  { title: "Байкал — самое глубокое озеро в мире", url: "https://ru.wikipedia.org/wiki/Байкал", snippet: "Байкал — озеро тектонического происхождения в Сибири, самое глубокое озеро планеты и крупнейший источник пресной воды.", tags: "байкал озеро сибирь природа" },
+  { title: "Солнечная система — Википедия", url: "https://ru.wikipedia.org/wiki/Солнечная_система", snippet: "Солнечная система — планетная система, включающая Солнце и естественные космические объекты: планеты, спутники, астероиды.", tags: "космос солнечная система планеты астрономия" },
+  { title: "Как работает нейросеть — объяснение простыми словами", url: "https://habr.com/ru/articles/758986/", snippet: "Разбираемся, как устроены нейронные сети: слои, веса, обучение и генеративные модели на понятных примерах.", tags: "нейросеть искусственный интеллект ии нейронная сеть" },
+  { title: "Квантовый компьютер — Википедия", url: "https://ru.wikipedia.org/wiki/Квантовый_компьютер", snippet: "Квантовый компьютер — вычислительное устройство, использующее явления квантовой механики: суперпозицию и запутанность.", tags: "квантовый компьютер технологии наука" },
+  { title: "Последние новости России и мира", url: "https://ria.ru/", snippet: "Оперативные новости дня: политика, экономика, общество, наука и спорт. Обновляется круглосуточно.", tags: "новости россия мир сегодня последние" },
+  { title: "История космонавтики: от Гагарина до Марса", url: "https://www.popmech.ru/technologies/", snippet: "Как развивалось освоение космоса: первый спутник, полёт Гагарина, станции «Мир» и МКС, миссии на Марс.", tags: "космонавтика космос гагарин марс история" },
+  { title: "Лучшие сериалы 2026 года — подборка", url: "https://www.kinopoisk.ru/lists/movies/", snippet: "Подборка лучших сериалов и фильмов года: драмы, триллеры, фантастика и документальное кино.", tags: "сериалы фильмы кино подборка" },
+  { title: "Красная площадь и Московский Кремль — Википедия", url: "https://ru.wikipedia.org/wiki/Красная_площадь", snippet: "Красная площадь — главная площадь Москвы, памятник Всемирного наследия ЮНЕСКО рядом с Кремлём.", tags: "москва кремль красная площадь достопримечательности" },
+];
+
+const DEMO_PHRASES = [
+  "погода в Астрахани", "курс доллара", "что посмотреть в Астрахани", "рецепт борща",
+  "python для начинающих", "последние новости", "рецепт плова", "дельта Волги",
+  "Эйфелева башня", "столица Франции", "как работает нейросеть", "озеро Байкал",
+  "квантовые компьютеры", "история космонавтики", "лучшие сериалы 2026",
+];
+
+function escapeRe(s) { return s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"); }
+
+function wrapMarks(text, stems) {
+  let out = escapeHtml(text);
+  const store = [];
+  for (const s of stems) {
+    out = out.replace(new RegExp("(" + escapeRe(s) + ")", "gi"), (m) => {
+      store.push(m);
+      return "\x01" + (store.length - 1) + "\x02";
+    });
+  }
+  return out.replace(/\x01(\d+)\x02/g, (_, i) => "<mark>" + store[+i] + "</mark>");
+}
+
+function demoSearch(query) {
+  const words = query.toLowerCase().match(/[a-zа-яё0-9]{3,}/gi) || [];
+  const stems = [...new Set(words.map((w) => w.slice(0, 4)))];
+  if (!stems.length) return [];
+  const scored = [];
+  for (const item of DEMO_INDEX) {
+    const title = item.title.toLowerCase();
+    const text = (item.snippet + " " + item.tags).toLowerCase();
+    let score = 0;
+    for (const s of stems) {
+      if (title.includes(s)) score += 3;
+      else if (text.includes(s)) score += 1;
+    }
+    if (score > 0) scored.push({ item, score });
+  }
+  scored.sort((a, b) => b.score - a.score);
+  return scored.slice(0, 8).map(({ item }) => ({
+    title: wrapMarks(item.title, stems),
+    url: item.url,
+    display_url: escapeHtml(item.url.replace(/^https?:\/\//, "").slice(0, 72)),
+    snippet: wrapMarks(item.snippet, stems),
+  }));
+}
+
+function demoSuggestions(q) {
+  const words = q.toLowerCase().match(/[a-zа-яё0-9]{3,}/gi) || [];
+  const stems = words.map((w) => w.slice(0, 4));
+  return DEMO_PHRASES
+    .filter((p) => {
+      const pl = p.toLowerCase();
+      return stems.some((s) => pl.includes(s)) && pl !== q.toLowerCase();
+    })
+    .slice(0, 6);
+}
+
+function runOfflineDemo(query) {
+  showResults();
+  const started = Date.now();
+  const results = demoSearch(query);
+  els.demoBanner.hidden = false;
+  els.demoBanner.innerHTML =
+    window.iskatelAPI
+    ? "<b>Автономный демо-режим.</b> Нет соединения с интернетом — показаны встроенные примеры результатов."
+    : "<b>Автономный демо-режим.</b> Поиск идёт по встроенным примерам: у этого окна нет доступа в интернет. " +
+      "Живой поиск по интернету работает во вкладке сервера (порт 8080).";
+  renderResults({
+    query,
+    page: 0,
+    results,
+    related: demoSuggestions(query),
+    instant: {},
+    wiki: {},
+    engine: "Демо-режим",
+    took_ms: Date.now() - started,
+  }, false);
+}
+
+/* ---------- состояние ---------- */
+const state = {
+  query: "",
+  page: 0,
+  busy: false,
+  sugIndex: -1,
+  suggestions: [],
+};
+
+const $ = (id) => document.getElementById(id);
+
+const els = {
+  body: document.body,
+  homeView: $("homeView"),
+  resultsView: $("resultsView"),
+  homeInput: $("homeInput"),
+  topInput: $("topInput"),
+  homeForm: $("homeForm"),
+  topForm: $("topForm"),
+  homeSuggest: $("homeSuggest"),
+  topSuggest: $("topSuggest"),
+  homeClear: $("homeClear"),
+  topClear: $("topClear"),
+  resultsList: $("resultsList"),
+  resultsInfo: $("resultsInfo"),
+  answerCard: $("answerCard"),
+  skeletons: $("skeletons"),
+  errorCard: $("errorCard"),
+  errorText: $("errorText"),
+  emptyState: $("emptyState"),
+  moreWrap: $("moreWrap"),
+  moreBtn: $("moreBtn"),
+  relatedWrap: $("relatedWrap"),
+  relatedRow: $("relatedRow"),
+  sideCol: $("sideCol"),
+  wikiCard: $("wikiCard"),
+  themeBtn: $("themeBtn"),
+  luckyBtn: $("luckyBtn"),
+  quickRow: $("quickRow"),
+  recentBlock: $("recentBlock"),
+  recentRow: $("recentRow"),
+  clearRecent: $("clearRecent"),
+  retryBtn: $("retryBtn"),
+  toTop: $("toTop"),
+  brandLink: $("brandLink"),
+  demoBanner: $("demoBanner"),
+};
+
+/* ---------- тема ---------- */
+function applyTheme(theme) {
+  document.documentElement.setAttribute("data-theme", theme);
+  try { localStorage.setItem("iskatel-theme", theme); } catch (_) {}
+}
+
+(function initTheme() {
+  let saved = null;
+  try { saved = localStorage.getItem("iskatel-theme"); } catch (_) {}
+  if (!saved) {
+    saved = window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+  }
+  applyTheme(saved);
+})();
+
+els.themeBtn.addEventListener("click", () => {
+  const cur = document.documentElement.getAttribute("data-theme");
+  applyTheme(cur === "dark" ? "light" : "dark");
+});
+
+/* ---------- недавние запросы ---------- */
+function getRecent() {
+  try { return JSON.parse(localStorage.getItem("iskatel-recent") || "[]"); }
+  catch (_) { return []; }
+}
+
+function pushRecent(q) {
+  try {
+    let list = getRecent().filter((x) => x.toLowerCase() !== q.toLowerCase());
+    list.unshift(q);
+    list = list.slice(0, 8);
+    localStorage.setItem("iskatel-recent", JSON.stringify(list));
+  } catch (_) {}
+  renderRecent();
+}
+
+function renderRecent() {
+  const list = getRecent();
+  els.recentBlock.hidden = list.length === 0;
+  els.recentRow.innerHTML = "";
+  list.forEach((q) => {
+    const b = document.createElement("button");
+    b.type = "button";
+    b.className = "chip";
+    b.textContent = q;
+    b.addEventListener("click", () => runSearch(q));
+    els.recentRow.appendChild(b);
+  });
+}
+
+els.clearRecent.addEventListener("click", () => {
+  try { localStorage.removeItem("iskatel-recent"); } catch (_) {}
+  renderRecent();
+});
+
+renderRecent();
+
+/* ---------- подсказки ---------- */
+let sugTimer = null;
+
+function bindSuggest(input, box) {
+  input.addEventListener("input", () => {
+    const q = input.value.trim();
+    els.homeClear.hidden = !els.homeInput.value;
+    els.topClear.hidden = !els.topInput.value;
+    clearTimeout(sugTimer);
+    if (q.length < 2) { hideSuggest(); return; }
+    sugTimer = setTimeout(() => fetchSuggest(q, box), 180);
+  });
+
+  input.addEventListener("keydown", (e) => {
+    const items = box.querySelectorAll(".suggest-item");
+    if (!items.length || box.hidden) {
+      if (e.key === "ArrowDown" && input.value.trim().length >= 2) {
+        fetchSuggest(input.value.trim(), box);
+        e.preventDefault();
+      }
+      return;
+    }
+    if (e.key === "ArrowDown") {
+      e.preventDefault();
+      state.sugIndex = (state.sugIndex + 1) % items.length;
+      syncActive(items);
+    } else if (e.key === "ArrowUp") {
+      e.preventDefault();
+      state.sugIndex = (state.sugIndex - 1 + items.length) % items.length;
+      syncActive(items);
+    } else if (e.key === "Enter") {
+      if (state.sugIndex >= 0 && items[state.sugIndex]) {
+        e.preventDefault();
+        items[state.sugIndex].click();
+      }
+    } else if (e.key === "Escape") {
+      hideSuggest();
+    }
+  });
+
+  input.addEventListener("blur", () => setTimeout(hideSuggest, 180));
+  input.addEventListener("focus", () => {
+    if (input.value.trim().length >= 2 && state.suggestions.length) {
+      renderSuggest(state.suggestions, input.value.trim(), box);
+    }
+  });
+}
+
+function syncActive(items) {
+  items.forEach((el, i) => el.classList.toggle("active", i === state.sugIndex));
+}
+
+async function fetchSuggest(q, box) {
+  try {
+    const r = await apiFetch(`/api/suggest?q=${encodeURIComponent(q)}`);
+    const data = await r.json();
+    state.suggestions = data.suggestions || [];
+    state.sugIndex = -1;
+    renderSuggest(state.suggestions, q, box);
+  } catch (_) {
+    /* нет связи с сервером — берём подсказки из демо-базы */
+    state.suggestions = demoSuggestions(q);
+    state.sugIndex = -1;
+    renderSuggest(state.suggestions, q, box);
+  }
+}
+
+function renderSuggest(list, q, box) {
+  hideSuggest();
+  if (!list.length) return;
+  const target = box === els.homeSuggest ? els.homeInput : els.topInput;
+  list.forEach((s) => {
+    const btn = document.createElement("button");
+    btn.type = "button";
+    btn.className = "suggest-item";
+    btn.setAttribute("role", "option");
+    btn.innerHTML =
+      `<svg class="ico-search" viewBox="0 0 24 24" aria-hidden="true"><path d="M10.5 3a7.5 7.5 0 0 1 5.94 12.09l4.24 4.24a1 1 0 0 1-1.41 1.41l-4.24-4.24A7.5 7.5 0 1 1 10.5 3Zm0 2a5.5 5.5 0 1 0 0 11 5.5 5.5 0 0 0 0-11Z"/></svg>` +
+      `<span class="s-text">${highlight(s, q)}</span>`;
+    btn.addEventListener("mousedown", (e) => e.preventDefault());
+    btn.addEventListener("click", () => {
+      target.value = s;
+      hideSuggest();
+      runSearch(s);
+    });
+    box.appendChild(btn);
+  });
+  box.hidden = false;
+}
+
+function highlight(text, q) {
+  const esc = (t) => t.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+  const i = text.toLowerCase().indexOf(q.toLowerCase());
+  if (i < 0) return esc(text);
+  return esc(text.slice(0, i)) + "<b>" + esc(text.slice(i, i + q.length)) + "</b>" + esc(text.slice(i + q.length));
+}
+
+function hideSuggest() {
+  els.homeSuggest.hidden = true;
+  els.topSuggest.hidden = true;
+  els.homeSuggest.innerHTML = "";
+  els.topSuggest.innerHTML = "";
+  state.sugIndex = -1;
+}
+
+bindSuggest(els.homeInput, els.homeSuggest);
+bindSuggest(els.topInput, els.topSuggest);
+
+/* синхронизация двух полей ввода */
+function setInputs(q) {
+  els.homeInput.value = q;
+  els.topInput.value = q;
+  els.homeClear.hidden = !q;
+  els.topClear.hidden = !q;
+}
+
+[els.homeInput, els.topInput].forEach((inp) => {
+  inp.addEventListener("input", () => {
+    const other = inp === els.homeInput ? els.topInput : els.homeInput;
+    other.value = inp.value;
+  });
+});
+
+els.homeClear.addEventListener("click", () => { setInputs(""); els.homeInput.focus(); });
+els.topClear.addEventListener("click", () => { setInputs(""); els.topInput.focus(); });
+
+/* ---------- поиск ---------- */
+els.homeForm.addEventListener("submit", (e) => {
+  e.preventDefault();
+  runSearch(els.homeInput.value);
+});
+
+els.topForm.addEventListener("submit", (e) => {
+  e.preventDefault();
+  runSearch(els.topInput.value);
+});
+
+els.retryBtn.addEventListener("click", () => runSearch(state.query, { page: 0 }));
+
+els.moreBtn.addEventListener("click", () => runSearch(state.query, { page: state.page + 1, append: true }));
+
+els.brandLink.addEventListener("click", (e) => {
+  e.preventDefault();
+  showHome();
+});
+
+els.toTop.addEventListener("click", () => window.scrollTo({ top: 0, behavior: "smooth" }));
+
+/* «Мне повезёт» — случайный интересный запрос */
+const LUCKY = [
+  "что посмотреть в Астрахани",
+  "как приготовить идеальный борщ",
+  "почему небо голубое",
+  "история космонавтики",
+  "лучшие книги 2026 года",
+  "как работает нейросеть",
+  "делта волги",
+  "что такое квантовые компьютеры",
+  "рецепт плова",
+  "самые красивые места России",
+];
+
+els.luckyBtn.addEventListener("click", () => {
+  const q = LUCKY[Math.floor(Math.random() * LUCKY.length)];
+  setInputs(q);
+  runSearch(q);
+});
+
+/* чипсы */
+els.quickRow.querySelectorAll(".chip").forEach((chip) => {
+  chip.addEventListener("click", () => {
+    setInputs(chip.textContent);
+    runSearch(chip.textContent);
+  });
+});
+
+function showHome() {
+  els.body.dataset.view = "home";
+  els.homeView.hidden = false;
+  els.resultsView.hidden = true;
+  state.query = "";
+  state.page = 0;
+  setInputs("");
+  hideSuggest();
+  window.scrollTo({ top: 0 });
+}
+
+function showResults() {
+  els.body.dataset.view = "results";
+  els.homeView.hidden = true;
+  els.resultsView.hidden = false;
+}
+
+async function runSearch(query, { page = 0, append = false } = {}) {
+  query = (query || "").trim();
+  if (!query) {
+    const inp = els.body.dataset.view === "home" ? els.homeInput : els.topInput;
+    inp.focus();
+    return;
+  }
+  if (state.busy) return;
+
+  state.busy = true;
+  state.query = query;
+  state.page = page;
+  setInputs(query);
+  hideSuggest();
+
+  if (!append) {
+    showResults();
+    els.resultsList.innerHTML = "";
+    els.answerCard.hidden = true;
+    els.emptyState.hidden = true;
+    els.errorCard.hidden = true;
+    els.relatedWrap.hidden = true;
+    els.moreWrap.hidden = true;
+    els.sideCol.hidden = true;
+    els.skeletons.hidden = false;
+    els.resultsInfo.innerHTML = `Ищем <b>${escapeHtml(query)}</b>…`;
+    window.scrollTo({ top: 0 });
+  } else {
+    els.moreBtn.disabled = true;
+    els.moreBtn.textContent = "Загрузка…";
+  }
+
+  const url = `/api/search?q=${encodeURIComponent(query)}&page=${page}`;
+  if (!append) {
+    history.pushState({ q: query }, "", `?q=${encodeURIComponent(query)}`);
+  } else {
+    history.replaceState({ q: query, page }, "", `?q=${encodeURIComponent(query)}&page=${page + 1}`);
+  }
+
+  try {
+    const resp = await apiFetch(url);
+    const data = await resp.json();
+
+    els.skeletons.hidden = true;
+
+    if (!resp.ok || data.error) {
+      if (!append) showError(data.error || "Неизвестная ошибка");
+      return;
+    }
+
+    pushRecent(query);
+    els.demoBanner.hidden = true;
+    renderResults(data, append);
+  } catch (err) {
+    els.skeletons.hidden = true;
+    if (!append) runOfflineDemo(query);
+  } finally {
+    state.busy = false;
+    els.moreBtn.disabled = false;
+    els.moreBtn.textContent = "Показать ещё";
+  }
+}
+
+function showError(msg) {
+  els.errorText.textContent = msg;
+  els.errorCard.hidden = false;
+  els.resultsInfo.innerHTML = "";
+  els.emptyState.hidden = true;
+  els.resultsList.innerHTML = "";
+  els.moreWrap.hidden = true;
+  els.relatedWrap.hidden = true;
+  els.sideCol.hidden = true;
+}
+
+function renderResults(data, append) {
+  const results = data.results || [];
+
+  /* статистика */
+  els.resultsInfo.innerHTML =
+    `<span>Результаты по запросу <b>${escapeHtml(data.query)}</b></span>` +
+    `<span class="dot">·</span><span>${(data.took_ms / 1000).toFixed(2)} сек</span>` +
+    `<span class="dot">·</span><span>стр. ${data.page + 1}</span>` +
+    (data.engine ? `<span class="dot">·</span><span>${escapeHtml(data.engine)}</span>` : "");
+
+  /* мгновенный ответ */
+  if (!append) {
+    renderAnswer(data.instant, data.wiki);
+    renderWiki(data.wiki);
+  }
+
+  /* пусто */
+  if (!results.length && !append) {
+    els.emptyState.hidden = false;
+    els.moreWrap.hidden = true;
+  }
+
+  /* список */
+  results.forEach((r) => {
+    const li = document.createElement("li");
+    li.className = "result-item";
+
+    let domain = "";
+    try { domain = new URL(r.url).hostname.replace(/^www\./, ""); } catch (_) {}
+
+    li.innerHTML = `
+      <div class="result-head">
+        <div class="result-favicon" data-domain="${escapeHtml(domain)}">${escapeHtml((domain[0] || "?").toUpperCase())}</div>
+        <div class="result-url">${r.display_url || escapeHtml(domain)}</div>
+      </div>
+      <h2 class="result-title"><a href="${escapeAttr(r.url)}" target="_blank" rel="noopener noreferrer">${r.title}</a></h2>
+      <p class="result-snippet">${r.snippet}</p>
+    `;
+
+    /* favicon: пробуем картинку, иначе буква */
+    const fav = li.querySelector(".result-favicon");
+    if (domain) {
+      const img = new Image();
+      img.src = `https://www.google.com/s2/favicons?domain=${encodeURIComponent(domain)}&sz=64`;
+      img.alt = "";
+      img.loading = "lazy";
+      img.addEventListener("error", () => img.remove());
+      fav.textContent = "";
+      fav.appendChild(img);
+    }
+
+    els.resultsList.appendChild(li);
+  });
+
+  /* «показать ещё» */
+  els.moreWrap.hidden = results.length === 0;
+
+  /* похожие запросы */
+  const related = data.related || [];
+  if (!append && related.length) {
+    els.relatedRow.innerHTML = "";
+    related.forEach((t) => {
+      const b = document.createElement("button");
+      b.type = "button";
+      b.className = "chip";
+      b.textContent = t;
+      b.addEventListener("click", () => {
+        setInputs(t);
+        runSearch(t);
+      });
+      els.relatedRow.appendChild(b);
+    });
+    els.relatedWrap.hidden = false;
+  }
+
+  if (append) {
+    const y = window.scrollY;
+    requestAnimationFrame(() => window.scrollTo({ top: y }));
+  }
+}
+
+function renderAnswer(instant, wiki) {
+  const parts = [];
+  if (instant && instant.answer) {
+    parts.push(
+      `<div class="a-label">Ответ</div><div class="a-answer">${escapeHtml(instant.answer)}</div>` +
+      (instant.answer_source ? `<a class="a-source" href="${escapeAttr(instant.answer_source)}" target="_blank" rel="noopener noreferrer">источник ↗</a>` : "")
+    );
+  }
+  if (instant && instant.abstract) {
+    parts.push(
+      `<div class="a-label">${escapeHtml(instant.source || "Справка")}</div>` +
+      `<div class="answer-media">` +
+      (instant.image ? `<img src="${escapeAttr(instant.image)}" alt="" onerror="this.remove()">` : "") +
+      `<div><p class="a-text">${escapeHtml(instant.abstract)}</p>` +
+      (instant.source_url ? `<a class="a-source" href="${escapeAttr(instant.source_url)}" target="_blank" rel="noopener noreferrer">${escapeHtml(instant.source)} ↗</a>` : "") +
+      `</div></div>`
+    );
+  } else if (instant && instant.definition) {
+    parts.push(
+      `<div class="a-label">Определение${instant.definition_source ? " · " + escapeHtml(instant.definition_source) : ""}</div>` +
+      `<p class="a-text">${escapeHtml(instant.definition)}</p>` +
+      (instant.definition_url ? `<a class="a-source" href="${escapeAttr(instant.definition_url)}" target="_blank" rel="noopener noreferrer">источник ↗</a>` : "")
+    );
+  }
+  if (!parts.length) {
+    els.answerCard.hidden = true;
+    return;
+  }
+  els.answerCard.innerHTML = parts.join("<hr style='border:none;border-top:1px solid var(--border);margin:14px 0'>");
+  els.answerCard.hidden = false;
+}
+
+function renderWiki(wiki) {
+  if (!wiki || !wiki.title) {
+    els.sideCol.hidden = true;
+    return;
+  }
+  els.wikiCard.innerHTML = `
+    <div class="w-label">${escapeHtml(wiki.source || "Справка")}</div>
+    ${wiki.image ? `<img src="${escapeAttr(wiki.image)}" alt="" onerror="this.remove()">` : ""}
+    <h3 class="w-title">${escapeHtml(wiki.title)}</h3>
+    <p class="w-text">${escapeHtml(wiki.text)}</p>
+    <a class="w-link" href="${escapeAttr(wiki.url)}" target="_blank" rel="noopener noreferrer">Читать в Википедии ↗</a>
+  `;
+  els.sideCol.hidden = false;
+  els.resultsView.querySelector(".results-layout").classList.add("has-side");
+}
+
+/* ---------- утилиты ---------- */
+function escapeHtml(s) {
+  return String(s ?? "").replace(/[&<>"']/g, (c) => ({
+    "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;",
+  }[c]));
+}
+
+function escapeAttr(s) {
+  return escapeHtml(s).replace(/`/g, "&#96;");
+}
+
+/* ---------- клавиатура ---------- */
+document.addEventListener("keydown", (e) => {
+  const tag = (e.target.tagName || "").toLowerCase();
+  const typing = tag === "input" || tag === "textarea";
+
+  if ((e.key === "/" && !typing) || ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "k")) {
+    e.preventDefault();
+    (els.body.dataset.view === "home" ? els.homeInput : els.topInput).focus();
+  }
+  if (e.key === "Escape") hideSuggest();
+});
+
+/* ---------- история браузера ---------- */
+window.addEventListener("popstate", () => {
+  const params = new URLSearchParams(location.search);
+  const q = params.get("q");
+  if (q) {
+    runSearch(q, { page: parseInt(params.get("page") || "0", 10) || 0 });
+  } else {
+    showHome();
+  }
+});
+
+/* старт: если в URL есть запрос */
+(function boot() {
+  const params = new URLSearchParams(location.search);
+  const q = params.get("q");
+  if (q) {
+    runSearch(q, { page: parseInt(params.get("page") || "0", 10) || 0 });
+  } else {
+    setInputs("");
+    els.homeInput.focus({ preventScroll: true });
+  }
+  $("year").textContent = new Date().getFullYear();
+})();
+
+
+
+/* ---------- логика настроек и обновлений (v1.1.0) ---------- */
+(function initSettingsAndUpdater() {
+  const modal = $("settingsModal");
+  const openBtn = $("settingsBtn");
+  const closeBtn = $("settingsCloseBtn");
+  const cancelBtn = $("settingsCancelBtn");
+  const saveBtn = $("settingsSaveBtn");
+  const tabs = document.querySelectorAll(".modal-tab");
+  const panels = {
+    general: $("tabGeneral"),
+    appearance: $("tabAppearance"),
+    updates: $("tabUpdates"),
+  };
+
+  const selEngine = $("settingEngine");
+  const selRegion = $("settingRegion");
+  const selTheme = $("settingTheme");
+  const chkAuto = $("settingAutoUpdate");
+
+  const checkBtn = $("checkUpdatesBtn");
+  const lastCheckTime = $("lastCheckTime");
+  const statusCard = $("updateStatusCard");
+  const statusIcon = $("updateStatusIcon");
+  const statusTitle = $("updateStatusTitle");
+  const statusBody = $("updateStatusBody");
+  const releaseInfo = $("updateReleaseInfo");
+  const releaseTitle = $("updateReleaseTitle");
+  const releaseNotes = $("updateReleaseNotes");
+  const assetInfo = $("updateAssetInfo");
+  const progressWrap = $("updateProgressWrap");
+  const progressFill = $("updateProgressFill");
+  const progressText = $("updateProgressText");
+  const downloadBtn = $("downloadUpdateBtn");
+  const repoLink = $("githubRepoLink");
+
+  let currentSettings = {
+    engine: "auto",
+    region: "ru-ru",
+    theme: "system",
+    autoCheckUpdates: true,
+  };
+  let pendingUpdate = null;
+
+  function openModal(tab = "general") {
+    modal.classList.add("open");
+    modal.removeAttribute("aria-hidden");
+    switchTab(tab);
+    loadSettingsIntoUI();
+  }
+
+  function closeModal() {
+    modal.classList.remove("open");
+    modal.setAttribute("aria-hidden", "true");
+  }
+
+  function switchTab(name) {
+    tabs.forEach((t) => t.classList.toggle("active", t.dataset.tab === name));
+    Object.entries(panels).forEach(([k, p]) => {
+      if (p) p.classList.toggle("active", k === name);
+    });
+  }
+
+  tabs.forEach((t) => {
+    t.addEventListener("click", () => switchTab(t.dataset.tab));
+  });
+
+  if (openBtn) openBtn.addEventListener("click", () => openModal("general"));
+  if (closeBtn) closeBtn.addEventListener("click", closeModal);
+  if (cancelBtn) cancelBtn.addEventListener("click", closeModal);
+
+  modal.addEventListener("click", (e) => {
+    if (e.target === modal) closeModal();
+  });
+
+  async function loadSettingsIntoUI() {
+    if (window.iskatelAPI && window.iskatelAPI.getSettings) {
+      try {
+        const s = await window.iskatelAPI.getSettings();
+        if (s) currentSettings = { ...currentSettings, ...s };
+      } catch (_) {}
+    } else {
+      try {
+        const saved = localStorage.getItem("iskatel-settings");
+        if (saved) currentSettings = { ...currentSettings, ...JSON.parse(saved) };
+      } catch (_) {}
+    }
+
+    if (selEngine) selEngine.value = currentSettings.engine || "auto";
+    if (selRegion) selRegion.value = currentSettings.region || "ru-ru";
+    if (selTheme) selTheme.value = currentSettings.theme || "system";
+    if (chkAuto) chkAuto.checked = currentSettings.autoCheckUpdates !== false;
+  }
+
+  async function saveSettingsFromUI() {
+    currentSettings = {
+      engine: selEngine ? selEngine.value : "auto",
+      region: selRegion ? selRegion.value : "ru-ru",
+      theme: selTheme ? selTheme.value : "system",
+      autoCheckUpdates: chkAuto ? chkAuto.checked : true,
+    };
+
+    if (window.iskatelAPI && window.iskatelAPI.saveSettings) {
+      await window.iskatelAPI.saveSettings(currentSettings);
+    }
+    try {
+      localStorage.setItem("iskatel-settings", JSON.stringify(currentSettings));
+    } catch (_) {}
+
+    // Применяем тему
+    if (currentSettings.theme === "system") {
+      const prefersDark = window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches;
+      applyTheme(prefersDark ? "dark" : "light");
+    } else {
+      applyTheme(currentSettings.theme);
+    }
+
+    closeModal();
+  }
+
+  if (saveBtn) saveBtn.addEventListener("click", saveSettingsFromUI);
+
+  /* ---------- Проверка обновлений ---------- */
+  async function performUpdateCheck(manual = false) {
+    if (!window.iskatelAPI || !window.iskatelAPI.checkForUpdates) {
+      if (manual) {
+        statusCard.style.display = "block";
+        statusIcon.textContent = "ℹ️";
+        statusTitle.textContent = "Веб-режим";
+        statusBody.textContent = "Автообновление доступно в настольной версии приложения «Искатель».";
+      }
+      return;
+    }
+
+    if (checkBtn) checkBtn.classList.add("loading");
+    if (manual) {
+      statusCard.style.display = "block";
+      statusIcon.textContent = "⏳";
+      statusTitle.textContent = "Проверка наличия обновлений…";
+      statusBody.textContent = "Опрашиваем GitHub Releases...";
+      releaseInfo.style.display = "none";
+    }
+
+    try {
+      const res = await window.iskatelAPI.checkForUpdates();
+      if (lastCheckTime) {
+        const now = new Date();
+        lastCheckTime.textContent = `Проверено: ${now.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}`;
+      }
+
+      if (res.error) {
+        statusCard.style.display = "block";
+        statusIcon.textContent = "⚠️";
+        statusTitle.textContent = "Не удалось проверить обновления";
+        statusBody.textContent = res.error;
+        releaseInfo.style.display = "none";
+        return;
+      }
+
+      if (res.hasUpdate) {
+        pendingUpdate = res;
+        statusCard.style.display = "block";
+        statusIcon.textContent = "🚀";
+        statusTitle.textContent = `Доступно обновление: ${res.latestTag || res.latestVersion}`;
+        statusBody.textContent = `Текущая версия: ${res.currentVersion} → Новая версия: ${res.latestVersion}`;
+
+        releaseInfo.style.display = "block";
+        releaseTitle.textContent = res.releaseName || `Релиз ${res.latestTag}`;
+        releaseNotes.textContent = res.releaseNotes || "Описание изменений отсутствует.";
+
+        if (res.asset) {
+          const mb = (res.asset.size / (1024 * 1024)).toFixed(1);
+          assetInfo.textContent = `Файл установщика: ${res.asset.name} (${mb} МБ)`;
+          downloadBtn.disabled = false;
+          downloadBtn.textContent = "Скачать и установить";
+          downloadBtn.style.display = "inline-flex";
+        } else {
+          assetInfo.textContent = `Установщик для вашей платформы (${res.expectedAsset || "файлы ОС"}) пока готовится разработчиком.`;
+          downloadBtn.style.display = "none";
+        }
+
+        if (!manual) {
+          // Если фоновая проверка нашла обновление — открываем модалку на вкладке обновлений
+          openModal("updates");
+        }
+      } else {
+        pendingUpdate = null;
+        if (manual) {
+          statusCard.style.display = "block";
+          statusIcon.textContent = "✅";
+          statusTitle.textContent = "У вас установлена последняя версия";
+          statusBody.textContent = `Искатель ${res.currentVersion} — обновлений не требуется.`;
+          releaseInfo.style.display = "none";
+        }
+      }
+    } catch (err) {
+      if (manual) {
+        statusCard.style.display = "block";
+        statusIcon.textContent = "❌";
+        statusTitle.textContent = "Ошибка проверки";
+        statusBody.textContent = err.message || String(err);
+      }
+    } finally {
+      if (checkBtn) checkBtn.classList.remove("loading");
+    }
+  }
+
+  if (checkBtn) {
+    checkBtn.addEventListener("click", () => performUpdateCheck(true));
+  }
+
+  /* ---------- Скачивание и запуск обновления ---------- */
+  if (downloadBtn) {
+    downloadBtn.addEventListener("click", async () => {
+      if (!pendingUpdate || !pendingUpdate.asset) return;
+      downloadBtn.disabled = true;
+      progressWrap.style.display = "block";
+      progressFill.style.width = "0%";
+      progressText.textContent = "Начало загрузки…";
+
+      if (window.iskatelAPI.onDownloadProgress) {
+        window.iskatelAPI.onDownloadProgress((p) => {
+          progressFill.style.width = `${p.percent}%`;
+          const mbDown = (p.downloaded / (1024 * 1024)).toFixed(1);
+          const mbTotal = (p.total / (1024 * 1024)).toFixed(1);
+          progressText.textContent = `${p.percent}% (${mbDown} из ${mbTotal} МБ)`;
+        });
+      }
+
+      try {
+        const result = await window.iskatelAPI.downloadUpdate({
+          url: pendingUpdate.asset.downloadUrl,
+          filename: pendingUpdate.asset.name,
+        });
+
+        if (result.ok) {
+          progressText.textContent = "Загрузка завершена! Запуск установщика…";
+          setTimeout(async () => {
+            await window.iskatelAPI.installUpdate({ filePath: result.filePath });
+          }, 800);
+        } else {
+          progressText.textContent = `Ошибка скачивания: ${result.error}`;
+          downloadBtn.disabled = false;
+        }
+      } catch (err) {
+        progressText.textContent = `Ошибка: ${err.message}`;
+        downloadBtn.disabled = false;
+      }
+    });
+  }
+
+  // Внешние ссылки в модалке
+  if (repoLink) {
+    repoLink.addEventListener("click", (e) => {
+      e.preventDefault();
+      if (window.iskatelAPI && window.iskatelAPI.openExternal) {
+        window.iskatelAPI.openExternal("https://github.com/UsmanMusav/Iskatel");
+      } else {
+        window.open("https://github.com/UsmanMusav/Iskatel", "_blank");
+      }
+    });
+  }
+
+  // Автопроверка при старте приложения
+  setTimeout(async () => {
+    await loadSettingsIntoUI();
+    if (currentSettings.autoCheckUpdates !== false) {
+      performUpdateCheck(false);
+    }
+  }, 2000);
+})();
+
+</script>
+</body>
+</html>

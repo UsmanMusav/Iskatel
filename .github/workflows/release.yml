@@ -32,7 +32,9 @@ jobs:
         run: npm ci || npm install
 
       - name: Сборка установщика Windows
-        run: npx electron-builder --win --x64
+        run: npx electron-builder --win --x64 --publish never
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Сохранение артефакта Windows
         uses: actions/upload-artifact@v4
@@ -58,7 +60,9 @@ jobs:
         run: npm ci || npm install
 
       - name: Сборка пакета Debian/Ubuntu
-        run: npx electron-builder --linux deb
+        run: npx electron-builder --linux deb --publish never
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Проверка и нормализация имени .deb
         run: |
@@ -93,8 +97,10 @@ jobs:
 
       - name: Сборка образов macOS (Apple Silicon + Intel)
         run: |
-          npx electron-builder --mac dmg --arm64
-          npx electron-builder --mac dmg --x64
+          npx electron-builder --mac dmg --arm64 --publish never
+          npx electron-builder --mac dmg --x64 --publish never
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Нормализация названий файлов macOS
         run: |

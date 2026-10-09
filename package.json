@@ -71,7 +71,8 @@
       ],
       "category": "Network",
       "artifactName": "iskatel-linux-amd64.${ext}"
-    }
+    },
+    "publish": null
   },
   "devDependencies": {
     "electron": "^33.2.0",

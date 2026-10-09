@@ -17,6 +17,16 @@ contextBridge.exposeInMainWorld("iskatelAPI", {
   getSettings: () => ipcRenderer.invoke("iskatel:get-settings"),
   saveSettings: (settings) => ipcRenderer.invoke("iskatel:save-settings", settings),
 
+  // Система аккаунтов и регистрации (Gmail / Google) v2.5
+  getCurrentUser: () => ipcRenderer.invoke("iskatel:auth-get-current-user"),
+  loginUser: (params) => ipcRenderer.invoke("iskatel:auth-login", params),
+  registerUser: (params) => ipcRenderer.invoke("iskatel:auth-register", params),
+  googleLogin: (params) => ipcRenderer.invoke("iskatel:auth-google-login", params),
+  logoutUser: () => ipcRenderer.invoke("iskatel:auth-logout"),
+  getBookmarks: () => ipcRenderer.invoke("iskatel:auth-get-bookmarks"),
+  addBookmark: (bookmark) => ipcRenderer.invoke("iskatel:auth-add-bookmark", bookmark),
+  removeBookmark: (id) => ipcRenderer.invoke("iskatel:auth-remove-bookmark", id),
+
   // Проверка и установка обновлений через GitHub Releases
   checkForUpdates: () => ipcRenderer.invoke("iskatel:check-update"),
   downloadUpdate: (params) => ipcRenderer.invoke("iskatel:download-update", params),

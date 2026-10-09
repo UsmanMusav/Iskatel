@@ -10,10 +10,11 @@ const fs = require("fs");
 const https = require("https");
 const http = require("http");
 const { spawn } = require("child_process");
+const crypto = require("crypto");
 
 app.setName("Искатель");
 
-const APP_VERSION = "2.0.0";
+const APP_VERSION = "2.5.0";
 const GITHUB_REPO = "UsmanMusav/Iskatel";
 const LATEST_RELEASE_URL = `https://api.github.com/repos/${GITHUB_REPO}/releases/latest`;
 
@@ -34,6 +35,232 @@ const JSON_HEADERS = {
   "Referer": "https://duckduckgo.com/",
   "X-Requested-With": "XMLHttpRequest",
 };
+
+
+/* ---------- система аккаунтов, профилей и Gmail-авторизации (v2.5) ---------- */
+
+function getAccountsPath() {
+  return path.join(app.getPath("userData"), "accounts.json");
+}
+
+function getSessionPath() {
+  return path.join(app.getPath("userData"), "session.json");
+}
+
+function loadAccounts() {
+  try {
+    const p = getAccountsPath();
+    if (fs.existsSync(p)) {
+      return JSON.parse(fs.readFileSync(p, "utf-8")) || [];
+    }
+  } catch (_) {}
+  return [];
+}
+
+function saveAccounts(accounts) {
+  try {
+    const p = getAccountsPath();
+    fs.mkdirSync(path.dirname(p), { recursive: true });
+    fs.writeFileSync(p, JSON.stringify(accounts, null, 2), "utf-8");
+    return true;
+  } catch (err) {
+    console.error("Ошибка сохранения аккаунтов:", err);
+    return false;
+  }
+}
+
+function loadSession() {
+  try {
+    const p = getSessionPath();
+    if (fs.existsSync(p)) {
+      const sess = JSON.parse(fs.readFileSync(p, "utf-8"));
+      if (sess && sess.userId) {
+        const accounts = loadAccounts();
+        const user = accounts.find((a) => a.id === sess.userId);
+        if (user) {
+          const { passwordHash, ...safeUser } = user;
+          return safeUser;
+        }
+      }
+    }
+  } catch (_) {}
+  return null;
+}
+
+function saveSession(userId) {
+  try {
+    const p = getSessionPath();
+    fs.mkdirSync(path.dirname(p), { recursive: true });
+    if (userId) {
+      fs.writeFileSync(p, JSON.stringify({ userId, loginAt: Date.now() }, null, 2), "utf-8");
+    } else {
+      if (fs.existsSync(p)) fs.unlinkSync(p);
+    }
+    return true;
+  } catch (_) {
+    return false;
+  }
+}
+
+function hashPassword(password) {
+  return crypto.createHash("sha256").update(String(password || "") + "iskatel_salt_2026").digest("hex");
+}
+
+function registerAccount({ name, email, password }) {
+  const cleanEmail = String(email || "").trim().toLowerCase();
+  const cleanName = String(name || "").trim() || cleanEmail.split("@")[0];
+  const pass = String(password || "");
+
+  if (!cleanEmail || !cleanEmail.includes("@")) {
+    return { ok: false, error: "Укажите корректный адрес электронной почты (Gmail)." };
+  }
+  if (pass.length < 6) {
+    return { ok: false, error: "Пароль должен содержать не менее 6 символов." };
+  }
+
+  const accounts = loadAccounts();
+  const exists = accounts.find((a) => a.email.toLowerCase() === cleanEmail);
+  if (exists) {
+    return { ok: false, error: "Аккаунт с таким email уже зарегистрирован. Войдите в него." };
+  }
+
+  const isGmail = cleanEmail.endsWith("@gmail.com");
+  const newUser = {
+    id: "usr_" + Date.now() + "_" + Math.random().toString(36).slice(2, 7),
+    name: cleanName,
+    email: cleanEmail,
+    provider: isGmail ? "gmail" : "email",
+    passwordHash: hashPassword(pass),
+    createdAt: Date.now(),
+    lastLoginAt: Date.now(),
+    bookmarks: [],
+    history: [],
+  };
+
+  accounts.push(newUser);
+  saveAccounts(accounts);
+  saveSession(newUser.id);
+
+  const { passwordHash, ...safeUser } = newUser;
+  return { ok: true, user: safeUser };
+}
+
+function loginAccount({ email, password }) {
+  const cleanEmail = String(email || "").trim().toLowerCase();
+  const pass = String(password || "");
+
+  if (!cleanEmail || !pass) {
+    return { ok: false, error: "Введите email и пароль." };
+  }
+
+  const accounts = loadAccounts();
+  const user = accounts.find((a) => a.email.toLowerCase() === cleanEmail);
+  if (!user) {
+    return { ok: false, error: "Аккаунт с таким email не найден." };
+  }
+
+  if (user.passwordHash !== hashPassword(pass)) {
+    return { ok: false, error: "Неверный пароль. Попробуйте снова." };
+  }
+
+  user.lastLoginAt = Date.now();
+  saveAccounts(accounts);
+  saveSession(user.id);
+
+  const { passwordHash, ...safeUser } = user;
+  return { ok: true, user: safeUser };
+}
+
+function googleSignIn({ email, name, avatar }) {
+  const cleanEmail = String(email || "").trim().toLowerCase();
+  if (!cleanEmail || !cleanEmail.includes("@")) {
+    return { ok: false, error: "Некорректный аккаунт Google." };
+  }
+
+  const accounts = loadAccounts();
+  let user = accounts.find((a) => a.email.toLowerCase() === cleanEmail);
+
+  if (!user) {
+    // Автоматическая регистрация через Google/Gmail
+    user = {
+      id: "usr_g_" + Date.now() + "_" + Math.random().toString(36).slice(2, 7),
+      name: name || cleanEmail.split("@")[0],
+      email: cleanEmail,
+      avatar: avatar || "",
+      provider: "google",
+      createdAt: Date.now(),
+      lastLoginAt: Date.now(),
+      bookmarks: [],
+      history: [],
+    };
+    accounts.push(user);
+  } else {
+    user.lastLoginAt = Date.now();
+    if (name) user.name = name;
+    if (avatar) user.avatar = avatar;
+    user.provider = "google";
+  }
+
+  saveAccounts(accounts);
+  saveSession(user.id);
+
+  const { passwordHash, ...safeUser } = user;
+  return { ok: true, user: safeUser };
+}
+
+function addBookmarkForUser(bookmark) {
+  const session = loadSession();
+  if (!session) return { ok: false, error: "Требуется авторизация" };
+
+  const accounts = loadAccounts();
+  const user = accounts.find((a) => a.id === session.id);
+  if (!user) return { ok: false, error: "Пользователь не найден" };
+
+  if (!user.bookmarks) user.bookmarks = [];
+  const bm = {
+    id: "bm_" + Date.now(),
+    title: bookmark.title || bookmark.url,
+    url: bookmark.url,
+    domain: bookmark.domain || "",
+    addedAt: Date.now(),
+  };
+
+  // Проверяем дубликат
+  user.bookmarks = user.bookmarks.filter((b) => b.url !== bm.url);
+  user.bookmarks.unshift(bm);
+  saveAccounts(accounts);
+
+  return { ok: true, bookmarks: user.bookmarks };
+}
+
+function removeBookmarkForUser(id) {
+  const session = loadSession();
+  if (!session) return { ok: false, error: "Требуется авторизация" };
+
+  const accounts = loadAccounts();
+  const user = accounts.find((a) => a.id === session.id);
+  if (!user || !user.bookmarks) return { ok: true, bookmarks: [] };
+
+  user.bookmarks = user.bookmarks.filter((b) => b.id !== id);
+  saveAccounts(accounts);
+
+  return { ok: true, bookmarks: user.bookmarks };
+}
+
+function recordSearchHistory(query) {
+  try {
+    const session = loadSession();
+    if (!session) return;
+    const accounts = loadAccounts();
+    const user = accounts.find((a) => a.id === session.id);
+    if (!user) return;
+    if (!user.history) user.history = [];
+    user.history = user.history.filter((h) => h.query.toLowerCase() !== query.toLowerCase());
+    user.history.unshift({ query, date: Date.now() });
+    if (user.history.length > 100) user.history = user.history.slice(0, 100);
+    saveAccounts(accounts);
+  } catch (_) {}
+}
 
 /* ---------- настройки пользователя ---------- */
 
@@ -479,6 +706,7 @@ async function doSearch({ q, page = 0 }) {
     engine: engineUsed,
     took_ms: Date.now() - started,
   };
+  recordSearchHistory(query);
   cacheSet(key, payload);
   return payload;
 }
@@ -696,6 +924,22 @@ app.whenReady().then(() => {
 
   // Метаданные
   ipcMain.handle("iskatel:get-version", () => APP_VERSION);
+
+  // Авторизация и аккаунты (v2.5)
+  ipcMain.handle("iskatel:auth-get-current-user", () => loadSession());
+  ipcMain.handle("iskatel:auth-register", (_e, params) => registerAccount(params || {}));
+  ipcMain.handle("iskatel:auth-login", (_e, params) => loginAccount(params || {}));
+  ipcMain.handle("iskatel:auth-google-login", (_e, params) => googleSignIn(params || {}));
+  ipcMain.handle("iskatel:auth-logout", () => {
+    saveSession(null);
+    return { ok: true };
+  });
+  ipcMain.handle("iskatel:auth-get-bookmarks", () => {
+    const user = loadSession();
+    return (user && user.bookmarks) || [];
+  });
+  ipcMain.handle("iskatel:auth-add-bookmark", (_e, bm) => addBookmarkForUser(bm || {}));
+  ipcMain.handle("iskatel:auth-remove-bookmark", (_e, id) => removeBookmarkForUser(id));
 
   // Настройки
   ipcMain.handle("iskatel:get-settings", () => loadSettings());

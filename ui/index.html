@@ -1118,7 +1118,7 @@ mark {
   }
 
 
-  /* ---------- Палитры акцентных цветов v2.0 ---------- */
+  /* ---------- Палитры акцентных цветов v2.5 ---------- */
   :root[data-accent="indigo"] {
     --accent: #6366f1;
     --accent-2: #38bdf8;
@@ -1191,7 +1191,7 @@ mark {
     -webkit-backdrop-filter: none !important;
   }
 
-  /* ---------- Угловой бейдж версии (v2.0) ---------- */
+  /* ---------- Угловой бейдж версии (v2.5) ---------- */
   .corner-version {
     position: fixed;
     bottom: 20px;
@@ -1270,6 +1270,287 @@ mark {
     display: block;
   }
 
+
+  /* ---------- Стили профиля и авторизации (v2.5) ---------- */
+  .btn-auth-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 7px 16px;
+    border-radius: 999px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    color: var(--text);
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+  }
+  .btn-auth-pill:hover {
+    background: var(--card-solid);
+    border-color: var(--accent);
+    color: var(--accent);
+    transform: translateY(-1px);
+    box-shadow: var(--shadow);
+  }
+  .user-profile-menu-wrap {
+    position: relative;
+    display: inline-block;
+  }
+  .user-profile-trigger {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 4px 12px 4px 4px;
+    border-radius: 999px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    color: var(--text);
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.15s ease;
+  }
+  .user-profile-trigger:hover {
+    background: var(--card-solid);
+    border-color: var(--accent);
+  }
+  .user-avatar {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--accent), var(--accent-2));
+    color: #fff;
+    display: grid;
+    place-items: center;
+    font-size: 13px;
+    font-weight: 700;
+    text-transform: uppercase;
+  }
+  .user-dropdown-menu {
+    position: absolute;
+    top: calc(100% + 8px);
+    right: 0;
+    width: 250px;
+    background: var(--card-solid);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    box-shadow: var(--shadow-lg);
+    padding: 8px 0;
+    z-index: 1100;
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+  }
+  .user-menu-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 16px;
+  }
+  .user-menu-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--accent), var(--accent-2));
+    color: #fff;
+    display: grid;
+    place-items: center;
+    font-size: 16px;
+    font-weight: 700;
+  }
+  .user-menu-name {
+    font-weight: 700;
+    font-size: 14px;
+    color: var(--text);
+  }
+  .user-menu-email {
+    font-size: 12px;
+    color: var(--text-2);
+    word-break: break-all;
+  }
+  .user-menu-divider {
+    height: 1px;
+    background: var(--border);
+    margin: 6px 0;
+  }
+  .user-menu-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    padding: 10px 16px;
+    background: transparent;
+    border: none;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text);
+    cursor: pointer;
+    text-align: left;
+    transition: background 0.15s ease, color 0.15s ease;
+  }
+  .user-menu-item:hover {
+    background: var(--bg);
+    color: var(--accent);
+  }
+  .user-menu-item.logout {
+    color: var(--danger);
+  }
+  .user-menu-item.logout:hover {
+    background: rgba(220, 38, 38, 0.08);
+  }
+  .user-menu-count {
+    background: var(--accent-soft);
+    color: var(--accent);
+    padding: 2px 7px;
+    border-radius: 999px;
+    font-size: 11px;
+    font-weight: 700;
+  }
+
+  /* Модальное окно авторизации */
+  .auth-modal-card {
+    max-width: 440px !important;
+  }
+  .btn-google-sign-in {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    width: 100%;
+    padding: 12px 18px;
+    border-radius: 12px;
+    background: #ffffff;
+    border: 1px solid #dadce0;
+    color: #3c4043;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    box-shadow: 0 1px 3px rgba(60, 64, 67, 0.08);
+  }
+  .btn-google-sign-in:hover {
+    background: #f8f9fa;
+    border-color: #c0c4c8;
+    box-shadow: 0 3px 10px rgba(60, 64, 67, 0.15);
+  }
+  [data-theme="dark"] .btn-google-sign-in {
+    background: #1f2430;
+    border-color: #333a4d;
+    color: #e2e8f0;
+  }
+  [data-theme="dark"] .btn-google-sign-in:hover {
+    background: #282f40;
+  }
+  .auth-divider {
+    display: flex;
+    align-items: center;
+    text-align: center;
+    margin: 18px 0;
+    color: var(--text-3);
+    font-size: 12px;
+  }
+  .auth-divider::before, .auth-divider::after {
+    content: "";
+    flex: 1;
+    border-bottom: 1px solid var(--border);
+  }
+  .auth-divider span {
+    padding: 0 12px;
+  }
+  .auth-tabs {
+    display: flex;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 18px;
+  }
+  .auth-tab {
+    flex: 1;
+    padding: 10px;
+    text-align: center;
+    background: transparent;
+    border: none;
+    border-bottom: 2px solid transparent;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text-2);
+    cursor: pointer;
+    transition: all 0.15s ease;
+  }
+  .auth-tab.active {
+    color: var(--accent);
+    border-bottom-color: var(--accent);
+  }
+  .auth-input-group {
+    margin-bottom: 14px;
+  }
+  .auth-label {
+    display: block;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-2);
+    margin-bottom: 5px;
+  }
+  .auth-input {
+    width: 100%;
+    padding: 10px 14px;
+    border-radius: 10px;
+    border: 1px solid var(--border);
+    background: var(--bg);
+    color: var(--text);
+    font-size: 14px;
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+  }
+  .auth-input:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px var(--accent-soft);
+  }
+  .auth-submit-btn {
+    width: 100%;
+    padding: 12px;
+    border-radius: 10px;
+    background: var(--accent);
+    color: #fff;
+    border: none;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    margin-top: 8px;
+    transition: all 0.15s ease;
+  }
+  .auth-submit-btn:hover {
+    filter: brightness(1.1);
+  }
+  .auth-error {
+    color: var(--danger);
+    font-size: 12px;
+    margin-top: 10px;
+    padding: 8px 12px;
+    border-radius: 8px;
+    background: rgba(220, 38, 38, 0.08);
+    display: none;
+  }
+
+  /* Кнопка закладки в поисковой выдаче */
+  .bookmark-btn {
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    font-size: 16px;
+    opacity: 0.4;
+    transition: all 0.2s ease;
+    padding: 4px;
+    margin-left: auto;
+  }
+  .bookmark-btn:hover {
+    opacity: 1;
+    transform: scale(1.2);
+  }
+  .bookmark-btn.bookmarked {
+    opacity: 1;
+    color: #f59e0b;
+  }
+
 </style>
 </head>
 <body data-view="home">
@@ -1308,6 +1589,44 @@ mark {
     </div>
 
         <div class="top-actions">
+      <!-- Кнопка входа / Профиль пользователя (v2.5) -->
+      <button type="button" class="btn-auth-pill" id="authOpenBtn">
+        <svg class="ico-google" viewBox="0 0 24 24" width="16" height="16">
+          <path fill="#4285F4" d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.8-2.4 3.65v3.05h3.88c2.27-2.09 3.66-5.17 3.66-9.14z"/>
+          <path fill="#34A853" d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.05c-1.08.72-2.45 1.16-4.05 1.16-3.12 0-5.77-2.1-6.72-4.93H1.25v3.15C3.27 21.43 7.35 24 12 24z"/>
+          <path fill="#FBBC05" d="M5.28 14.27c-.25-.72-.38-1.49-.38-2.27s.13-1.55.38-2.27V6.58H1.25C.45 8.18 0 9.99 0 12s.45 3.82 1.25 5.42l4.03-3.15z"/>
+          <path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.35 0 3.27 2.57 1.25 6.58l4.03 3.15c.95-2.83 3.6-4.98 6.72-4.98z"/>
+        </svg>
+        <span>Войти</span>
+      </button>
+
+      <div class="user-profile-menu-wrap" id="userMenuWrap" style="display:none;">
+        <button type="button" class="user-profile-trigger" id="userMenuTrigger">
+          <span class="user-avatar" id="headerUserAvatar">U</span>
+          <span class="user-display-name" id="headerUserName">Профиль</span>
+        </button>
+        <div class="user-dropdown-menu" id="userDropdownMenu" style="display:none;">
+          <div class="user-menu-header">
+            <div class="user-menu-avatar" id="menuUserAvatar">U</div>
+            <div class="user-menu-details">
+              <div class="user-menu-name" id="menuUserName">Имя</div>
+              <div class="user-menu-email" id="menuUserEmail">user@gmail.com</div>
+            </div>
+          </div>
+          <div class="user-menu-divider"></div>
+          <button type="button" class="user-menu-item" id="menuBookmarksBtn">
+            <span>⭐ Мои закладки</span>
+            <span class="user-menu-count" id="menuBookmarksCount">0</span>
+          </button>
+          <button type="button" class="user-menu-item" id="menuSettingsBtn">
+            <span>⚙️ Настройки и оформление</span>
+          </button>
+          <div class="user-menu-divider"></div>
+          <button type="button" class="user-menu-item logout" id="menuLogoutBtn">
+            <span>🚪 Выйти из аккаунта</span>
+          </button>
+        </div>
+      </div>
       <button class="icon-btn" id="settingsBtn" aria-label="Настройки и обновления" title="Настройки и обновления">
         <svg viewBox="0 0 24 24" aria-hidden="true" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <circle cx="12" cy="12" r="3"/>
@@ -1440,7 +1759,7 @@ mark {
       <div class="modal-header">
         <div class="modal-title-wrap">
           <h2 class="modal-title" id="settingsTitle">Настройки</h2>
-          <span class="badge-version" id="settingsVersionBadge">v2.0</span>
+          <span class="badge-version" id="settingsVersionBadge">v2.5</span>
         </div>
         <button type="button" class="icon-btn modal-close" id="settingsCloseBtn" aria-label="Закрыть">✕</button>
       </div>
@@ -1498,7 +1817,7 @@ mark {
             </label>
           </div>
 
-        <!-- Вкладка: Оформление (Кастомизация v2.0) -->
+        <!-- Вкладка: Оформление (Кастомизация v2.5) -->
         <div class="tab-panel" id="tabAppearance" role="tabpanel">
           <div class="setting-group">
             <label class="setting-label" for="settingTheme">Режим оформления</label>
@@ -1575,7 +1894,7 @@ mark {
               <h3 class="about-name">Искатель Desktop</h3>
               <p class="about-desc">Настольный поисковик без слежки, рекламы и сбора пользовательских данных.</p>
               <div class="about-meta">
-                <span>Версия: <strong id="aboutVersionText">2.0.0</strong></span>
+                <span>Версия: <strong id="aboutVersionText">2.5.0</strong></span>
                 <span class="dot">·</span>
                 <a href="https://github.com/UsmanMusav/Iskatel" target="_blank" rel="noopener" class="link-external" id="githubRepoLink">GitHub Репозиторий ↗</a>
               </div>
@@ -2188,6 +2507,7 @@ function renderResults(data, append) {
       <div class="result-head">
         <div class="result-favicon" data-domain="${escapeHtml(domain)}">${escapeHtml((domain[0] || "?").toUpperCase())}</div>
         <div class="result-url">${r.display_url || escapeHtml(domain)}</div>
+        <button type="button" class="bookmark-btn" data-url="${escapeAttr(r.url)}" data-title="${escapeAttr(r.title)}" data-domain="${escapeAttr(domain)}" title="Добавить в закладки">☆</button>
       </div>
       <h2 class="result-title"><a href="${escapeAttr(r.url)}" target="_blank" rel="noopener noreferrer">${r.title}</a></h2>
       <p class="result-snippet">${r.snippet}</p>
@@ -2332,7 +2652,7 @@ window.addEventListener("popstate", () => {
 
 
 
-/* ---------- логика настроек, кастомизации и обновлений (v2.0) ---------- */
+/* ---------- логика настроек, кастомизации и обновлений (v2.5) ---------- */
 (function initSettingsAndUpdater() {
   const modal = $("settingsModal");
   const openBtn = $("settingsBtn");
@@ -2674,13 +2994,465 @@ window.addEventListener("popstate", () => {
   }, 1000);
 })();
 
+
+
+/* ---------- система авторизации, Gmail и закладок (v2.5) ---------- */
+(function initAuthAndBookmarks() {
+  const authModal = $("authModal");
+  const authOpenBtn = $("authOpenBtn");
+  const authCloseBtn = $("authCloseBtn");
+  const googleAuthBtn = $("googleAuthBtn");
+  const tabLogin = $("tabLoginBtn");
+  const tabRegister = $("tabRegisterBtn");
+  const loginForm = $("loginForm");
+  const registerForm = $("registerForm");
+  const loginEmail = $("loginEmail");
+  const loginPassword = $("loginPassword");
+  const regName = $("regName");
+  const regEmail = $("regEmail");
+  const regPassword = $("regPassword");
+  const errorMsg = $("authErrorMsg");
+
+  const userMenuWrap = $("userMenuWrap");
+  const userMenuTrigger = $("userMenuTrigger");
+  const userDropdownMenu = $("userDropdownMenu");
+  const headerAvatar = $("headerUserAvatar");
+  const headerName = $("headerUserName");
+  const menuAvatar = $("menuUserAvatar");
+  const menuName = $("menuUserName");
+  const menuEmail = $("menuUserEmail");
+  const menuBookmarksBtn = $("menuBookmarksBtn");
+  const menuSettingsBtn = $("menuSettingsBtn");
+  const menuLogoutBtn = $("menuLogoutBtn");
+  const menuBookmarksCount = $("menuBookmarksCount");
+
+  const bookmarksModal = $("bookmarksModal");
+  const bookmarksCloseBtn = $("bookmarksCloseBtn");
+  const bookmarksList = $("bookmarksList");
+  const bookmarksEmpty = $("bookmarksEmptyState");
+
+  let currentUser = null;
+  let userBookmarks = [];
+
+  function showError(msg) {
+    if (!errorMsg) return;
+    if (msg) {
+      errorMsg.textContent = msg;
+      errorMsg.style.display = "block";
+    } else {
+      errorMsg.textContent = "";
+      errorMsg.style.display = "none";
+    }
+  }
+
+  function openAuthModal() {
+    showError("");
+    authModal.classList.add("open");
+    authModal.removeAttribute("aria-hidden");
+    switchAuthTab("login");
+  }
+
+  function closeAuthModal() {
+    authModal.classList.remove("open");
+    authModal.setAttribute("aria-hidden", "true");
+  }
+
+  function switchAuthTab(tab) {
+    showError("");
+    if (tab === "login") {
+      tabLogin.classList.add("active");
+      tabRegister.classList.remove("active");
+      loginForm.style.display = "block";
+      registerForm.style.display = "none";
+    } else {
+      tabRegister.classList.add("active");
+      tabLogin.classList.remove("active");
+      loginForm.style.display = "none";
+      registerForm.style.display = "block";
+    }
+  }
+
+  if (authOpenBtn) authOpenBtn.addEventListener("click", openAuthModal);
+  if (authCloseBtn) authCloseBtn.addEventListener("click", closeAuthModal);
+  if (tabLogin) tabLogin.addEventListener("click", () => switchAuthTab("login"));
+  if (tabRegister) tabRegister.addEventListener("click", () => switchAuthTab("register"));
+
+  authModal.addEventListener("click", (e) => {
+    if (e.target === authModal) closeAuthModal();
+  });
+
+  function renderUserState(user) {
+    currentUser = user;
+    if (user) {
+      if (authOpenBtn) authOpenBtn.style.display = "none";
+      if (userMenuWrap) userMenuWrap.style.display = "inline-block";
+
+      const initial = (user.name || user.email || "U")[0].toUpperCase();
+      if (headerAvatar) headerAvatar.textContent = initial;
+      if (headerName) headerName.textContent = user.name || user.email.split("@")[0];
+      if (menuAvatar) menuAvatar.textContent = initial;
+      if (menuName) menuName.textContent = user.name;
+      if (menuEmail) menuEmail.textContent = user.email;
+
+      userBookmarks = user.bookmarks || [];
+      if (menuBookmarksCount) menuBookmarksCount.textContent = userBookmarks.length;
+      updateBookmarkStars();
+    } else {
+      if (authOpenBtn) authOpenBtn.style.display = "inline-flex";
+      if (userMenuWrap) userMenuWrap.style.display = "none";
+      if (userDropdownMenu) userDropdownMenu.style.display = "none";
+      userBookmarks = [];
+      updateBookmarkStars();
+    }
+  }
+
+  // Загрузка сессии
+  async function checkSession() {
+    if (window.iskatelAPI && window.iskatelAPI.getCurrentUser) {
+      try {
+        const user = await window.iskatelAPI.getCurrentUser();
+        renderUserState(user);
+        return;
+      } catch (_) {}
+    }
+    try {
+      const saved = localStorage.getItem("iskatel_active_user");
+      if (saved) renderUserState(JSON.parse(saved));
+    } catch (_) {}
+  }
+
+  // Вход по Email/Пароль
+  if (loginForm) {
+    loginForm.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      showError("");
+      const email = loginEmail.value.trim();
+      const password = loginPassword.value;
+
+      if (window.iskatelAPI && window.iskatelAPI.loginUser) {
+        const res = await window.iskatelAPI.loginUser({ email, password });
+        if (res.ok) {
+          renderUserState(res.user);
+          closeAuthModal();
+        } else {
+          showError(res.error || "Ошибка авторизации");
+        }
+      } else {
+        // Веб-фолбэк
+        const user = { id: "u_" + Date.now(), name: email.split("@")[0], email, bookmarks: [] };
+        localStorage.setItem("iskatel_active_user", JSON.stringify(user));
+        renderUserState(user);
+        closeAuthModal();
+      }
+    });
+  }
+
+  // Регистрация
+  if (registerForm) {
+    registerForm.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      showError("");
+      const name = regName.value.trim();
+      const email = regEmail.value.trim();
+      const password = regPassword.value;
+
+      if (window.iskatelAPI && window.iskatelAPI.registerUser) {
+        const res = await window.iskatelAPI.registerUser({ name, email, password });
+        if (res.ok) {
+          renderUserState(res.user);
+          closeAuthModal();
+        } else {
+          showError(res.error || "Ошибка регистрации");
+        }
+      } else {
+        const user = { id: "u_" + Date.now(), name, email, bookmarks: [] };
+        localStorage.setItem("iskatel_active_user", JSON.stringify(user));
+        renderUserState(user);
+        closeAuthModal();
+      }
+    });
+  }
+
+  // Вход через Google (Gmail)
+  if (googleAuthBtn) {
+    googleAuthBtn.addEventListener("click", async () => {
+      showError("");
+      // Диалог выбора / ввода аккаунта Google
+      const promptEmail = prompt("Введите ваш адрес Gmail (например, usman@gmail.com):", "user@gmail.com");
+      if (!promptEmail) return;
+
+      const clean = promptEmail.trim().toLowerCase();
+      if (!clean.includes("@")) {
+        alert("Пожалуйста, введите корректный адрес электронной почты.");
+        return;
+      }
+
+      const defaultName = clean.split("@")[0];
+      const gUser = {
+        email: clean,
+        name: defaultName.charAt(0).toUpperCase() + defaultName.slice(1),
+        avatar: "",
+      };
+
+      if (window.iskatelAPI && window.iskatelAPI.googleLogin) {
+        const res = await window.iskatelAPI.googleLogin(gUser);
+        if (res.ok) {
+          renderUserState(res.user);
+          closeAuthModal();
+        } else {
+          showError(res.error || "Ошибка входа через Google");
+        }
+      } else {
+        localStorage.setItem("iskatel_active_user", JSON.stringify({ ...gUser, bookmarks: [] }));
+        renderUserState({ ...gUser, bookmarks: [] });
+        closeAuthModal();
+      }
+    });
+  }
+
+  // Выпадающее меню профиля
+  if (userMenuTrigger) {
+    userMenuTrigger.addEventListener("click", (e) => {
+      e.stopPropagation();
+      const isVisible = userDropdownMenu.style.display === "block";
+      userDropdownMenu.style.display = isVisible ? "none" : "block";
+    });
+  }
+
+  document.addEventListener("click", () => {
+    if (userDropdownMenu) userDropdownMenu.style.display = "none";
+  });
+
+  if (menuLogoutBtn) {
+    menuLogoutBtn.addEventListener("click", async () => {
+      if (window.iskatelAPI && window.iskatelAPI.logoutUser) {
+        await window.iskatelAPI.logoutUser();
+      }
+      try { localStorage.removeItem("iskatel_active_user"); } catch (_) {}
+      renderUserState(null);
+    });
+  }
+
+  if (menuSettingsBtn) {
+    menuSettingsBtn.addEventListener("click", () => {
+      if (userDropdownMenu) userDropdownMenu.style.display = "none";
+      const settingsBtn = $("settingsBtn");
+      if (settingsBtn) settingsBtn.click();
+    });
+  }
+
+  /* ---------- Модалка закладок ---------- */
+  function openBookmarksModal() {
+    if (userDropdownMenu) userDropdownMenu.style.display = "none";
+    renderBookmarksList();
+    bookmarksModal.classList.add("open");
+    bookmarksModal.removeAttribute("aria-hidden");
+  }
+
+  function closeBookmarksModal() {
+    bookmarksModal.classList.remove("open");
+    bookmarksModal.setAttribute("aria-hidden", "true");
+  }
+
+  if (menuBookmarksBtn) menuBookmarksBtn.addEventListener("click", openBookmarksModal);
+  if (bookmarksCloseBtn) bookmarksCloseBtn.addEventListener("click", closeBookmarksModal);
+
+  bookmarksModal.addEventListener("click", (e) => {
+    if (e.target === bookmarksModal) closeBookmarksModal();
+  });
+
+  function renderBookmarksList() {
+    bookmarksList.innerHTML = "";
+    if (!userBookmarks || userBookmarks.length === 0) {
+      bookmarksEmpty.style.display = "block";
+      return;
+    }
+    bookmarksEmpty.style.display = "none";
+
+    userBookmarks.forEach((bm) => {
+      const li = document.createElement("li");
+      li.style.cssText = "display:flex; align-items:center; justify-content:space-between; padding:12px; border-bottom:1px solid var(--border); gap:12px;";
+
+      li.innerHTML = `
+        <div style="overflow:hidden;">
+          <a href="${escapeAttr(bm.url)}" target="_blank" rel="noopener noreferrer" style="font-weight:600; font-size:14px; color:var(--text); text-decoration:none;">${escapeHtml(bm.title || bm.url)}</a>
+          <div style="font-size:12px; color:var(--text-3);">${escapeHtml(bm.domain || bm.url)}</div>
+        </div>
+        <button type="button" class="icon-btn delete-bm-btn" data-id="${escapeAttr(bm.id)}" style="color:var(--danger); flex-shrink:0;" title="Удалить из закладок">✕</button>
+      `;
+
+      const delBtn = li.querySelector(".delete-bm-btn");
+      delBtn.addEventListener("click", async () => {
+        if (window.iskatelAPI && window.iskatelAPI.removeBookmark) {
+          const res = await window.iskatelAPI.removeBookmark(bm.id);
+          userBookmarks = res.bookmarks || [];
+        } else {
+          userBookmarks = userBookmarks.filter((b) => b.id !== bm.id);
+        }
+        if (menuBookmarksCount) menuBookmarksCount.textContent = userBookmarks.length;
+        renderBookmarksList();
+        updateBookmarkStars();
+      });
+
+      bookmarksList.appendChild(li);
+    });
+  }
+
+  function updateBookmarkStars() {
+    const bookmarkedUrls = new Set((userBookmarks || []).map((b) => b.url));
+    document.querySelectorAll(".bookmark-btn").forEach((btn) => {
+      const url = btn.dataset.url;
+      if (bookmarkedUrls.has(url)) {
+        btn.classList.add("bookmarked");
+        btn.textContent = "★";
+        btn.title = "В закладках";
+      } else {
+        btn.classList.remove("bookmarked");
+        btn.textContent = "☆";
+        btn.title = "Добавить в закладки";
+      }
+    });
+  }
+
+  // Обработка клика на звездочку закладки в результатах поиска
+  document.addEventListener("click", async (e) => {
+    const btn = e.target.closest(".bookmark-btn");
+    if (!btn) return;
+    e.preventDefault();
+
+    if (!currentUser) {
+      openAuthModal();
+      return;
+    }
+
+    const url = btn.dataset.url;
+    const title = btn.dataset.title;
+    const domain = btn.dataset.domain;
+
+    const isBookmarked = btn.classList.contains("bookmarked");
+    if (isBookmarked) {
+      // Удаляем
+      const targetBm = (userBookmarks || []).find((b) => b.url === url);
+      if (targetBm) {
+        if (window.iskatelAPI && window.iskatelAPI.removeBookmark) {
+          const res = await window.iskatelAPI.removeBookmark(targetBm.id);
+          userBookmarks = res.bookmarks || [];
+        } else {
+          userBookmarks = userBookmarks.filter((b) => b.id !== targetBm.id);
+        }
+      }
+    } else {
+      // Добавляем
+      if (window.iskatelAPI && window.iskatelAPI.addBookmark) {
+        const res = await window.iskatelAPI.addBookmark({ title, url, domain });
+        userBookmarks = res.bookmarks || [];
+      } else {
+        userBookmarks.unshift({ id: "bm_" + Date.now(), title, url, domain, addedAt: Date.now() });
+      }
+    }
+
+    if (menuBookmarksCount) menuBookmarksCount.textContent = userBookmarks.length;
+    updateBookmarkStars();
+  });
+
+  // Запуск проверки сессии
+  checkSession();
+})();
+
 </script>
 
-  <!-- Угловой бейдж версии v2.0 в углу экрана -->
-  <button type="button" class="corner-version" id="cornerVersion" aria-label="Версия Искатель 2.0. Нажмите для открытия настроек">
+  <!-- Угловой бейдж версии v2.5 в углу экрана -->
+  <button type="button" class="corner-version" id="cornerVersion" aria-label="Версия Искатель 2.5. Нажмите для открытия настроек">
     <span class="corner-version-dot" aria-hidden="true"></span>
-    <span class="corner-version-label">v2.0</span>
+    <span class="corner-version-label">v2.5</span>
   </button>
+
+
+  <!-- Модальное окно авторизации и регистрации (v2.5) -->
+  <div class="modal-backdrop" id="authModal" aria-hidden="true">
+    <div class="modal-card auth-modal-card" role="dialog" aria-modal="true" aria-labelledby="authTitle">
+      <div class="modal-header">
+        <div class="modal-title-wrap">
+          <h2 class="modal-title" id="authTitle">Аккаунт Искателя</h2>
+        </div>
+        <button type="button" class="icon-btn modal-close" id="authCloseBtn" aria-label="Закрыть">✕</button>
+      </div>
+
+      <div class="modal-body">
+        <!-- Кнопка быстрого входа Google / Gmail -->
+        <button type="button" class="btn-google-sign-in" id="googleAuthBtn">
+          <svg class="ico-google" viewBox="0 0 24 24" width="20" height="20">
+            <path fill="#4285F4" d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.8-2.4 3.65v3.05h3.88c2.27-2.09 3.66-5.17 3.66-9.14z"/>
+            <path fill="#34A853" d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.05c-1.08.72-2.45 1.16-4.05 1.16-3.12 0-5.77-2.1-6.72-4.93H1.25v3.15C3.27 21.43 7.35 24 12 24z"/>
+            <path fill="#FBBC05" d="M5.28 14.27c-.25-.72-.38-1.49-.38-2.27s.13-1.55.38-2.27V6.58H1.25C.45 8.18 0 9.99 0 12s.45 3.82 1.25 5.42l4.03-3.15z"/>
+            <path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.35 0 3.27 2.57 1.25 6.58l4.03 3.15c.95-2.83 3.6-4.98 6.72-4.98z"/>
+          </svg>
+          <span>Продолжить с Google (Gmail)</span>
+        </button>
+
+        <div class="auth-divider">
+          <span>или через почту и пароль</span>
+        </div>
+
+        <div class="auth-tabs">
+          <button type="button" class="auth-tab active" id="tabLoginBtn">Вход</button>
+          <button type="button" class="auth-tab" id="tabRegisterBtn">Регистрация</button>
+        </div>
+
+        <!-- Форма Входа -->
+        <form id="loginForm" autocomplete="on">
+          <div class="auth-input-group">
+            <label class="auth-label" for="loginEmail">Email / Gmail</label>
+            <input type="email" class="auth-input" id="loginEmail" placeholder="example@gmail.com" required>
+          </div>
+          <div class="auth-input-group">
+            <label class="auth-label" for="loginPassword">Пароль</label>
+            <input type="password" class="auth-input" id="loginPassword" placeholder="••••••••" required>
+          </div>
+          <button type="submit" class="auth-submit-btn">Войти в аккаунт</button>
+        </form>
+
+        <!-- Форма Регистрации -->
+        <form id="registerForm" style="display:none;" autocomplete="on">
+          <div class="auth-input-group">
+            <label class="auth-label" for="regName">Ваше имя</label>
+            <input type="text" class="auth-input" id="regName" placeholder="Александр" required>
+          </div>
+          <div class="auth-input-group">
+            <label class="auth-label" for="regEmail">Gmail / Email адрес</label>
+            <input type="email" class="auth-input" id="regEmail" placeholder="yourname@gmail.com" required>
+          </div>
+          <div class="auth-input-group">
+            <label class="auth-label" for="regPassword">Пароль (минимум 6 символов)</label>
+            <input type="password" class="auth-input" id="regPassword" placeholder="••••••••" minlength="6" required>
+          </div>
+          <button type="submit" class="auth-submit-btn">Зарегистрироваться</button>
+        </form>
+
+        <div class="auth-error" id="authErrorMsg"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Модальное окно закладок пользователя (v2.5) -->
+  <div class="modal-backdrop" id="bookmarksModal" aria-hidden="true">
+    <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="bookmarksTitle">
+      <div class="modal-header">
+        <div class="modal-title-wrap">
+          <h2 class="modal-title" id="bookmarksTitle">⭐ Мои закладки</h2>
+        </div>
+        <button type="button" class="icon-btn modal-close" id="bookmarksCloseBtn" aria-label="Закрыть">✕</button>
+      </div>
+      <div class="modal-body">
+        <ul class="bookmarks-list" id="bookmarksList" style="list-style:none; padding:0; margin:0;"></ul>
+        <div class="empty-state" id="bookmarksEmptyState" style="padding:40px 20px;">
+          <div class="empty-ico">⭐</div>
+          <h3>Закладок пока нет</h3>
+          <p>Нажимайте на звёздочку рядом с найденными результатами, чтобы сохранять их сюда.</p>
+        </div>
+      </div>
+    </div>
+  </div>
 
 </body>
 </html>

@@ -148,7 +148,7 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ github.ref_name || inputs.tag_name }}
-          name: Искатель ${{ github.ref_name || inputs.tag_name }}
+          name: Proton ${{ github.ref_name || inputs.tag_name }}
           files: |
             release-assets/iskatel-win64-setup.exe
             release-assets/iskatel-win64-portable.exe

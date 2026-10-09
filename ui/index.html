@@ -3,21 +3,53 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Искатель 2.6 — Минималистичный браузер</title>
-  <meta name="description" content="Искатель — быстрый и чистый поисковик. Находите сайты, ответы и справочную информацию.">
+  <title>Proton 2.7 — Минималистичный браузер</title>
+  <meta name="description" content="Proton — быстрый, ультра-минималистичный черный браузер с вкладками.">
   <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2048%2048%22%3E%0A%20%20%3Cdefs%3E%0A%20%20%20%20%3ClinearGradient%20id%3D%22g%22%20x1%3D%220%22%20y1%3D%220%22%20x2%3D%221%22%20y2%3D%221%22%3E%0A%20%20%20%20%20%20%3Cstop%20offset%3D%220%22%20stop-color%3D%22%236d5dfc%22%2F%3E%3Cstop%20offset%3D%221%22%20stop-color%3D%22%2338bdf8%22%2F%3E%0A%20%20%20%20%3C%2FlinearGradient%3E%0A%20%20%3C%2Fdefs%3E%0A%20%20%3Crect%20x%3D%222%22%20y%3D%222%22%20width%3D%2244%22%20height%3D%2244%22%20rx%3D%2213%22%20fill%3D%22url%28%23g%29%22%2F%3E%0A%20%20%3Ccircle%20cx%3D%2221%22%20cy%3D%2221%22%20r%3D%228.5%22%20fill%3D%22none%22%20stroke%3D%22%23fff%22%20stroke-width%3D%224%22%2F%3E%0A%20%20%3Crect%20x%3D%2227.5%22%20y%3D%2227.5%22%20width%3D%224%22%20height%3D%2213%22%20rx%3D%222%22%20transform%3D%22rotate%28-45%2029.5%2034%29%22%20fill%3D%22%23fff%22%2F%3E%0A%3C%2Fsvg%3E">
   <style>
-/* ============ «Искатель» ============ */
+/* ============ ТЕМЫ ОФОРМЛЕНИЯ PROTON 2.7 ============ */
 
-:root {
+/* 1. OLED Black (По умолчанию — глубокий лаконичный чёрный) */
+:root,
+[data-app-style="oled"] {
+  --bg: #000000;
+  --bg-soft: #08090c;
+  --text: #ffffff;
+  --text-2: #94a3b8;
+  --text-3: #64748b;
+  --card: rgba(14, 15, 19, 0.88);
+  --card-solid: #0d0e12;
+  --border: rgba(255, 255, 255, 0.09);
+  --border-hover: rgba(255, 255, 255, 0.18);
+  --accent: #8b5cf6;
+  --accent-2: #38bdf8;
+  --accent-soft: rgba(139, 92, 246, 0.16);
+  --link: #a78bfa;
+  --link-hover: #c4b5fd;
+  --danger: #f87171;
+  --shadow: 0 12px 36px rgba(0, 0, 0, 0.7);
+  --shadow-lg: 0 20px 60px rgba(0, 0, 0, 0.9);
+  --radius: 14px;
+  --mark-bg: rgba(250, 204, 21, 0.28);
+  --mark-text: inherit;
+  --blob-opacity: 0.10;
+  --input-bg: #07080a;
+  --tab-bar-bg: #000000;
+  --tab-active-bg: #121318;
+  --tab-inactive-text: #717688;
+}
+
+/* 2. Classic Light (Оригинальный стиль «Искатель» — старый светлый) */
+[data-app-style="classic"] {
   --bg: #f4f6fb;
   --bg-soft: #ffffff;
   --text: #171a2b;
   --text-2: #5b6178;
   --text-3: #8b90a3;
-  --card: rgba(255, 255, 255, 0.82);
+  --card: rgba(255, 255, 255, 0.85);
   --card-solid: #ffffff;
   --border: rgba(23, 26, 43, 0.10);
+  --border-hover: rgba(23, 26, 43, 0.18);
   --accent: #5b4df0;
   --accent-2: #38bdf8;
   --accent-soft: rgba(91, 77, 240, 0.10);
@@ -29,30 +61,156 @@
   --radius: 16px;
   --mark-bg: rgba(250, 204, 21, 0.38);
   --mark-text: inherit;
-  --blob-opacity: 0.55;
+  --blob-opacity: 0.45;
   --input-bg: #ffffff;
+  --tab-bar-bg: #e2e8f0;
+  --tab-active-bg: #ffffff;
+  --tab-inactive-text: #64748b;
 }
 
-[data-theme="dark"] {
-  --bg: #0c1020;
-  --bg-soft: #121832;
-  --text: #e9ebf5;
-  --text-2: #a6adc7;
-  --text-3: #6d7592;
-  --card: rgba(22, 28, 52, 0.72);
-  --card-solid: #161c34;
-  --border: rgba(233, 235, 245, 0.10);
-  --accent: #8b85ff;
-  --accent-2: #38bdf8;
-  --accent-soft: rgba(139, 133, 255, 0.14);
-  --link: #a5b4fc;
-  --link-hover: #c7d2fe;
+/* 3. Midnight Navy (Полуночный глубокий синий) */
+[data-app-style="midnight"] {
+  --bg: #080c18;
+  --bg-soft: #0e1528;
+  --text: #f1f5f9;
+  --text-2: #94a3b8;
+  --text-3: #64748b;
+  --card: rgba(14, 21, 40, 0.88);
+  --card-solid: #0f172a;
+  --border: rgba(56, 189, 248, 0.12);
+  --border-hover: rgba(56, 189, 248, 0.25);
+  --accent: #38bdf8;
+  --accent-2: #818cf8;
+  --accent-soft: rgba(56, 189, 248, 0.14);
+  --link: #7dd3fc;
+  --link-hover: #bae6fd;
   --danger: #f87171;
-  --shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
-  --shadow-lg: 0 18px 50px rgba(0, 0, 0, 0.5);
-  --mark-bg: rgba(250, 204, 21, 0.28);
-  --blob-opacity: 0.30;
-  --input-bg: rgba(18, 24, 50, 0.9);
+  --shadow: 0 12px 36px rgba(0, 0, 0, 0.6);
+  --shadow-lg: 0 20px 60px rgba(0, 0, 0, 0.8);
+  --radius: 14px;
+  --mark-bg: rgba(56, 189, 248, 0.25);
+  --mark-text: inherit;
+  --blob-opacity: 0.20;
+  --input-bg: #0a0f1f;
+  --tab-bar-bg: #050811;
+  --tab-active-bg: #111a33;
+  --tab-inactive-text: #64748b;
+}
+
+/* 4. Cyberpunk Neon (Тёмный киберпанк с циан/маджента) */
+[data-app-style="cyberpunk"] {
+  --bg: #05060a;
+  --bg-soft: #0c0d14;
+  --text: #e0f2fe;
+  --text-2: #7dd3fc;
+  --text-3: #475569;
+  --card: rgba(12, 14, 22, 0.9);
+  --card-solid: #0e101a;
+  --border: rgba(6, 182, 212, 0.22);
+  --border-hover: rgba(6, 182, 212, 0.45);
+  --accent: #06b6d4;
+  --accent-2: #ec4899;
+  --accent-soft: rgba(6, 182, 212, 0.16);
+  --link: #22d3ee;
+  --link-hover: #67e8f9;
+  --danger: #f43f5e;
+  --shadow: 0 12px 36px rgba(6, 182, 212, 0.12);
+  --shadow-lg: 0 20px 60px rgba(6, 182, 212, 0.2);
+  --radius: 14px;
+  --mark-bg: rgba(6, 182, 212, 0.25);
+  --mark-text: inherit;
+  --blob-opacity: 0.25;
+  --input-bg: #07080f;
+  --tab-bar-bg: #030406;
+  --tab-active-bg: #0e111d;
+  --tab-inactive-text: #64748b;
+}
+
+/* 5. Carbon Graphite (Матовый строгий графит) */
+[data-app-style="graphite"] {
+  --bg: #121316;
+  --bg-soft: #191a1e;
+  --text: #f4f4f5;
+  --text-2: #a1a1aa;
+  --text-3: #71717a;
+  --card: rgba(26, 27, 32, 0.88);
+  --card-solid: #1b1c21;
+  --border: rgba(255, 255, 255, 0.09);
+  --border-hover: rgba(255, 255, 255, 0.18);
+  --accent: #a1a1aa;
+  --accent-2: #e4e4e7;
+  --accent-soft: rgba(255, 255, 255, 0.10);
+  --link: #d4d4d8;
+  --link-hover: #ffffff;
+  --danger: #f87171;
+  --shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+  --shadow-lg: 0 18px 50px rgba(0, 0, 0, 0.7);
+  --radius: 14px;
+  --mark-bg: rgba(255, 255, 255, 0.2);
+  --mark-text: inherit;
+  --blob-opacity: 0.06;
+  --input-bg: #16171b;
+  --tab-bar-bg: #0c0d0f;
+  --tab-active-bg: #22232a;
+  --tab-inactive-text: #71717a;
+}
+
+/* 6. Emerald Forest (Глубокий изумрудный тёмный) */
+[data-app-style="emerald"] {
+  --bg: #050f0a;
+  --bg-soft: #0a1b13;
+  --text: #ecfdf5;
+  --text-2: #6ee7b7;
+  --text-3: #34d399;
+  --card: rgba(10, 26, 18, 0.88);
+  --card-solid: #0d2319;
+  --border: rgba(16, 185, 129, 0.18);
+  --border-hover: rgba(16, 185, 129, 0.35);
+  --accent: #10b981;
+  --accent-2: #34d399;
+  --accent-soft: rgba(16, 185, 129, 0.15);
+  --link: #6ee7b7;
+  --link-hover: #a7f3d0;
+  --danger: #f87171;
+  --shadow: 0 12px 36px rgba(0, 0, 0, 0.6);
+  --shadow-lg: 0 20px 60px rgba(0, 0, 0, 0.8);
+  --radius: 14px;
+  --mark-bg: rgba(16, 185, 129, 0.25);
+  --mark-text: inherit;
+  --blob-opacity: 0.18;
+  --input-bg: #07150e;
+  --tab-bar-bg: #030805;
+  --tab-active-bg: #0f2b1f;
+  --tab-inactive-text: #4e7a64;
+}
+
+/* 7. Nordic Frost (Чистый светлый скандинавский минимализм) */
+[data-app-style="nordic"] {
+  --bg: #f8fafc;
+  --bg-soft: #ffffff;
+  --text: #0f172a;
+  --text-2: #475569;
+  --text-3: #94a3b8;
+  --card: rgba(255, 255, 255, 0.9);
+  --card-solid: #ffffff;
+  --border: rgba(15, 23, 42, 0.08);
+  --border-hover: rgba(15, 23, 42, 0.16);
+  --accent: #2563eb;
+  --accent-2: #38bdf8;
+  --accent-soft: rgba(37, 99, 235, 0.10);
+  --link: #1d4ed8;
+  --link-hover: #1e40af;
+  --danger: #dc2626;
+  --shadow: 0 10px 30px rgba(15, 23, 42, 0.06);
+  --shadow-lg: 0 18px 50px rgba(15, 23, 42, 0.12);
+  --radius: 14px;
+  --mark-bg: rgba(37, 99, 235, 0.2);
+  --mark-text: inherit;
+  --blob-opacity: 0.35;
+  --input-bg: #ffffff;
+  --tab-bar-bg: #e2e8f0;
+  --tab-active-bg: #ffffff;
+  --tab-inactive-text: #64748b;
 }
 
 * { box-sizing: border-box; }
@@ -1598,6 +1756,287 @@ mark {
     color: #f59e0b;
   }
 
+
+/* ============ СТИЛИ ВКЛАДОК PROTON (v2.7) ============ */
+.tab-strip-bar {
+  display: flex;
+  align-items: center;
+  background: var(--tab-bar-bg);
+  border-bottom: 1px solid var(--border);
+  padding: 6px 12px 0 12px;
+  gap: 6px;
+  position: sticky;
+  top: 0;
+  z-index: 120;
+  user-select: none;
+  transition: background 0.25s ease, border-color 0.25s ease;
+}
+
+.tabs-scroll {
+  display: flex;
+  align-items: center;
+  overflow-x: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  flex: 1;
+  min-width: 0;
+}
+.tabs-scroll::-webkit-scrollbar { display: none; }
+
+.tab-list {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex: 1;
+  min-width: 0;
+}
+
+.tab-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 12px;
+  max-width: 220px;
+  min-width: 120px;
+  height: 34px;
+  border-radius: 9px 9px 0 0;
+  background: transparent;
+  color: var(--tab-inactive-text);
+  font-size: 12.5px;
+  font-weight: 500;
+  cursor: pointer;
+  position: relative;
+  transition: background 0.15s ease, color 0.15s ease;
+  border: 1px solid transparent;
+  border-bottom: 0;
+}
+
+.tab-item:hover {
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--text);
+}
+
+.tab-item.active {
+  background: var(--bg);
+  color: var(--text);
+  font-weight: 600;
+  border-color: var(--border);
+  box-shadow: 0 -3px 12px rgba(0, 0, 0, 0.2);
+}
+
+.tab-item.active::after {
+  content: "";
+  position: absolute;
+  top: -1px;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, var(--accent), var(--accent-2));
+  border-radius: 2px 2px 0 0;
+}
+
+.tab-icon-wrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+  color: var(--accent);
+}
+
+.tab-title {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.tab-close-btn {
+  border: 0;
+  background: transparent;
+  color: var(--text-3);
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  font-size: 14px;
+  line-height: 1;
+  cursor: pointer;
+  padding: 0;
+  margin-left: 2px;
+  opacity: 0.5;
+  transition: all 0.15s ease;
+}
+
+.tab-close-btn:hover {
+  background: rgba(255, 255, 255, 0.15);
+  color: #fff;
+  opacity: 1;
+}
+
+.tab-actions-group {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  margin-left: 6px;
+  margin-bottom: 2px;
+  flex-shrink: 0;
+}
+
+.tab-action-btn {
+  width: 30px;
+  height: 30px;
+  border-radius: 8px;
+  border: 0;
+  background: transparent;
+  color: var(--text-2);
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.tab-action-btn:hover {
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--text);
+  transform: scale(1.05);
+}
+
+.tab-action-btn:active {
+  transform: scale(0.95);
+}
+
+.tab-action-btn.spinning .reload-icon {
+  animation: spinReload 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes spinReload {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+/* Контекстное меню вкладок */
+.tab-context-menu {
+  position: fixed;
+  z-index: 2500;
+  background: var(--card-solid);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  box-shadow: 0 14px 40px rgba(0, 0, 0, 0.5);
+  padding: 6px;
+  min-width: 190px;
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  animation: popCtx 0.12s ease;
+}
+
+@keyframes popCtx {
+  from { opacity: 0; transform: scale(0.95); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+.context-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 12px;
+  border-radius: 8px;
+  color: var(--text);
+  font-size: 13px;
+  cursor: pointer;
+  transition: background 0.12s ease, color 0.12s ease;
+}
+
+.context-item:hover {
+  background: var(--accent-soft);
+  color: var(--accent);
+}
+
+.context-shortcut {
+  margin-left: auto;
+  font-size: 11px;
+  color: var(--text-3);
+  font-family: monospace;
+}
+
+.context-divider {
+  height: 1px;
+  background: var(--border);
+  margin: 4px 6px;
+}
+
+/* Сетка стилей оформления в настройках */
+.app-style-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
+  gap: 12px;
+  margin-top: 12px;
+}
+
+.style-card {
+  border: 2px solid var(--border);
+  border-radius: 12px;
+  padding: 12px 14px;
+  cursor: pointer;
+  background: var(--card);
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  position: relative;
+  overflow: hidden;
+}
+
+.style-card:hover {
+  border-color: var(--accent);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow);
+}
+
+.style-card.active {
+  border-color: var(--accent);
+  background: var(--card-solid);
+  box-shadow: 0 0 0 2px var(--accent-soft), var(--shadow);
+}
+
+.style-card-badge {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  font-size: 10px;
+  font-weight: 700;
+  padding: 2px 7px;
+  border-radius: 999px;
+  background: var(--accent-soft);
+  color: var(--accent);
+  border: 1px solid var(--accent);
+}
+
+.style-preview-dots {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 10px;
+}
+
+.style-dot {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  border: 1.5px solid rgba(255, 255, 255, 0.2);
+}
+
+.style-card-name {
+  font-weight: 700;
+  font-size: 13.5px;
+  color: var(--text);
+  margin-bottom: 3px;
+}
+
+.style-card-desc {
+  font-size: 11.5px;
+  color: var(--text-2);
+  line-height: 1.35;
+}
+
 </style>
 </head>
 <body data-view="home">
@@ -1608,20 +2047,69 @@ mark {
     <span class="blob blob-c"></span>
   </div>
 
+  <!-- Полоса вкладок Proton (Tabs Strip v2.7) -->
+  <div class="tab-strip-bar" id="tabStripBar">
+    <div class="tabs-scroll" id="tabsScroll">
+      <div class="tab-list" id="tabList" role="tablist">
+        <!-- Вкладки создаются динамически -->
+      </div>
+    </div>
+    <div class="tab-actions-group">
+      <button type="button" class="tab-action-btn" id="newTabBtn" title="Новая вкладка (Ctrl+T)" aria-label="Новая вкладка">
+        <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+      </button>
+      <button type="button" class="tab-action-btn" id="reloadTabBtn" title="Перезагрузить вкладку (Ctrl+R / F5)" aria-label="Перезагрузить">
+        <svg class="reload-icon" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/>
+        </svg>
+      </button>
+    </div>
+  </div>
+
+  <!-- Контекстное меню вкладки -->
+  <div class="tab-context-menu" id="tabContextMenu" style="display:none;">
+    <div class="context-item" id="ctxReload">
+      <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/></svg>
+      <span>Перезагрузить</span>
+      <span class="context-shortcut">Ctrl+R</span>
+    </div>
+    <div class="context-item" id="ctxDuplicate">
+      <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+      <span>Дублировать вкладку</span>
+    </div>
+    <div class="context-item" id="ctxNewTab">
+      <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+      <span>Новая вкладка</span>
+      <span class="context-shortcut">Ctrl+T</span>
+    </div>
+    <div class="context-divider"></div>
+    <div class="context-item" id="ctxClose">
+      <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      <span>Закрыть вкладку</span>
+      <span class="context-shortcut">Ctrl+W</span>
+    </div>
+    <div class="context-item" id="ctxCloseOthers">
+      <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
+      <span>Закрыть другие</span>
+    </div>
+  </div>
+
   <!-- Верхняя панель -->
   <header class="topbar" id="topbar">
     <a class="brand" href="/" id="brandLink">
       <svg class="brand-mark" viewBox="0 0 48 48" aria-hidden="true">
         <defs>
-          <linearGradient id="gTop" x1="0" y1="0" x2="1" y2="1">
-            <stop offset="0" stop-color="#6d5dfc"/><stop offset="1" stop-color="#38bdf8"/>
+          <linearGradient id="gProton" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%" stop-color="#8b5cf6"/>
+            <stop offset="100%" stop-color="#06b6d4"/>
           </linearGradient>
         </defs>
-        <rect x="2" y="2" width="44" height="44" rx="13" fill="url(#gTop)"/>
-        <circle cx="21" cy="21" r="8.5" fill="none" stroke="#fff" stroke-width="4"/>
-        <rect x="27.5" y="27.5" width="4" height="13" rx="2" transform="rotate(-45 29.5 34)" fill="#fff"/>
+        <rect x="3" y="3" width="42" height="42" rx="12" fill="url(#gProton)"/>
+        <circle cx="24" cy="24" r="6" fill="#ffffff"/>
+        <ellipse cx="24" cy="24" rx="15" ry="6" fill="none" stroke="#ffffff" stroke-width="2.5" transform="rotate(-30 24 24)" stroke-dasharray="3 2" opacity="0.85"/>
+        <ellipse cx="24" cy="24" rx="15" ry="6" fill="none" stroke="#ffffff" stroke-width="2.5" transform="rotate(30 24 24)" stroke-dasharray="3 2" opacity="0.85"/>
       </svg>
-      <span class="brand-name">Искатель</span>
+      <span class="brand-name">Proton</span>
     </a>
 
     <div class="top-search" id="topSearch">
@@ -1667,8 +2155,8 @@ mark {
             </div>
           </div>
           <div class="user-menu-divider"></div>
-          <button type="button" class="user-menu-item" id="menuThemeToggleBtn">
-            <span>🌓 Сменить тему (Светлая / Тёмная)</span>
+          <button type="button" class="user-menu-item" id="menuStyleToggleBtn">
+            <span>🎨 Стиль: <b id="menuCurrentStyleLabel">OLED Black</b></span>
           </button>
           <button type="button" class="user-menu-item" id="menuBookmarksBtn">
             <span>⭐ Мои закладки</span>
@@ -1700,17 +2188,19 @@ mark {
         <div class="hero-logo">
           <svg viewBox="0 0 48 48" aria-hidden="true">
             <defs>
-              <linearGradient id="gHero" x1="0" y1="0" x2="1" y2="1">
-                <stop offset="0" stop-color="#6d5dfc"/><stop offset="1" stop-color="#38bdf8"/>
+              <linearGradient id="gProtonHero" x1="0" y1="0" x2="1" y2="1">
+                <stop offset="0%" stop-color="#8b5cf6"/>
+                <stop offset="100%" stop-color="#06b6d4"/>
               </linearGradient>
             </defs>
-            <rect x="2" y="2" width="44" height="44" rx="13" fill="url(#gHero)"/>
-            <circle cx="21" cy="21" r="8.5" fill="none" stroke="#fff" stroke-width="4"/>
-            <rect x="27.5" y="27.5" width="4" height="13" rx="2" transform="rotate(-45 29.5 34)" fill="#fff"/>
+            <rect x="3" y="3" width="42" height="42" rx="12" fill="url(#gProtonHero)"/>
+            <circle cx="24" cy="24" r="6" fill="#ffffff"/>
+            <ellipse cx="24" cy="24" rx="15" ry="6" fill="none" stroke="#ffffff" stroke-width="2.5" transform="rotate(-30 24 24)" stroke-dasharray="3 2" opacity="0.85"/>
+            <ellipse cx="24" cy="24" rx="15" ry="6" fill="none" stroke="#ffffff" stroke-width="2.5" transform="rotate(30 24 24)" stroke-dasharray="3 2" opacity="0.85"/>
           </svg>
         </div>
-        <h1 class="hero-title">Искатель</h1>
-        <p class="hero-sub">Быстрый и чистый поиск по интернету</p>
+        <h1 class="hero-title">Proton</h1>
+        <p class="hero-sub">Быстрый, ультра-минималистичный черный браузер с вкладками</p>
 
         <form class="search-form hero-form" id="homeForm" autocomplete="off">
           <div class="search-box search-box-lg">
@@ -1802,7 +2292,7 @@ mark {
       <div class="modal-header">
         <div class="modal-title-wrap">
           <h2 class="modal-title" id="settingsTitle">Настройки</h2>
-          <span class="badge-version" id="settingsVersionBadge">v2.6</span>
+          <span class="badge-version" id="settingsVersionBadge">v2.7</span>
         </div>
         <button type="button" class="icon-btn modal-close" id="settingsCloseBtn" aria-label="Закрыть">✕</button>
       </div>
@@ -1860,9 +2350,17 @@ mark {
             </label>
           </div>
 
-        <!-- Вкладка: Оформление (Кастомизация v2.5) -->
+        <!-- Вкладка: Оформление (Кастомизация Proton v2.7) -->
         <div class="tab-panel" id="tabAppearance" role="tabpanel">
           <div class="setting-group">
+            <label class="setting-label">Стиль приложения (Тема)</label>
+            <p class="setting-desc">По умолчанию активен лаконичный глубокий чёрный стиль (OLED Black). Вы можете в любой момент переключиться на оригинальный классический стиль «Искатель» или выбрать другой стиль оформления.</p>
+            <div class="app-style-grid" id="appStyleGrid">
+              <!-- Карточки стилей генерируются динамически -->
+            </div>
+          </div>
+
+          <div class="setting-group" style="display:none;">
             <label class="setting-label" for="settingTheme">Режим оформления</label>
             <p class="setting-desc">Светлая, тёмная или автоматическая адаптация под тему операционной системы.</p>
             <select class="setting-select" id="settingTheme">
@@ -1934,10 +2432,10 @@ mark {
               </svg>
             </div>
             <div class="about-info">
-              <h3 class="about-name">Искатель Desktop</h3>
-              <p class="about-desc">Настольный поисковик без слежки, рекламы и сбора пользовательских данных.</p>
+              <h3 class="about-name">Proton Desktop</h3>
+              <p class="about-desc">Быстрый, ультра-минималистичный черный браузер с вкладками без слежки и рекламы.</p>
               <div class="about-meta">
-                <span>Версия: <strong id="aboutVersionText">2.6.0</strong></span>
+                <span>Версия: <strong id="aboutVersionText">2.7.0</strong></span>
                 <span class="dot">·</span>
                 <a href="https://github.com/UsmanMusav/Iskatel" target="_blank" rel="noopener" class="link-external" id="githubRepoLink">GitHub Репозиторий ↗</a>
               </div>
@@ -1995,13 +2493,457 @@ mark {
 
   <footer class="footer">
     <div class="footer-inner">
-      <span>© <span id="year"></span> Искатель · Конфиденциальный поиск · v2.6.0</span>
+      <span>© <span id="year"></span> Proton · Минималистичный браузер · v2.7.0</span>
     </div>
   </footer>
 
   <script>
 /* «Искатель» — логика фронтенда */
 "use strict";
+
+/* ============ СПИСОК СТИЛЕЙ ОФОРМЛЕНИЯ PROTON (v2.7) ============ */
+const PROTON_STYLES = [
+  {
+    key: "oled",
+    name: "OLED Black",
+    subtitle: "По умолчанию — глубокий лаконичный чёрный",
+    bg: "#000000",
+    card: "#121318",
+    accent: "#8b5cf6",
+    badge: "По умолчанию"
+  },
+  {
+    key: "classic",
+    name: "Классический Искатель",
+    subtitle: "Старый светлый стиль с синим акцентом",
+    bg: "#f4f6fb",
+    card: "#ffffff",
+    accent: "#5b4df0",
+    badge: "Классика"
+  },
+  {
+    key: "midnight",
+    name: "Midnight Navy",
+    subtitle: "Космический полуночный синий",
+    bg: "#080c18",
+    card: "#11192e",
+    accent: "#38bdf8",
+    badge: "Тёмный"
+  },
+  {
+    key: "cyberpunk",
+    name: "Киберпанк",
+    subtitle: "Неоновый тёмный стиль с цианом",
+    bg: "#05060a",
+    card: "#0e101a",
+    accent: "#06b6d4",
+    badge: "Неон"
+  },
+  {
+    key: "graphite",
+    name: "Графит",
+    subtitle: "Строгий матовый тёмно-серый монохром",
+    bg: "#121316",
+    card: "#1b1c21",
+    accent: "#a1a1aa",
+    badge: "Монохром"
+  },
+  {
+    key: "emerald",
+    name: "Изумрудная ночь",
+    subtitle: "Глубокий хвойно-зелёный ночной",
+    bg: "#050f0a",
+    card: "#0d2319",
+    accent: "#10b981",
+    badge: "Природа"
+  },
+  {
+    key: "nordic",
+    name: "Скандинавский",
+    subtitle: "Светлый снежно-белый минимализм",
+    bg: "#f8fafc",
+    card: "#ffffff",
+    accent: "#2563eb",
+    badge: "Светлый"
+  }
+];
+
+function applyAppStyle(styleKey) {
+  const s = PROTON_STYLES.find(x => x.key === styleKey) || PROTON_STYLES[0];
+  document.documentElement.setAttribute("data-app-style", s.key);
+  try { localStorage.setItem("proton-app-style", s.key); } catch (_) {}
+
+  // Обновляем метку в меню
+  const menuLabel = $("menuCurrentStyleLabel");
+  if (menuLabel) menuLabel.textContent = s.name;
+
+  // Обновляем карточки в настройках
+  const cards = document.querySelectorAll(".style-card");
+  cards.forEach(card => {
+    card.classList.toggle("active", card.dataset.style === s.key);
+  });
+}
+
+function initAppStyles() {
+  let saved = null;
+  try { saved = localStorage.getItem("proton-app-style"); } catch (_) {}
+  applyAppStyle(saved || "oled");
+
+  // Рендер карточек в настройках
+  const grid = $("appStyleGrid");
+  if (grid) {
+    grid.innerHTML = "";
+    PROTON_STYLES.forEach(st => {
+      const card = document.createElement("div");
+      card.className = "style-card" + (document.documentElement.getAttribute("data-app-style") === st.key ? " active" : "");
+      card.dataset.style = st.key;
+      card.innerHTML = `
+        <span class="style-card-badge">${st.badge}</span>
+        <div class="style-preview-dots">
+          <span class="style-dot" style="background:${st.bg};" title="Фон"></span>
+          <span class="style-dot" style="background:${st.card};" title="Карточки"></span>
+          <span class="style-dot" style="background:${st.accent};" title="Акцент"></span>
+        </div>
+        <div class="style-card-name">${escapeHtml(st.name)}</div>
+        <div class="style-card-desc">${escapeHtml(st.subtitle)}</div>
+      `;
+      card.addEventListener("click", () => applyAppStyle(st.key));
+      grid.appendChild(card);
+    });
+  }
+
+  // Быстрый переключатель в меню профиля
+  const menuStyleBtn = $("menuStyleToggleBtn");
+  if (menuStyleBtn) {
+    menuStyleBtn.addEventListener("click", () => {
+      const cur = document.documentElement.getAttribute("data-app-style") || "oled";
+      const nextKey = cur === "oled" ? "classic" : "oled";
+      applyAppStyle(nextKey);
+    });
+  }
+}
+
+/* ============ СИСТЕМА ВКЛАДОК PROTON (v2.7) ============ */
+const TabManager = {
+  tabs: [],
+  activeTabId: null,
+  counter: 0,
+  contextTabId: null,
+
+  init() {
+    let savedTabs = null;
+    try {
+      savedTabs = JSON.parse(sessionStorage.getItem("proton_tabs") || "null");
+    } catch (_) {}
+
+    if (savedTabs && Array.isArray(savedTabs) && savedTabs.length > 0) {
+      this.tabs = savedTabs;
+      this.activeTabId = sessionStorage.getItem("proton_active_tab") || this.tabs[0].id;
+    } else {
+      const initialTab = {
+        id: "tab_" + (++this.counter),
+        title: "Новая вкладка",
+        query: "",
+        view: "home",
+        resultsData: null,
+        scrollPos: 0,
+        page: 0
+      };
+      this.tabs = [initialTab];
+      this.activeTabId = initialTab.id;
+    }
+
+    this.renderTabs();
+    this.bindEvents();
+    this.switchTab(this.activeTabId);
+  },
+
+  saveState() {
+    try {
+      const cleanTabs = this.tabs.map(t => ({
+        id: t.id,
+        title: t.title,
+        query: t.query,
+        view: t.view,
+        page: t.page,
+        scrollPos: t.scrollPos
+      }));
+      sessionStorage.setItem("proton_tabs", JSON.stringify(cleanTabs));
+      sessionStorage.setItem("proton_active_tab", this.activeTabId);
+    } catch (_) {}
+  },
+
+  createTab(opts = {}) {
+    const id = "tab_" + (++this.counter) + "_" + Date.now();
+    const newTab = {
+      id,
+      title: opts.title || "Новая вкладка",
+      query: opts.query || "",
+      view: opts.view || "home",
+      resultsData: opts.resultsData || null,
+      scrollPos: 0,
+      page: opts.page || 0
+    };
+    this.tabs.push(newTab);
+    this.renderTabs();
+    if (opts.activate !== false) {
+      this.switchTab(id);
+    }
+    this.saveState();
+    return newTab;
+  },
+
+  getActiveTab() {
+    return this.tabs.find(t => t.id === this.activeTabId) || this.tabs[0];
+  },
+
+  switchTab(tabId) {
+    const prevTab = this.getActiveTab();
+    if (prevTab && prevTab.id !== tabId) {
+      prevTab.scrollPos = window.scrollY || 0;
+      prevTab.query = (els.body.dataset.view === "home" ? els.homeInput.value : els.topInput.value).trim();
+    }
+
+    const tab = this.tabs.find(t => t.id === tabId);
+    if (!tab) return;
+
+    this.activeTabId = tabId;
+    this.renderTabs();
+
+    document.title = (tab.query ? tab.query + " — " : "") + "Proton";
+
+    setInputs(tab.query || "");
+
+    if (tab.view === "results" && (tab.resultsData || tab.query)) {
+      showResults();
+      if (tab.resultsData) {
+        renderResults(tab.resultsData, false);
+      } else if (tab.query) {
+        runSearch(tab.query, { page: tab.page || 0, fromTab: true });
+      }
+      window.scrollTo({ top: tab.scrollPos || 0 });
+    } else {
+      showHome();
+      window.scrollTo({ top: 0 });
+      if (els.homeInput) els.homeInput.focus();
+    }
+
+    this.saveState();
+  },
+
+  closeTab(tabId) {
+    const idx = this.tabs.findIndex(t => t.id === tabId);
+    if (idx === -1) return;
+
+    this.tabs.splice(idx, 1);
+
+    if (this.tabs.length === 0) {
+      this.createTab({ activate: true });
+      return;
+    }
+
+    if (this.activeTabId === tabId) {
+      const nextTab = this.tabs[Math.min(idx, this.tabs.length - 1)];
+      this.switchTab(nextTab.id);
+    } else {
+      this.renderTabs();
+      this.saveState();
+    }
+  },
+
+  reloadTab(tabId = null) {
+    const targetId = tabId || this.activeTabId;
+    const tab = this.tabs.find(t => t.id === targetId);
+    if (!tab) return;
+
+    const reloadBtn = $("reloadTabBtn");
+    if (reloadBtn) {
+      reloadBtn.classList.add("spinning");
+      setTimeout(() => reloadBtn.classList.remove("spinning"), 650);
+    }
+
+    if (tab.query) {
+      tab.resultsData = null;
+      runSearch(tab.query, { page: 0, fromTab: true });
+    } else {
+      showHome();
+      setInputs("");
+      hideSuggest();
+      if (els.homeInput) els.homeInput.focus();
+    }
+  },
+
+  duplicateTab(tabId) {
+    const tab = this.tabs.find(t => t.id === tabId);
+    if (!tab) return;
+    this.createTab({
+      title: tab.title,
+      query: tab.query,
+      view: tab.view,
+      resultsData: tab.resultsData,
+      page: tab.page,
+      activate: true
+    });
+  },
+
+  closeOtherTabs(tabId) {
+    this.tabs = this.tabs.filter(t => t.id === tabId);
+    this.switchTab(tabId);
+  },
+
+  updateActiveTabTitle(title, query = "") {
+    const tab = this.getActiveTab();
+    if (!tab) return;
+    tab.title = title || "Новая вкладка";
+    if (query) tab.query = query;
+    this.renderTabs();
+    this.saveState();
+    document.title = (tab.query ? tab.query + " — " : "") + "Proton";
+  },
+
+  renderTabs() {
+    const listEl = $("tabList");
+    if (!listEl) return;
+    listEl.innerHTML = "";
+
+    this.tabs.forEach((tab) => {
+      const isActive = tab.id === this.activeTabId;
+      const tabEl = document.createElement("div");
+      tabEl.className = "tab-item" + (isActive ? " active" : "");
+      tabEl.dataset.id = tab.id;
+      tabEl.setAttribute("role", "tab");
+      tabEl.setAttribute("aria-selected", isActive ? "true" : "false");
+
+      const iconSvg = tab.view === "results"
+        ? `<svg class="tab-icon" viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>`
+        : `<svg class="tab-icon" viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="12" cy="12" r="3"/><circle cx="12" cy="12" r="8"/></svg>`;
+
+      tabEl.innerHTML = `
+        <span class="tab-icon-wrap">${iconSvg}</span>
+        <span class="tab-title" title="${escapeAttr(tab.title)}">${escapeHtml(tab.title)}</span>
+        <button type="button" class="tab-close-btn" aria-label="Закрыть вкладку" title="Закрыть (Ctrl+W)">×</button>
+      `;
+
+      tabEl.addEventListener("click", (e) => {
+        if (e.target.closest(".tab-close-btn")) return;
+        this.switchTab(tab.id);
+      });
+
+      const closeBtn = tabEl.querySelector(".tab-close-btn");
+      closeBtn.addEventListener("click", (e) => {
+        e.stopPropagation();
+        this.closeTab(tab.id);
+      });
+
+      tabEl.addEventListener("auxclick", (e) => {
+        if (e.button === 1) {
+          e.preventDefault();
+          this.closeTab(tab.id);
+        }
+      });
+
+      tabEl.addEventListener("contextmenu", (e) => {
+        e.preventDefault();
+        this.contextTabId = tab.id;
+        openTabContextMenu(e.clientX, e.clientY);
+      });
+
+      listEl.appendChild(tabEl);
+    });
+  },
+
+  bindEvents() {
+    const newBtn = $("newTabBtn");
+    if (newBtn) {
+      newBtn.addEventListener("click", () => this.createTab({ activate: true }));
+    }
+
+    const reloadBtn = $("reloadTabBtn");
+    if (reloadBtn) {
+      reloadBtn.addEventListener("click", () => this.reloadTab());
+    }
+
+    window.addEventListener("keydown", (e) => {
+      if ((e.ctrlKey || e.metaKey) && (e.key === "t" || e.key === "T" || e.code === "KeyT")) {
+        e.preventDefault();
+        this.createTab({ activate: true });
+      } else if ((e.ctrlKey || e.metaKey) && (e.key === "w" || e.key === "W" || e.code === "KeyW")) {
+        const modal = document.querySelector(".modal-backdrop.open");
+        if (!modal) {
+          e.preventDefault();
+          this.closeTab(this.activeTabId);
+        }
+      } else if ((e.ctrlKey && (e.key === "r" || e.key === "R" || e.code === "KeyR")) || e.key === "F5") {
+        e.preventDefault();
+        this.reloadTab();
+      } else if ((e.ctrlKey || e.metaKey) && e.key === "Tab") {
+        e.preventDefault();
+        const curIdx = this.tabs.findIndex(t => t.id === this.activeTabId);
+        if (curIdx !== -1) {
+          const nextIdx = e.shiftKey
+            ? (curIdx - 1 + this.tabs.length) % this.tabs.length
+            : (curIdx + 1) % this.tabs.length;
+          this.switchTab(this.tabs[nextIdx].id);
+        }
+      }
+    });
+
+    const tabStrip = $("tabStripBar");
+    if (tabStrip) {
+      tabStrip.addEventListener("dblclick", (e) => {
+        if (!e.target.closest(".tab-item") && !e.target.closest("button")) {
+          this.createTab({ activate: true });
+        }
+      });
+    }
+
+    // Обработчики контекстного меню
+    const ctx = $("tabContextMenu");
+    document.addEventListener("click", () => {
+      if (ctx) ctx.style.display = "none";
+    });
+
+    const ctxReload = $("ctxReload");
+    if (ctxReload) ctxReload.addEventListener("click", () => {
+      this.reloadTab(this.contextTabId);
+      if (ctx) ctx.style.display = "none";
+    });
+
+    const ctxDuplicate = $("ctxDuplicate");
+    if (ctxDuplicate) ctxDuplicate.addEventListener("click", () => {
+      this.duplicateTab(this.contextTabId);
+      if (ctx) ctx.style.display = "none";
+    });
+
+    const ctxNewTab = $("ctxNewTab");
+    if (ctxNewTab) ctxNewTab.addEventListener("click", () => {
+      this.createTab({ activate: true });
+      if (ctx) ctx.style.display = "none";
+    });
+
+    const ctxClose = $("ctxClose");
+    if (ctxClose) ctxClose.addEventListener("click", () => {
+      this.closeTab(this.contextTabId);
+      if (ctx) ctx.style.display = "none";
+    });
+
+    const ctxCloseOthers = $("ctxCloseOthers");
+    if (ctxCloseOthers) ctxCloseOthers.addEventListener("click", () => {
+      this.closeOtherTabs(this.contextTabId);
+      if (ctx) ctx.style.display = "none";
+    });
+  }
+};
+
+function openTabContextMenu(x, y) {
+  const ctx = $("tabContextMenu");
+  if (!ctx) return;
+  ctx.style.display = "block";
+  const maxX = window.innerWidth - ctx.offsetWidth - 10;
+  ctx.style.left = Math.min(x, maxX) + "px";
+  ctx.style.top = y + "px";
+}
+
 
 /* мост к встроенному движку приложения (или к серверу в веб-версии) */
 async function apiFetch(path) {
@@ -2431,6 +3373,16 @@ function showHome() {
   setInputs("");
   hideSuggest();
   window.scrollTo({ top: 0 });
+  if (typeof TabManager !== "undefined") {
+    const curTab = TabManager.getActiveTab();
+    if (curTab) {
+      curTab.view = "home";
+      curTab.title = "Новая вкладка";
+      curTab.query = "";
+      curTab.resultsData = null;
+      TabManager.updateActiveTabTitle("Новая вкладка", "");
+    }
+  }
 }
 
 function showResults() {
@@ -2439,8 +3391,18 @@ function showResults() {
   els.resultsView.hidden = false;
 }
 
-async function runSearch(query, { page = 0, append = false } = {}) {
+async function runSearch(query, { page = 0, append = false, fromTab = false } = {}) {
   query = (query || "").trim();
+  if (query && !append && typeof TabManager !== "undefined") {
+    const curTab = TabManager.getActiveTab();
+    if (curTab) {
+      curTab.query = query;
+      curTab.title = query;
+      curTab.view = "results";
+      curTab.page = page;
+      TabManager.updateActiveTabTitle(query, query);
+    }
+  }
   if (!query) {
     const inp = els.body.dataset.view === "home" ? els.homeInput : els.topInput;
     inp.focus();
@@ -2491,6 +3453,14 @@ async function runSearch(query, { page = 0, append = false } = {}) {
 
     pushRecent(query);
     els.demoBanner.hidden = true;
+    if (typeof TabManager !== "undefined") {
+      const curTab = TabManager.getActiveTab();
+      if (curTab && !append) {
+        curTab.resultsData = data;
+        curTab.page = page;
+        TabManager.saveState();
+      }
+    }
     renderResults(data, append);
   } catch (err) {
     els.skeletons.hidden = true;
@@ -3439,6 +4409,14 @@ window.addEventListener("popstate", () => {
   // Запуск проверки сессии
   checkSession();
 })();
+
+// Инициализация вкладок и стилей Proton (v2.7)
+try {
+  initAppStyles();
+  TabManager.init();
+} catch (e) {
+  console.error("Proton init error:", e);
+}
 
 </script>
 

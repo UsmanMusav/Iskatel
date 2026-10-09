@@ -1,8 +1,8 @@
 {
-  "name": "iskatel",
-  "productName": "Искатель",
-  "version": "2.6.0",
-  "description": "Быстрый, чистый и минималистичный браузер-поисковик без слежки, рекламы и лишних кнопок",
+  "name": "proton",
+  "productName": "Proton",
+  "version": "2.7.0",
+  "description": "Быстрый, ультра-минималистичный черный браузер с вкладками без слежки и рекламы",
   "main": "main.js",
   "author": "UsmanMusav <usmanmusaev003@gmail.com>",
   "license": "MIT",
@@ -19,8 +19,8 @@
     "dist:mac": "electron-builder --mac dmg"
   },
   "build": {
-    "appId": "com.usmanmusav.iskatel",
-    "productName": "Искатель",
+    "appId": "com.usmanmusav.proton",
+    "productName": "Proton",
     "directories": {
       "output": "dist"
     },
@@ -54,7 +54,7 @@
       "allowToChangeInstallationDirectory": true,
       "createDesktopShortcut": true,
       "createStartMenuShortcut": true,
-      "shortcutName": "Искатель",
+      "shortcutName": "Proton",
       "artifactName": "iskatel-win64-setup.${ext}"
     },
     "mac": {

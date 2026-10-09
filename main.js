@@ -1,8 +1,8 @@
 "use strict";
-/* «Искатель» — десктопное приложение (Electron).
-   Главный процесс: окно + встроенный поисковый движок (DuckDuckGo + Bing),
+/* «Proton» — десктопный браузер (Electron).
+   Главный процесс: окно + встроенный поисковый движок, система вкладок,
    подсказки, Википедия, мгновенные ответы, настройки и проверка обновлений через GitHub Releases.
-   Текущая версия: 2.6.0 (Минималистичный дизайн) */
+   Текущая версия: 2.7.0 (Вкладки, черный лаконичный стиль OLED, стили оформления) */
 
 const { app, BrowserWindow, ipcMain, shell } = require("electron");
 const path = require("path");
@@ -12,9 +12,9 @@ const http = require("http");
 const { spawn } = require("child_process");
 const crypto = require("crypto");
 
-app.setName("Искатель");
+app.setName("Proton");
 
-const APP_VERSION = "2.6.0";
+const APP_VERSION = "2.7.0";
 const GITHUB_REPO = "UsmanMusav/Iskatel";
 const LATEST_RELEASE_URL = `https://api.github.com/repos/${GITHUB_REPO}/releases/latest`;
 
@@ -887,7 +887,7 @@ function createWindow() {
     height: 880,
     minWidth: 720,
     minHeight: 560,
-    title: "Искатель",
+    title: "Proton",
     backgroundColor: "#f4f6fb",
     autoHideMenuBar: true,
     webPreferences: {

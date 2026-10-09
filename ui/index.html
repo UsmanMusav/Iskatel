@@ -6,13 +6,15 @@
   <title>Proton — Быстрый браузер</title>
   <style>
 /* ==========================================================================
-   PROTON BROWSER v2.7.1
+   PROTON BROWSER v2.8.0
+   - Без эмодзи (строгий минималистичный дизайн с SVG-иконками)
    - Черно-белый лаконичный стиль по умолчанию (Monochrome Dark)
-   - Мягкий не слепящий темный фон (комфортный графит #16171d)
-   - Плавные микро-анимации и переходы
-   - Стильное футуристическое название и квантовый логотип на главной
-   - Вкладки в стиле Chrome + Навигационная панель (Назад, Вперёд, Перезагрузить, Omnibox)
-   - 7 надежных переключаемых стилей оформления без конфликтов
+   - Мягкий не слепящий темный фон (#16171d)
+   - Пользовательский фон (собственное фото, масштабирование, размытие, затемнение)
+   - Четкое, не сливающееся название Proton на всех темах и фотографиях
+   - Отключаемые быстрые категории (по умолчанию выключены)
+   - Chrome-вкладки и панель навигации (Назад, Вперёд, Перезагрузить, Omnibox)
+   - 7 надежных тем оформления
    ========================================================================== */
 
 /* 1. ПО УМОЛЧАНИЮ: MONOCHROME DARK (Мягкий темный графит) */
@@ -47,9 +49,13 @@
   --toolbar-bg: #1c1d25;
   --submit-bg: #ffffff;
   --submit-color: #121318;
+  --hero-title-grad: linear-gradient(135deg, #ffffff 0%, #f1f5f9 45%, #cbd5e1 100%);
+  --hero-title-shadow: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.8)) drop-shadow(0 6px 20px rgba(0, 0, 0, 0.65));
+  --hero-sub-color: #94a3b8;
+  --hero-logo-bg: #1e2029;
 }
 
-/* 2. CLASSIC LIGHT (Оригинальный «Искатель» — старый светлый стиль) */
+/* 2. CLASSIC LIGHT (Оригинальный «Искатель» — светлый стиль) */
 [data-theme-style="classic"] {
   --bg: #f4f6fb;
   --bg-soft: #ffffff;
@@ -80,6 +86,10 @@
   --toolbar-bg: #ffffff;
   --submit-bg: #5b4df0;
   --submit-color: #ffffff;
+  --hero-title-grad: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #334155 100%);
+  --hero-title-shadow: drop-shadow(0 2px 4px rgba(255, 255, 255, 0.95)) drop-shadow(0 4px 14px rgba(0, 0, 0, 0.12));
+  --hero-sub-color: #475569;
+  --hero-logo-bg: #ffffff;
 }
 
 /* 3. MIDNIGHT BLUE (Глубокий полуночный индиго) */
@@ -113,6 +123,10 @@
   --toolbar-bg: #151d36;
   --submit-bg: #38bdf8;
   --submit-color: #0b0f1c;
+  --hero-title-grad: linear-gradient(135deg, #ffffff 0%, #e0f2fe 45%, #7dd3fc 100%);
+  --hero-title-shadow: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.8)) drop-shadow(0 6px 24px rgba(56, 189, 248, 0.3));
+  --hero-sub-color: #94a3b8;
+  --hero-logo-bg: #151d36;
 }
 
 /* 4. CYBERPUNK NEON (Киберпанк циан) */
@@ -146,6 +160,10 @@
   --toolbar-bg: #101426;
   --submit-bg: #06b6d4;
   --submit-color: #04050a;
+  --hero-title-grad: linear-gradient(135deg, #ffffff 0%, #cffafe 40%, #06b6d4 100%);
+  --hero-title-shadow: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.9)) drop-shadow(0 6px 24px rgba(6, 182, 212, 0.4));
+  --hero-sub-color: #7dd3fc;
+  --hero-logo-bg: #101426;
 }
 
 /* 5. CARBON GRAPHITE (Матовый строгий графит) */
@@ -179,6 +197,10 @@
   --toolbar-bg: #1d1f26;
   --submit-bg: #a1a1aa;
   --submit-color: #141519;
+  --hero-title-grad: linear-gradient(135deg, #ffffff 0%, #e4e4e7 45%, #a1a1aa 100%);
+  --hero-title-shadow: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.85)) drop-shadow(0 6px 20px rgba(0, 0, 0, 0.6));
+  --hero-sub-color: #a1a1aa;
+  --hero-logo-bg: #1d1f26;
 }
 
 /* 6. EMERALD NIGHT (Хвойный ночной) */
@@ -212,6 +234,10 @@
   --toolbar-bg: #10271b;
   --submit-bg: #10b981;
   --submit-color: #040a07;
+  --hero-title-grad: linear-gradient(135deg, #ffffff 0%, #d1fae5 45%, #6ee7b7 100%);
+  --hero-title-shadow: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.85)) drop-shadow(0 6px 20px rgba(16, 185, 129, 0.3));
+  --hero-sub-color: #6ee7b7;
+  --hero-logo-bg: #10271b;
 }
 
 /* 7. NORDIC FROST (Светлый скандинавский) */
@@ -245,6 +271,10 @@
   --toolbar-bg: #ffffff;
   --submit-bg: #2563eb;
   --submit-color: #ffffff;
+  --hero-title-grad: linear-gradient(135deg, #0284c7 0%, #0369a1 50%, #075985 100%);
+  --hero-title-shadow: drop-shadow(0 2px 4px rgba(255, 255, 255, 0.95)) drop-shadow(0 4px 14px rgba(0, 0, 0, 0.1));
+  --hero-sub-color: #475569;
+  --hero-logo-bg: #ffffff;
 }
 
 /* Настройки шрифта */
@@ -273,6 +303,7 @@ body {
   flex-direction: column;
   overflow-x: hidden;
   transition: background-color 0.25s ease, color 0.25s ease;
+  position: relative;
 }
 
 a {
@@ -282,6 +313,55 @@ a {
 }
 a:hover {
   color: var(--link-hover);
+}
+
+/* ==========================================================================
+   ПОЛЬЗОВАТЕЛЬСКИЙ ФОН (CUSTOM WALLPAPER LAYER)
+   ========================================================================== */
+.custom-bg-layer {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background-size: cover;
+  background-position: center center;
+  background-repeat: no-repeat;
+  transition: opacity 0.3s ease, filter 0.3s ease;
+  display: none;
+}
+.custom-bg-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background: rgba(0, 0, 0, 0.4);
+  transition: background 0.3s ease;
+  display: none;
+}
+
+body.has-custom-bg .custom-bg-layer,
+body.has-custom-bg .custom-bg-overlay {
+  display: block;
+}
+
+/* СТИЛИЗАЦИЯ ЗАГОЛОВКА ПРИ ПОЛЬЗОВАТЕЛЬСКОМ ФОНЕ (ЧТОБЫ НЕ СЛИВАЛОСЬ) */
+body.has-custom-bg {
+  --hero-title-grad: linear-gradient(135deg, #ffffff 0%, #f8fafc 45%, #e2e8f0 100%);
+  --hero-title-shadow: drop-shadow(0 2px 4px rgba(0, 0, 0, 1)) drop-shadow(0 6px 20px rgba(0, 0, 0, 0.95)) drop-shadow(0 0 35px rgba(0, 0, 0, 0.9));
+  --hero-sub-color: #ffffff;
+  --hero-sub-shadow: 0 2px 10px rgba(0, 0, 0, 0.95);
+  --hero-logo-bg: rgba(22, 23, 29, 0.85);
+}
+
+body.has-custom-bg .search-box-lg {
+  background: rgba(20, 21, 27, 0.82);
+  backdrop-filter: blur(18px);
+  border-color: rgba(255, 255, 255, 0.2);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+}
+
+body.has-custom-bg .hero-sub {
+  text-shadow: var(--hero-sub-shadow);
 }
 
 /* ==========================================================================
@@ -307,11 +387,6 @@ a:hover {
   100% { transform: rotate(360deg); }
 }
 
-@keyframes pulseDot {
-  0%, 100% { opacity: 1; transform: scale(1); }
-  50% { opacity: 0.4; transform: scale(0.8); }
-}
-
 @keyframes modalIn {
   from { opacity: 0; transform: scale(0.96) translateY(-10px); }
   to { opacity: 1; transform: scale(1) translateY(0); }
@@ -327,7 +402,10 @@ a:hover {
   opacity: var(--blob-opacity);
   transition: opacity 0.4s ease;
 }
-[data-ambient="false"] .ambient { display: none; }
+[data-ambient="false"] .ambient,
+body.has-custom-bg .ambient {
+  display: none;
+}
 .blob {
   position: absolute;
   border-radius: 50%;
@@ -442,7 +520,6 @@ a:hover {
   display: grid;
   place-items: center;
   cursor: pointer;
-  font-size: 11px;
   opacity: 0.65;
   transition: all 0.15s ease;
   flex-shrink: 0;
@@ -588,10 +665,11 @@ a:hover {
   background: none;
   border: 0;
   color: var(--text-3);
-  font-size: 16px;
   cursor: pointer;
   padding: 0 4px;
   line-height: 1;
+  display: flex;
+  align-items: center;
 }
 .clear-btn:hover {
   color: var(--text);
@@ -711,8 +789,8 @@ a:hover {
   width: 100%;
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  padding: 8px 14px;
+  gap: 10px;
+  padding: 9px 14px;
   border: 0;
   background: transparent;
   color: var(--text);
@@ -721,6 +799,9 @@ a:hover {
   cursor: pointer;
   transition: background 0.12s ease;
 }
+.user-menu-item svg {
+  flex-shrink: 0;
+}
 .user-menu-item:hover {
   background: var(--card);
 }
@@ -728,6 +809,7 @@ a:hover {
   color: var(--danger);
 }
 .user-menu-count {
+  margin-left: auto;
   font-size: 11px;
   background: var(--accent-soft);
   color: var(--accent);
@@ -810,40 +892,16 @@ a:hover {
   text-align: center;
 }
 
-.hero-badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 7px;
-  padding: 4px 14px;
-  border-radius: 999px;
-  background: rgba(255, 255, 255, 0.06);
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  color: var(--text-2);
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 0.12em;
-  margin-bottom: 16px;
-  text-transform: uppercase;
-  animation: fadeInDown 0.4s ease;
-}
-.hero-badge .badge-dot {
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  background: var(--accent);
-  box-shadow: 0 0 8px var(--accent);
-  animation: pulseDot 2s infinite ease-in-out;
-}
-
 .hero-logo-wrap {
-  width: 68px;
-  height: 68px;
-  margin: 0 auto 10px;
+  width: 72px;
+  height: 72px;
+  margin: 0 auto 12px;
   display: flex;
   align-items: center;
   justify-content: center;
   transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
   cursor: pointer;
+  border-radius: 18px;
 }
 .hero-logo-wrap:hover {
   transform: scale(1.08) rotate(5deg);
@@ -851,26 +909,34 @@ a:hover {
 .hero-logo-wrap svg {
   width: 100%;
   height: 100%;
-  filter: drop-shadow(0 6px 20px rgba(0, 0, 0, 0.4));
 }
 
+.hero-title-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 24px;
+}
+
+/* ЧЕТКОЕ, НЕ СЛИВАЮЩЕЕСЯ НАЗВАНИЕ */
 .hero-title {
-  margin: 6px 0 6px;
-  font-size: clamp(48px, 9vw, 76px);
+  margin: 0 0 6px;
+  font-size: clamp(48px, 9vw, 80px);
   letter-spacing: -0.04em;
   font-weight: 900;
-  background: linear-gradient(135deg, #ffffff 0%, #e2e8f0 45%, #94a3b8 100%);
+  background: var(--hero-title-grad);
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
-  filter: drop-shadow(0 4px 24px rgba(255, 255, 255, 0.12));
+  filter: var(--hero-title-shadow);
   line-height: 1.05;
+  user-select: none;
 }
 
 .hero-sub {
-  margin: 0 0 30px;
-  color: var(--text-2);
-  font-size: 14.5px;
+  margin: 0;
+  color: var(--hero-sub-color);
+  font-size: 15px;
   letter-spacing: 0.05em;
   font-weight: 500;
 }
@@ -936,7 +1002,7 @@ a:hover {
   box-shadow: 0 4px 12px rgba(255, 255, 255, 0.25);
 }
 
-/* Быстрые теги и недавние запросы */
+/* БЫСТРЫЕ ТЕГИ (ОТКЛЮЧАЕМЫЕ В НАСТРОЙКАХ, ПО УМОЛЧАНИЮ СКРЫТЫ) */
 .quick-tags {
   display: flex;
   flex-wrap: wrap;
@@ -946,12 +1012,12 @@ a:hover {
   margin-bottom: 24px;
 }
 .quick-chip {
-  padding: 5px 13px;
+  padding: 6px 14px;
   border-radius: 999px;
   background: var(--card-solid);
   border: 1px solid var(--border);
   color: var(--text-2);
-  font-size: 12px;
+  font-size: 12.5px;
   cursor: pointer;
   transition: all 0.15s cubic-bezier(0.16, 1, 0.3, 1);
 }
@@ -1141,12 +1207,17 @@ a:hover {
 .star-btn {
   background: transparent;
   border: 0;
-  font-size: 15px;
   cursor: pointer;
   color: var(--text-3);
-  line-height: 1;
   padding: 2px 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   transition: transform 0.15s ease, color 0.15s ease;
+}
+.star-btn svg {
+  width: 15px;
+  height: 15px;
 }
 .star-btn:hover,
 .star-btn.active {
@@ -1258,7 +1329,7 @@ a:hover {
   border-radius: 18px;
   box-shadow: var(--shadow-lg);
   width: 100%;
-  max-width: 580px;
+  max-width: 600px;
   max-height: 85vh;
   display: flex;
   flex-direction: column;
@@ -1293,9 +1364,10 @@ a:hover {
   background: none;
   border: 0;
   color: var(--text-2);
-  font-size: 18px;
   cursor: pointer;
   padding: 4px;
+  display: flex;
+  align-items: center;
 }
 .modal-close:hover {
   color: var(--text);
@@ -1340,7 +1412,7 @@ a:hover {
 }
 
 .setting-group {
-  margin-bottom: 20px;
+  margin-bottom: 22px;
 }
 .setting-label {
   display: block;
@@ -1352,6 +1424,7 @@ a:hover {
   font-size: 12px;
   color: var(--text-3);
   margin-bottom: 8px;
+  line-height: 1.4;
 }
 .setting-select {
   width: 100%;
@@ -1371,9 +1444,10 @@ a:hover {
   display: flex;
   align-items: center;
   gap: 10px;
-  font-size: 13px;
-  color: var(--text-2);
+  font-size: 13.5px;
+  color: var(--text);
   cursor: pointer;
+  font-weight: 500;
 }
 
 /* СЕТКА СТИЛЕЙ ОФОРМЛЕНИЯ В НАСТРОЙКАХ */
@@ -1435,6 +1509,14 @@ a:hover {
   line-height: 1.3;
 }
 
+/* ЭЛЕМЕНТЫ УПРАВЛЕНИЯ СВОИМИ ОБОЯМИ */
+.custom-bg-box {
+  background: var(--input-bg);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 14px;
+}
+
 .modal-footer {
   display: flex;
   justify-content: flex-end;
@@ -1444,6 +1526,9 @@ a:hover {
   background: rgba(0, 0, 0, 0.1);
 }
 .btn-secondary {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
   padding: 8px 18px;
   border-radius: 8px;
   border: 1px solid var(--border);
@@ -1451,8 +1536,17 @@ a:hover {
   color: var(--text);
   font-size: 13px;
   cursor: pointer;
+  transition: all 0.15s ease;
+}
+.btn-secondary:hover {
+  background: var(--card);
+  border-color: var(--border-hover);
 }
 .btn-primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
   padding: 8px 20px;
   border-radius: 8px;
   border: 0;
@@ -1548,6 +1642,10 @@ a:hover {
 
 <body data-view="home">
 
+  <!-- СЛОИ ПОЛЬЗОВАТЕЛЬСКОГО ФОНА -->
+  <div class="custom-bg-layer" id="customBgLayer" aria-hidden="true"></div>
+  <div class="custom-bg-overlay" id="customBgOverlay" aria-hidden="true"></div>
+
   <!-- Фоновые сферы -->
   <div class="ambient" aria-hidden="true">
     <span class="blob blob-a"></span>
@@ -1591,7 +1689,9 @@ a:hover {
         <div class="chrome-omnibox" id="chromeOmnibox">
           <svg class="ico-search" viewBox="0 0 24 24" aria-hidden="true"><path d="M10.5 3a7.5 7.5 0 0 1 5.94 12.09l4.24 4.24a1 1 0 0 1-1.41 1.41l-4.24-4.24A7.5 7.5 0 1 1 10.5 3Zm0 2a5.5 5.5 0 1 0 0 11 5.5 5.5 0 0 0 0-11Z"/></svg>
           <input type="search" id="omniboxInput" name="q" placeholder="Поиск в интернете или веб-адрес…" aria-label="Адрес или поисковый запрос" spellcheck="false">
-          <button type="button" class="clear-btn" id="omniboxClear" aria-label="Очистить" hidden>×</button>
+          <button type="button" class="clear-btn" id="omniboxClear" aria-label="Очистить" hidden>
+            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+          </button>
           <button type="submit" class="chrome-omnibox-submit" id="omniboxSubmitBtn" aria-label="Перейти">
             <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
               <line x1="5" y1="12" x2="19" y2="12"></line>
@@ -1630,18 +1730,22 @@ a:hover {
           </div>
           <div class="user-menu-divider"></div>
           <button type="button" class="user-menu-item" id="menuStyleToggleBtn">
-            <span>🎨 Стиль: <b id="menuCurrentStyleLabel">Monochrome Dark</b></span>
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 2a10 10 0 0 1 10 10c0 2.5-2 4.5-4.5 4.5H16a2 2 0 0 0-2 2v.5a2 2 0 0 1-2 2"/></svg>
+            <span>Стиль: <b id="menuCurrentStyleLabel">Monochrome Dark</b></span>
           </button>
           <button type="button" class="user-menu-item" id="menuBookmarksBtn">
-            <span>⭐ Мои закладки</span>
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+            <span>Мои закладки</span>
             <span class="user-menu-count" id="menuBookmarksCount">0</span>
           </button>
           <button type="button" class="user-menu-item" id="menuSettingsBtn">
-            <span>⚙️ Настройки и оформление</span>
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+            <span>Настройки и оформление</span>
           </button>
           <div class="user-menu-divider"></div>
           <button type="button" class="user-menu-item logout" id="menuLogoutBtn">
-            <span>🚪 Выйти из аккаунта</span>
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+            <span>Выйти из аккаунта</span>
           </button>
         </div>
       </div>
@@ -1690,11 +1794,6 @@ a:hover {
     <!-- ГЛАВНАЯ СТРАНИЦА (HOME VIEW) -->
     <section class="view view-home" id="homeView">
       <div class="hero">
-        <!-- Стильный футуристичный бейдж -->
-        <div class="hero-badge">
-          <span class="badge-dot"></span>
-          <span>PROTON BROWSER v2.7.1</span>
-        </div>
 
         <!-- Квантовый логотип с орбитальными кольцами -->
         <div class="hero-logo-wrap" title="Proton">
@@ -1705,23 +1804,27 @@ a:hover {
                 <stop offset="100%" stop-color="#94a3b8"/>
               </linearGradient>
             </defs>
-            <rect x="3" y="3" width="48" height="48" rx="14" fill="#1e2029" stroke="rgba(255, 255, 255, 0.16)" stroke-width="1.5"/>
+            <rect x="3" y="3" width="48" height="48" rx="14" fill="var(--hero-logo-bg)" stroke="rgba(255, 255, 255, 0.18)" stroke-width="1.5"/>
             <circle cx="27" cy="27" r="7" fill="url(#gProtonHero)"/>
             <ellipse cx="27" cy="27" rx="17" ry="7" fill="none" stroke="#ffffff" stroke-width="2" transform="rotate(-30 27 27)" stroke-dasharray="3 2" opacity="0.85"/>
             <ellipse cx="27" cy="27" rx="17" ry="7" fill="none" stroke="#cbd5e1" stroke-width="2" transform="rotate(30 27 27)" stroke-dasharray="3 2" opacity="0.85"/>
           </svg>
         </div>
 
-        <!-- Стильный заголовок с металлическим градиентом -->
-        <h1 class="hero-title">Proton</h1>
-        <p class="hero-sub">Быстрый · Приватный · Минималистичный</p>
+        <!-- Стильный заголовок, который НИКОГДА не сливается с фоном -->
+        <div class="hero-title-container">
+          <h1 class="hero-title">Proton</h1>
+          <p class="hero-sub">Быстрый · Приватный · Минималистичный</p>
+        </div>
 
         <!-- Поисковая форма на главной -->
         <form class="hero-form" id="homeForm" autocomplete="off">
           <div class="search-box-lg">
             <svg class="ico-search" viewBox="0 0 24 24" aria-hidden="true"><path d="M10.5 3a7.5 7.5 0 0 1 5.94 12.09l4.24 4.24a1 1 0 0 1-1.41 1.41l-4.24-4.24A7.5 7.5 0 1 1 10.5 3Zm0 2a5.5 5.5 0 1 0 0 11 5.5 5.5 0 0 0 0-11Z"/></svg>
             <input type="search" id="homeInput" name="q" placeholder="Поиск в интернете или веб-адрес…" aria-label="Поисковый запрос" spellcheck="false" autofocus>
-            <button type="button" class="clear-btn" id="homeClear" aria-label="Очистить" hidden>×</button>
+            <button type="button" class="clear-btn" id="homeClear" aria-label="Очистить" hidden>
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+            </button>
             <button type="submit" class="search-submit-btn" id="homeSubmitBtn" aria-label="Найти">
               <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                 <line x1="5" y1="12" x2="19" y2="12"></line>
@@ -1732,14 +1835,14 @@ a:hover {
           <div class="suggest-box" id="homeSuggest" role="listbox" hidden></div>
         </form>
 
-        <!-- Быстрые категории -->
-        <div class="quick-tags">
-          <span class="quick-chip" data-query="Погода в Астрахани">🌤 Погода</span>
-          <span class="quick-chip" data-query="Главные мировые новости">📰 Новости</span>
-          <span class="quick-chip" data-query="Нейросети и искусственный интеллект">🤖 Нейросети</span>
-          <span class="quick-chip" data-query="GitHub">🐙 GitHub</span>
-          <span class="quick-chip" data-query="Курс доллара и валют">📈 Валюта</span>
-          <span class="quick-chip" data-query="Википедия на русском">📚 Википедия</span>
+        <!-- Быстрые категории (ОТКЛЮЧЕНЫ ПО УМОЛЧАНИЮ) -->
+        <div class="quick-tags" id="quickTags" hidden>
+          <span class="quick-chip" data-query="Погода в Астрахани">Погода</span>
+          <span class="quick-chip" data-query="Главные мировые новости">Новости</span>
+          <span class="quick-chip" data-query="Нейросети и искусственный интеллект">Нейросети</span>
+          <span class="quick-chip" data-query="GitHub">GitHub</span>
+          <span class="quick-chip" data-query="Курс доллара и валют">Валюта</span>
+          <span class="quick-chip" data-query="Википедия на русском">Википедия</span>
         </div>
 
         <!-- Недавние запросы -->
@@ -1788,7 +1891,9 @@ a:hover {
 
           <!-- Пустое состояние -->
           <div id="emptyState" class="answer-card" style="text-align:center; padding:40px 20px;" hidden>
-            <div style="font-size:32px; margin-bottom:8px;">🔍</div>
+            <div style="margin-bottom:12px; color:var(--text-3);">
+              <svg viewBox="0 0 24 24" width="32" height="32" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            </div>
             <h3>Ничего не нашлось</h3>
             <p style="color:var(--text-3); margin-top:4px;">Попробуйте переформулировать запрос или проверить правописание.</p>
           </div>
@@ -1805,7 +1910,7 @@ a:hover {
 
   <!-- ПОДВАЛ -->
   <footer class="footer">
-    <span>Proton Browser &copy; 2026 · Версия 2.7.1 · Без рекламы и трекеров</span>
+    <span>Proton Browser &copy; 2026 · Версия 2.8.0 · Без рекламы и трекеров</span>
   </footer>
 
   <!-- МОДАЛЬНОЕ ОКНО НАСТРОЕК -->
@@ -1814,14 +1919,16 @@ a:hover {
       <div class="modal-header">
         <div class="modal-title-wrap">
           <h2 class="modal-title" id="settingsTitle">Настройки Proton</h2>
-          <span class="badge-version" id="settingsVersionBadge">v2.7.1</span>
+          <span class="badge-version" id="settingsVersionBadge">v2.8.0</span>
         </div>
-        <button type="button" class="modal-close" id="settingsCloseBtn" aria-label="Закрыть">✕</button>
+        <button type="button" class="modal-close" id="settingsCloseBtn" aria-label="Закрыть">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
       </div>
 
       <div class="modal-tabs" role="tablist">
         <button type="button" class="modal-tab active" data-tab="general" role="tab">Поиск</button>
-        <button type="button" class="modal-tab" data-tab="appearance" role="tab">Оформление</button>
+        <button type="button" class="modal-tab" data-tab="appearance" role="tab">Оформление и фон</button>
         <button type="button" class="modal-tab" data-tab="updates" role="tab">Обновления</button>
       </div>
 
@@ -1849,6 +1956,15 @@ a:hover {
             </select>
           </div>
 
+          <!-- ПУНКТ ВКЛЮЧЕНИЯ/ВЫКЛЮЧЕНИЯ БЫСТРЫХ ВКЛАДОК КАТЕГОРИЙ -->
+          <div class="setting-group">
+            <label class="setting-checkbox-label">
+              <input type="checkbox" id="settingShowQuickTags">
+              <span>Показывать быстрые категории на главной странице (Новости, Погода и др.)</span>
+            </label>
+            <p class="setting-desc">По умолчанию выключено. Включите, если хотите видеть быстрые кнопки тем под строкой поиска.</p>
+          </div>
+
           <div class="setting-group">
             <label class="setting-checkbox-label">
               <input type="checkbox" id="settingShowWiki" checked>
@@ -1869,11 +1985,72 @@ a:hover {
           </div>
         </div>
 
-        <!-- Вкладка: Оформление -->
+        <!-- Вкладка: Оформление и фон -->
         <div class="tab-panel" id="tabAppearance" role="tabpanel">
+
+          <!-- БЛОК СВОЕЙ ФОТОГРАФИИ НА ФОН -->
+          <div class="setting-group">
+            <label class="setting-label">Фоновое изображение (Свои обои)</label>
+            <p class="setting-desc">Установите собственную фотографию или картинку на задний фон поисковика с настройкой масштабирования, размытия и затемнения.</p>
+            
+            <div class="custom-bg-box">
+              <div style="display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px;">
+                <input type="file" id="customBgFileInput" accept="image/*" style="display:none;">
+                <button type="button" class="btn-secondary" id="customBgUploadBtn">
+                  <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                  <span>Загрузить фото с устройства</span>
+                </button>
+                <button type="button" class="btn-secondary" id="customBgResetBtn" style="color:var(--danger);">Удалить фон</button>
+              </div>
+
+              <div style="display:flex; gap:8px; margin-bottom:14px;">
+                <input type="url" class="setting-select" id="customBgUrlInput" placeholder="Или вставьте прямую ссылку на картинку (https://...)" style="flex:1;">
+                <button type="button" class="btn-secondary" id="customBgApplyUrlBtn">Применить</button>
+              </div>
+
+              <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin-bottom:14px;">
+                <div>
+                  <label class="setting-label" style="font-size:12px;" for="customBgSize">Масштаб (Подгонка)</label>
+                  <select class="setting-select" id="customBgSize">
+                    <option value="cover" selected>Заполнение экрана (Cover)</option>
+                    <option value="contain">Вписать целиком (Contain)</option>
+                    <option value="100% 100%">Растянуть (Stretch)</option>
+                    <option value="auto">Оригинальный размер</option>
+                  </select>
+                </div>
+                <div>
+                  <label class="setting-label" style="font-size:12px;" for="customBgPosition">Положение</label>
+                  <select class="setting-select" id="customBgPosition">
+                    <option value="center center" selected>По центру</option>
+                    <option value="center top">Сверху</option>
+                    <option value="center bottom">Снизу</option>
+                    <option value="left center">Слева</option>
+                    <option value="right center">Справа</option>
+                  </select>
+                </div>
+              </div>
+
+              <div style="margin-bottom:14px;">
+                <div style="display:flex; justify-content:space-between; margin-bottom:4px;">
+                  <label class="setting-label" style="font-size:12px;">Затемнение фона (для идеальной четкости текста)</label>
+                  <span id="customBgDimmingVal" style="font-size:12px; color:var(--text-2);">40%</span>
+                </div>
+                <input type="range" id="customBgDimming" min="0" max="90" value="40" style="width:100%; accent-color:var(--accent);">
+              </div>
+
+              <div>
+                <div style="display:flex; justify-content:space-between; margin-bottom:4px;">
+                  <label class="setting-label" style="font-size:12px;">Размытие фото (Blur)</label>
+                  <span id="customBgBlurVal" style="font-size:12px; color:var(--text-2);">0px</span>
+                </div>
+                <input type="range" id="customBgBlur" min="0" max="25" value="0" style="width:100%; accent-color:var(--accent);">
+              </div>
+            </div>
+          </div>
+
           <div class="setting-group">
             <label class="setting-label">Стиль оформления Proton</label>
-            <p class="setting-desc">По умолчанию активен комфортный черно-белый графит. Выберите желаемый стиль (изменения применяются мгновенно):</p>
+            <p class="setting-desc">Выберите базовую цветовую гамму интерфейса (применяется мгновенно):</p>
             <div class="app-style-grid" id="appStyleGrid">
               <!-- Карточки генерируются скриптом -->
             </div>
@@ -1907,10 +2084,12 @@ a:hover {
         <!-- Вкладка: Обновления -->
         <div class="tab-panel" id="tabUpdates" role="tabpanel">
           <div style="text-align:center; padding:16px 0;">
-            <div style="font-size:36px; margin-bottom:10px;">🚀</div>
-            <h3>Proton Desktop v2.7.1</h3>
+            <div style="display:inline-flex; align-items:center; justify-content:center; width:56px; height:56px; border-radius:50%; background:var(--accent-soft); color:var(--accent); margin-bottom:12px;">
+              <svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+            </div>
+            <h3>Proton Desktop v2.8.0</h3>
             <p style="color:var(--text-3); font-size:13px; margin:6px 0 16px;">
-              Черно-белый лаконичный браузер с вкладками в стиле Chrome.
+              Черно-белый лаконичный браузер с вкладками в стиле Chrome и поддержкой своих обоев.
             </p>
             <button class="btn-primary" id="checkUpdatesBtn">Проверить обновления</button>
             <div id="updateStatusText" style="margin-top:14px; font-size:13px; color:var(--text-2);"></div>
@@ -1930,7 +2109,9 @@ a:hover {
     <div class="modal-card" style="max-width:420px;">
       <div class="modal-header">
         <h2 class="modal-title">Вход в Proton</h2>
-        <button type="button" class="modal-close" id="authCloseBtn">✕</button>
+        <button type="button" class="modal-close" id="authCloseBtn">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
       </div>
       <div class="modal-body">
         <button type="button" class="btn-primary" id="googleQuickSignInBtn" style="width:100%; display:flex; align-items:center; justify-content:center; gap:8px; margin-bottom:16px;">
@@ -1987,29 +2168,33 @@ a:hover {
   <div class="modal-backdrop" id="bookmarksModal" aria-hidden="true">
     <div class="modal-card" style="max-width:500px;">
       <div class="modal-header">
-        <h2 class="modal-title">⭐ Мои закладки</h2>
-        <button type="button" class="modal-close" id="bookmarksCloseBtn">✕</button>
+        <h2 class="modal-title">Мои закладки</h2>
+        <button type="button" class="modal-close" id="bookmarksCloseBtn">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
       </div>
       <div class="modal-body">
         <ul id="bookmarksList" style="list-style:none;"></ul>
         <div id="bookmarksEmptyState" style="text-align:center; padding:30px 10px;">
-          <div style="font-size:32px; margin-bottom:8px;">⭐</div>
+          <div style="margin-bottom:8px; color:var(--text-3);">
+            <svg viewBox="0 0 24 24" width="32" height="32" fill="none" stroke="currentColor" stroke-width="1.8"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+          </div>
           <h4>Закладок пока нет</h4>
-          <p style="color:var(--text-3); font-size:12.5px; margin-top:4px;">Нажимайте на звёздочку рядом с найденными сайтами.</p>
+          <p style="color:var(--text-3); font-size:12.5px; margin-top:4px;">Нажимайте на звездочку рядом с найденными сайтами.</p>
         </div>
       </div>
     </div>
   </div>
 
   <!-- ==========================================================================
-       JAVASCRIPT ЛОГИКА PROTON v2.7.1
+       JAVASCRIPT ЛОГИКА PROTON v2.8.0
        ========================================================================== -->
   <script>
 "use strict";
 
 const $ = (id) => document.getElementById(id);
 
-/* СТИЛИ ОФОРМЛЕНИЯ PROTON */
+/* СТИЛИ ОФОРМЛЕНИЯ PROTON (БЕЗ ЭМОДЗИ) */
 const PROTON_STYLES = [
   {
     key: "monochrome",
@@ -2133,10 +2318,147 @@ function initThemeStyles() {
 }
 
 /* ==========================================================================
+   УПРАВЛЕНИЕ ПОЛЬЗОВАТЕЛЬСКИМ ФОНОМ (CUSTOM WALLPAPER)
+   ========================================================================== */
+const WallpaperManager = {
+  config: {
+    image: "",
+    size: "cover",
+    position: "center center",
+    dimming: 40,
+    blur: 0
+  },
+
+  init() {
+    try {
+      const saved = JSON.parse(localStorage.getItem("proton-custom-bg") || "null");
+      if (saved && saved.image) {
+        this.config = { ...this.config, ...saved };
+      }
+    } catch (_) {}
+    this.apply();
+    this.bindUI();
+  },
+
+  apply() {
+    const layer = $("customBgLayer");
+    const overlay = $("customBgOverlay");
+    if (!layer || !overlay) return;
+
+    if (this.config.image) {
+      document.body.classList.add("has-custom-bg");
+      layer.style.backgroundImage = `url("${this.config.image}")`;
+      layer.style.backgroundSize = this.config.size || "cover";
+      layer.style.backgroundPosition = this.config.position || "center center";
+      layer.style.filter = `blur(${this.config.blur || 0}px)`;
+      overlay.style.background = `rgba(0, 0, 0, ${(this.config.dimming || 40) / 100})`;
+    } else {
+      document.body.classList.remove("has-custom-bg");
+      layer.style.backgroundImage = "none";
+    }
+  },
+
+  save() {
+    try {
+      localStorage.setItem("proton-custom-bg", JSON.stringify(this.config));
+    } catch (_) {}
+    this.apply();
+  },
+
+  bindUI() {
+    const fileInput = $("customBgFileInput");
+    const uploadBtn = $("customBgUploadBtn");
+    const resetBtn = $("customBgResetBtn");
+    const urlInput = $("customBgUrlInput");
+    const applyUrlBtn = $("customBgApplyUrlBtn");
+    const sizeSelect = $("customBgSize");
+    const posSelect = $("customBgPosition");
+    const dimmingInput = $("customBgDimming");
+    const dimmingVal = $("customBgDimmingVal");
+    const blurInput = $("customBgBlur");
+    const blurVal = $("customBgBlurVal");
+
+    // Инициализация значений в форме настроек
+    if (sizeSelect) sizeSelect.value = this.config.size || "cover";
+    if (posSelect) posSelect.value = this.config.position || "center center";
+    if (dimmingInput) dimmingInput.value = this.config.dimming != null ? this.config.dimming : 40;
+    if (dimmingVal) dimmingVal.textContent = (this.config.dimming != null ? this.config.dimming : 40) + "%";
+    if (blurInput) blurInput.value = this.config.blur || 0;
+    if (blurVal) blurVal.textContent = (this.config.blur || 0) + "px";
+    if (urlInput && this.config.image && this.config.image.startsWith("http")) {
+      urlInput.value = this.config.image;
+    }
+
+    if (uploadBtn && fileInput) {
+      uploadBtn.addEventListener("click", () => fileInput.click());
+      fileInput.addEventListener("change", (e) => {
+        const file = e.target.files && e.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = (evt) => {
+          this.config.image = evt.target.result;
+          this.save();
+        };
+        reader.readAsDataURL(file);
+      });
+    }
+
+    if (applyUrlBtn && urlInput) {
+      applyUrlBtn.addEventListener("click", () => {
+        const url = urlInput.value.trim();
+        if (url) {
+          this.config.image = url;
+          this.save();
+        }
+      });
+    }
+
+    if (resetBtn) {
+      resetBtn.addEventListener("click", () => {
+        this.config.image = "";
+        if (urlInput) urlInput.value = "";
+        this.save();
+      });
+    }
+
+    if (sizeSelect) {
+      sizeSelect.addEventListener("change", () => {
+        this.config.size = sizeSelect.value;
+        this.save();
+      });
+    }
+
+    if (posSelect) {
+      posSelect.addEventListener("change", () => {
+        this.config.position = posSelect.value;
+        this.save();
+      });
+    }
+
+    if (dimmingInput) {
+      dimmingInput.addEventListener("input", () => {
+        const val = parseInt(dimmingInput.value, 10);
+        this.config.dimming = val;
+        if (dimmingVal) dimmingVal.textContent = val + "%";
+        this.apply();
+        this.save();
+      });
+    }
+
+    if (blurInput) {
+      blurInput.addEventListener("input", () => {
+        const val = parseInt(blurInput.value, 10);
+        this.config.blur = val;
+        if (blurVal) blurVal.textContent = val + "px";
+        this.apply();
+        this.save();
+      });
+    }
+  }
+};
+
+/* ==========================================================================
    СИСТЕМА CHROME-ВКЛАДОК И НАВИГАЦИИ (TAB MANAGER)
-   - Изоляция состояния каждой вкладки
-   - Восстановление DOM выдачи без перезагрузок
-   - Кнопки Назад / Вперёд / Перезагрузить в Omnibox
    ========================================================================== */
 const TabManager = {
   tabs: [],
@@ -2398,7 +2720,9 @@ const TabManager = {
       tabEl.innerHTML = `
         <div class="chrome-tab-favicon">${iconSvg}</div>
         <span class="chrome-tab-title">${escapeHtml(tab.title || "Новая вкладка")}</span>
-        <button type="button" class="chrome-tab-close" title="Закрыть вкладку (Ctrl+W)" aria-label="Закрыть">✕</button>
+        <button type="button" class="chrome-tab-close" title="Закрыть вкладку (Ctrl+W)" aria-label="Закрыть">
+          <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
       `;
 
       // Клик по вкладке
@@ -2779,7 +3103,9 @@ function renderResults(data, append) {
       <div class="result-meta">
         <img class="result-favicon" src="${faviconUrl}" alt="" onerror="this.style.display='none'">
         <span class="result-domain">${escapeHtml(domain)}</span>
-        <button type="button" class="star-btn" title="Сохранить в закладки" data-url="${escapeHtml(item.url)}" data-title="${escapeHtml(item.title)}">☆</button>
+        <button type="button" class="star-btn" title="Сохранить в закладки" data-url="${escapeHtml(item.url)}" data-title="${escapeHtml(item.title)}">
+          <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+        </button>
       </div>
       <h3 class="result-title"><a href="${escapeHtml(item.url)}" target="_blank" rel="noopener noreferrer">${item.title_html || escapeHtml(item.title)}</a></h3>
       <p class="result-snippet">${item.snippet_html || escapeHtml(item.snippet)}</p>
@@ -2801,8 +3127,9 @@ function renderResults(data, append) {
     const star = div.querySelector(".star-btn");
     star.addEventListener("click", () => {
       toggleBookmark({ url: item.url, title: item.title, domain });
-      star.textContent = "⭐";
       star.classList.add("active");
+      const poly = star.querySelector("polygon");
+      if (poly) poly.setAttribute("fill", "currentColor");
     });
 
     container.appendChild(div);
@@ -3010,7 +3337,9 @@ function updateBookmarksUI() {
         <a href="${escapeHtml(b.url)}" target="_blank" style="font-weight:600; font-size:13.5px;">${escapeHtml(b.title || b.url)}</a>
         <div style="color:var(--text-3); font-size:11.5px;">${escapeHtml(b.domain || b.url)}</div>
       </div>
-      <button type="button" class="btn-secondary" style="padding:3px 8px; font-size:11px;" data-del="${escapeHtml(b.id)}">✕</button>
+      <button type="button" class="btn-secondary" style="padding:4px 8px; font-size:11px;" data-del="${escapeHtml(b.id)}">
+        <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
     `;
     li.querySelector("[data-del]").addEventListener("click", () => {
       let cur = getBookmarks().filter(x => x.id !== b.id);
@@ -3200,6 +3529,7 @@ function initSettings() {
     if ($("settingShowInstant")) $("settingShowInstant").checked = s.showInstant !== false;
     if ($("settingShowSuggestions")) $("settingShowSuggestions").checked = s.showSuggestions !== false;
     if ($("settingAmbientBlobs")) $("settingAmbientBlobs").checked = s.ambientBlobs !== false;
+    if ($("settingShowQuickTags")) $("settingShowQuickTags").checked = s.showQuickTags === true;
   }
 
   function saveSettings() {
@@ -3212,6 +3542,7 @@ function initSettings() {
       showInstant: $("settingShowInstant").checked,
       showSuggestions: $("settingShowSuggestions").checked,
       ambientBlobs: $("settingAmbientBlobs").checked,
+      showQuickTags: $("settingShowQuickTags").checked // По умолчанию выключено
     };
     try {
       localStorage.setItem("proton-settings", JSON.stringify(s));
@@ -3221,6 +3552,12 @@ function initSettings() {
     document.documentElement.setAttribute("data-font", s.fontSize);
     document.documentElement.setAttribute("data-density", s.density);
     document.documentElement.setAttribute("data-ambient", s.ambientBlobs ? "true" : "false");
+
+    // Применяем отображение быстрых категорий
+    const quickTagsEl = $("quickTags");
+    if (quickTagsEl) {
+      quickTagsEl.hidden = !s.showQuickTags;
+    }
 
     closeSettings();
   }
@@ -3237,11 +3574,11 @@ function initSettings() {
         if (info && info.hasUpdate) {
           statusText.innerHTML = `<span style="color:#10b981;">Доступна новая версия v${escapeHtml(info.latestVersion)}!</span>`;
         } else {
-          statusText.innerHTML = `<span style="color:#10b981;">У вас установлена самая актуальная версия v2.7.1!</span>`;
+          statusText.innerHTML = `<span style="color:#10b981;">У вас установлена самая актуальная версия v2.8.0!</span>`;
         }
       } else {
         setTimeout(() => {
-          statusText.innerHTML = `<span style="color:#10b981;">У вас актуальная версия Proton v2.7.1</span>`;
+          statusText.innerHTML = `<span style="color:#10b981;">У вас актуальная версия Proton v2.8.0</span>`;
         }, 500);
       }
     } catch (e) {
@@ -3261,17 +3598,24 @@ function getSettings() {
    ========================================================================== */
 function init() {
   initThemeStyles();
+  WallpaperManager.init();
   TabManager.init();
   initAuth();
   initSettings();
   updateBookmarksUI();
   renderRecent();
 
-  // Применяем сохраненные настройки шрифта и плотности
+  // Применяем сохраненные настройки
   const s = getSettings();
   if (s.fontSize) document.documentElement.setAttribute("data-font", s.fontSize);
   if (s.density) document.documentElement.setAttribute("data-density", s.density);
   if (s.ambientBlobs === false) document.documentElement.setAttribute("data-ambient", "false");
+
+  // Быстрые категории (по умолчанию выключены: showQuickTags === true)
+  const quickTagsEl = $("quickTags");
+  if (quickTagsEl) {
+    quickTagsEl.hidden = (s.showQuickTags !== true);
+  }
 
   // Формы поиска
   const homeForm = $("homeForm");

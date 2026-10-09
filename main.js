@@ -13,7 +13,7 @@ const { spawn } = require("child_process");
 
 app.setName("Искатель");
 
-const APP_VERSION = "1.1.0";
+const APP_VERSION = "2.0.0";
 const GITHUB_REPO = "UsmanMusav/Iskatel";
 const LATEST_RELEASE_URL = `https://api.github.com/repos/${GITHUB_REPO}/releases/latest`;
 
@@ -39,8 +39,17 @@ const JSON_HEADERS = {
 
 const DEFAULT_SETTINGS = {
   engine: "auto", // "auto", "duckduckgo", "bing"
-  region: "ru-ru", // "ru-ru", "us-en", "wt-wt" (all)
+  region: "ru-ru", // "ru-ru", "wt-wt", "us-en", "de-de", "kz-kz"
   theme: "system", // "light", "dark", "system"
+  accentColor: "indigo", // "indigo", "emerald", "cyan", "orange", "ruby", "amber", "monochrome"
+  ambientBlobs: true,
+  glassmorphism: true,
+  fontSize: "medium", // "small", "medium", "large"
+  density: "normal", // "normal", "compact"
+  showWikiCards: true,
+  showInstantAnswers: true,
+  showSuggestions: true,
+  showRelatedQueries: true,
   autoCheckUpdates: true,
   openInBrowser: true,
 };
@@ -175,12 +184,12 @@ async function ddgSearch(query, page, region = "ru-ru") {
     }
     if (resp.ok) break;
   }
-  if (!resp || !resp.ok) {
+  if (!resp || !resp.ok || resp.status === 202) {
     throw new Error(`DuckDuckGo: HTTP ${resp ? resp.status : "0"}`);
   }
 
   const html = await resp.text();
-  if (html.includes("anomaly-modal")) {
+  if (html.includes("anomaly-modal") || html.includes("challenge-running")) {
     throw new Error("Поисковый движок временно ограничил запросы.");
   }
 
@@ -199,6 +208,9 @@ async function ddgSearch(query, page, region = "ru-ru") {
       display_url: displayUrl(url),
       snippet: snips[i] ? richText(snips[i][1]) : "",
     });
+  }
+  if (results.length === 0) {
+    throw new Error("DuckDuckGo вернул пустую страницу выдачи.");
   }
   return results;
 }
@@ -390,48 +402,80 @@ async function doSearch({ q, page = 0 }) {
   if (cached) return cached;
 
   const started = Date.now();
-  let results, engineUsed = "DuckDuckGo";
+  let results = [];
+  let engineUsed = "Умный гибрид";
 
+  // Функция гарантированного поиска с переходом на резервные движки
   if (preferredEngine === "bing") {
     try {
       results = await bingSearch(query, page, region);
       engineUsed = "Bing";
-    } catch (_) {
-      results = await ddgSearch(query, page, region);
-      engineUsed = "DuckDuckGo (резерв)";
+    } catch (e1) {
+      try {
+        results = await ddgSearch(query, page, region);
+        engineUsed = "DuckDuckGo (резерв)";
+      } catch (e2) {}
     }
   } else if (preferredEngine === "duckduckgo") {
     try {
       results = await ddgSearch(query, page, region);
       engineUsed = "DuckDuckGo";
-    } catch (_) {
-      results = await bingSearch(query, page, region);
-      engineUsed = "Bing (резерв)";
+    } catch (e1) {
+      try {
+        results = await bingSearch(query, page, region);
+        engineUsed = "Bing (резерв)";
+      } catch (e2) {}
     }
   } else {
-    // "auto"
+    // "auto" (гибридный): пробуем сначала DuckDuckGo, если 0 результатов или ошибка — мгновенно Bing
     try {
       results = await ddgSearch(query, page, region);
       engineUsed = "DuckDuckGo";
     } catch (_) {
-      results = await bingSearch(query, page, region);
-      engineUsed = "Bing";
+      try {
+        results = await bingSearch(query, page, region);
+        engineUsed = "Bing";
+      } catch (_) {
+        results = [];
+      }
     }
   }
 
+  // Если всё ещё пусто, пробуем Bing с общим запросом без фильтра региона
+  if ((!results || results.length === 0) && page === 0) {
+    try {
+      results = await bingSearch(query, 0, "wt-wt");
+      if (results.length > 0) engineUsed = "Bing (международный)";
+    } catch (_) {}
+  }
+
+  // Карточки и справки (учитываем настройки пользователя)
+  const showInstant = settings.showInstantAnswers !== false;
+  const showWiki = settings.showWikiCards !== false;
+  const showSuggestions = settings.showSuggestions !== false;
+
   const [instant, wiki, related] = await Promise.all([
-    page === 0 ? ddgInstant(query) : Promise.resolve({}),
-    page === 0 ? wikiCard(query) : Promise.resolve({}),
-    page === 0 ? ddgSuggest(query) : Promise.resolve([]),
+    (page === 0 && showInstant) ? ddgInstant(query) : Promise.resolve({}),
+    (page === 0 && showWiki) ? wikiCard(query) : Promise.resolve({}),
+    (page === 0 && showSuggestions) ? ddgSuggest(query) : Promise.resolve([]),
   ]);
+
+  let finalWiki = {};
+  if (showWiki) {
+    if (wiki && wiki.title) {
+      finalWiki = wiki;
+    } else if (page === 0 && results.length > 0) {
+      finalWiki = await wikiFromResults(results);
+    }
+  }
 
   const payload = {
     query,
     page,
-    results,
-    related: related.filter((s) => s.toLowerCase() !== query.toLowerCase()),
-    instant,
-    wiki: wiki.title ? wiki : (page === 0 ? await wikiFromResults(results) : {}),
+    results: results || [],
+    related: (related || []).filter((s) => s.toLowerCase() !== query.toLowerCase()),
+    instant: instant || {},
+    wiki: finalWiki || {},
     engine: engineUsed,
     took_ms: Date.now() - started,
   };

@@ -1117,6 +1117,159 @@ mark {
     margin-top: 10px;
   }
 
+
+  /* ---------- Палитры акцентных цветов v2.0 ---------- */
+  :root[data-accent="indigo"] {
+    --accent: #6366f1;
+    --accent-2: #38bdf8;
+    --accent-soft: rgba(99, 102, 241, 0.12);
+  }
+  :root[data-accent="emerald"] {
+    --accent: #10b981;
+    --accent-2: #34d399;
+    --accent-soft: rgba(16, 185, 129, 0.12);
+  }
+  :root[data-accent="cyan"] {
+    --accent: #06b6d4;
+    --accent-2: #38bdf8;
+    --accent-soft: rgba(6, 182, 212, 0.12);
+  }
+  :root[data-accent="orange"] {
+    --accent: #f97316;
+    --accent-2: #fbbf24;
+    --accent-soft: rgba(249, 115, 22, 0.12);
+  }
+  :root[data-accent="ruby"] {
+    --accent: #f43f5e;
+    --accent-2: #fb7185;
+    --accent-soft: rgba(244, 63, 94, 0.12);
+  }
+  :root[data-accent="amber"] {
+    --accent: #f59e0b;
+    --accent-2: #fbbf24;
+    --accent-soft: rgba(245, 158, 11, 0.12);
+  }
+  :root[data-accent="monochrome"] {
+    --accent: #64748b;
+    --accent-2: #94a3b8;
+    --accent-soft: rgba(100, 116, 139, 0.15);
+  }
+
+  /* Размеры интерфейса */
+  :root[data-font="small"] {
+    font-size: 13px;
+  }
+  :root[data-font="medium"] {
+    font-size: 15px;
+  }
+  :root[data-font="large"] {
+    font-size: 17px;
+  }
+
+  /* Плотность результатов */
+  :root[data-density="compact"] .result-item {
+    padding: 12px 14px;
+    margin-bottom: 8px;
+  }
+  :root[data-density="compact"] .result-title {
+    font-size: 16px;
+    margin-bottom: 4px;
+  }
+  :root[data-density="compact"] .result-snippet {
+    font-size: 13px;
+    line-height: 1.4;
+  }
+
+  /* Отключение фоновых сфер */
+  :root[data-ambient="false"] .ambient {
+    display: none !important;
+  }
+
+  /* Отключение размытия стекла */
+  :root[data-glass="false"] * {
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+  }
+
+  /* ---------- Угловой бейдж версии (v2.0) ---------- */
+  .corner-version {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    z-index: 999;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 7px 14px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    color: var(--text-2);
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    outline: none;
+    user-select: none;
+  }
+  .corner-version:hover {
+    transform: translateY(-2px) scale(1.03);
+    background: var(--card-solid);
+    color: var(--accent);
+    border-color: var(--accent);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.12);
+  }
+  .corner-version-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--accent);
+    box-shadow: 0 0 8px var(--accent);
+    display: inline-block;
+    animation: pulse-version-dot 2.5s infinite;
+  }
+  @keyframes pulse-version-dot {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.55; transform: scale(0.85); }
+  }
+
+  /* Селектор цветовых тем */
+  .accent-palette-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(42px, 1fr));
+    gap: 10px;
+    margin-top: 8px;
+  }
+  .accent-swatch {
+    width: 42px;
+    height: 42px;
+    border-radius: 12px;
+    border: 2px solid transparent;
+    cursor: pointer;
+    transition: transform 0.15s ease, border-color 0.15s ease;
+    display: grid;
+    place-items: center;
+  }
+  .accent-swatch:hover {
+    transform: scale(1.1);
+  }
+  .accent-swatch.active {
+    border-color: var(--text);
+    transform: scale(1.08);
+  }
+  .accent-swatch-check {
+    color: #fff;
+    font-size: 16px;
+    font-weight: bold;
+    display: none;
+  }
+  .accent-swatch.active .accent-swatch-check {
+    display: block;
+  }
+
 </style>
 </head>
 <body data-view="home">
@@ -1287,7 +1440,7 @@ mark {
       <div class="modal-header">
         <div class="modal-title-wrap">
           <h2 class="modal-title" id="settingsTitle">Настройки</h2>
-          <span class="badge-version" id="settingsVersionBadge">v1.1.0</span>
+          <span class="badge-version" id="settingsVersionBadge">v2.0</span>
         </div>
         <button type="button" class="icon-btn modal-close" id="settingsCloseBtn" aria-label="Закрыть">✕</button>
       </div>
@@ -1317,22 +1470,89 @@ mark {
             <select class="setting-select" id="settingRegion">
               <option value="ru-ru">Россия / Русский (ru-ru)</option>
               <option value="wt-wt">Весь мир (международная выдача)</option>
+              <option value="kz-kz">Казахстан / Русский (kz-kz)</option>
               <option value="us-en">США / English (us-en)</option>
               <option value="de-de">Германия / Deutsch (de-de)</option>
             </select>
           </div>
         </div>
 
-        <!-- Вкладка: Оформление -->
+          <div class="setting-group">
+            <label class="setting-checkbox-label">
+              <input type="checkbox" id="settingShowWiki" checked>
+              <span>Показывать карточки и выжимки из Википедии</span>
+            </label>
+          </div>
+
+          <div class="setting-group">
+            <label class="setting-checkbox-label">
+              <input type="checkbox" id="settingShowInstant" checked>
+              <span>Показывать мгновенные ответы и калькулятор (Instant Answers)</span>
+            </label>
+          </div>
+
+          <div class="setting-group">
+            <label class="setting-checkbox-label">
+              <input type="checkbox" id="settingShowSuggestions" checked>
+              <span>Показывать поисковые подсказки при наборе</span>
+            </label>
+          </div>
+
+        <!-- Вкладка: Оформление (Кастомизация v2.0) -->
         <div class="tab-panel" id="tabAppearance" role="tabpanel">
           <div class="setting-group">
-            <label class="setting-label" for="settingTheme">Цветовая тема</label>
-            <p class="setting-desc">Выберите оформление интерфейса или синхронизируйте его с системой.</p>
+            <label class="setting-label" for="settingTheme">Режим оформления</label>
+            <p class="setting-desc">Светлая, тёмная или автоматическая адаптация под тему операционной системы.</p>
             <select class="setting-select" id="settingTheme">
-              <option value="system">Как в операционной системе</option>
+              <option value="system">Как в операционной системе (авто)</option>
               <option value="light">Светлая тема</option>
               <option value="dark">Тёмная тема</option>
             </select>
+          </div>
+
+          <div class="setting-group">
+            <label class="setting-label">Акцентный цвет оформления</label>
+            <p class="setting-desc">Выберите индивидуальную цветовую палитру кнопок, ссылок и акцентов.</p>
+            <div class="accent-palette-grid" id="accentPaletteGrid">
+              <button type="button" class="accent-swatch active" data-accent="indigo" style="background:#6366f1;" title="Индиго (Фирменный)"><span class="accent-swatch-check">✓</span></button>
+              <button type="button" class="accent-swatch" data-accent="emerald" style="background:#10b981;" title="Изумрудный"><span class="accent-swatch-check">✓</span></button>
+              <button type="button" class="accent-swatch" data-accent="cyan" style="background:#06b6d4;" title="Киберпанк Циан"><span class="accent-swatch-check">✓</span></button>
+              <button type="button" class="accent-swatch" data-accent="orange" style="background:#f97316;" title="Закатный Оранжевый"><span class="accent-swatch-check">✓</span></button>
+              <button type="button" class="accent-swatch" data-accent="ruby" style="background:#f43f5e;" title="Рубиновый"><span class="accent-swatch-check">✓</span></button>
+              <button type="button" class="accent-swatch" data-accent="amber" style="background:#f59e0b;" title="Золотой Янтарь"><span class="accent-swatch-check">✓</span></button>
+              <button type="button" class="accent-swatch" data-accent="monochrome" style="background:#64748b;" title="Монохромный минимал"><span class="accent-swatch-check">✓</span></button>
+            </div>
+          </div>
+
+          <div class="setting-group">
+            <label class="setting-label" for="settingFontSize">Размер шрифта и элементов</label>
+            <select class="setting-select" id="settingFontSize">
+              <option value="small">Компактный шрифт (13px)</option>
+              <option value="medium" selected>Стандартный шрифт (15px)</option>
+              <option value="large">Крупный шрифт (17px)</option>
+            </select>
+          </div>
+
+          <div class="setting-group">
+            <label class="setting-label" for="settingDensity">Плотность карточек выдачи</label>
+            <select class="setting-select" id="settingDensity">
+              <option value="normal" selected>Просторная (комфортное чтение)</option>
+              <option value="compact">Компактная (больше результатов без прокрутки)</option>
+            </select>
+          </div>
+
+          <div class="setting-group">
+            <label class="setting-checkbox-label">
+              <input type="checkbox" id="settingAmbientBlobs" checked>
+              <span>Динамические фоновые световые сферы (Ambient Glow)</span>
+            </label>
+          </div>
+
+          <div class="setting-group">
+            <label class="setting-checkbox-label">
+              <input type="checkbox" id="settingGlass" checked>
+              <span>Эффект полупрозрачного стекла (Glassmorphism & Blur)</span>
+            </label>
           </div>
         </div>
 
@@ -1355,7 +1575,7 @@ mark {
               <h3 class="about-name">Искатель Desktop</h3>
               <p class="about-desc">Настольный поисковик без слежки, рекламы и сбора пользовательских данных.</p>
               <div class="about-meta">
-                <span>Версия: <strong id="aboutVersionText">1.1.0</strong></span>
+                <span>Версия: <strong id="aboutVersionText">2.0.0</strong></span>
                 <span class="dot">·</span>
                 <a href="https://github.com/UsmanMusav/Iskatel" target="_blank" rel="noopener" class="link-external" id="githubRepoLink">GitHub Репозиторий ↗</a>
               </div>
@@ -1944,10 +2164,16 @@ function renderResults(data, append) {
     renderWiki(data.wiki);
   }
 
-  /* пусто */
-  if (!results.length && !append) {
+  /* пусто — показываем ТОЛЬКО если действительно ничего не найдено (нет ни ссылок, ни мгновенного ответа, ни статьи Википедии) */
+  const hasInstant = !!(data.instant && (data.instant.answer || data.instant.abstract || data.instant.definition));
+  const hasWiki = !!(data.wiki && data.wiki.title);
+  const hasResults = results && results.length > 0;
+
+  if (!hasResults && !hasInstant && !hasWiki && !append) {
     els.emptyState.hidden = false;
     els.moreWrap.hidden = true;
+  } else {
+    els.emptyState.hidden = true;
   }
 
   /* список */
@@ -2106,10 +2332,11 @@ window.addEventListener("popstate", () => {
 
 
 
-/* ---------- логика настроек и обновлений (v1.1.0) ---------- */
+/* ---------- логика настроек, кастомизации и обновлений (v2.0) ---------- */
 (function initSettingsAndUpdater() {
   const modal = $("settingsModal");
   const openBtn = $("settingsBtn");
+  const cornerBtn = $("cornerVersion");
   const closeBtn = $("settingsCloseBtn");
   const cancelBtn = $("settingsCancelBtn");
   const saveBtn = $("settingsSaveBtn");
@@ -2123,7 +2350,15 @@ window.addEventListener("popstate", () => {
   const selEngine = $("settingEngine");
   const selRegion = $("settingRegion");
   const selTheme = $("settingTheme");
+  const selFontSize = $("settingFontSize");
+  const selDensity = $("settingDensity");
+  const chkAmbient = $("settingAmbientBlobs");
+  const chkGlass = $("settingGlass");
+  const chkWiki = $("settingShowWiki");
+  const chkInstant = $("settingShowInstant");
+  const chkSuggestions = $("settingShowSuggestions");
   const chkAuto = $("settingAutoUpdate");
+  const accentSwatches = document.querySelectorAll(".accent-swatch");
 
   const checkBtn = $("checkUpdatesBtn");
   const lastCheckTime = $("lastCheckTime");
@@ -2145,9 +2380,45 @@ window.addEventListener("popstate", () => {
     engine: "auto",
     region: "ru-ru",
     theme: "system",
+    accentColor: "indigo",
+    fontSize: "medium",
+    density: "normal",
+    ambientBlobs: true,
+    glassmorphism: true,
+    showWikiCards: true,
+    showInstantAnswers: true,
+    showSuggestions: true,
     autoCheckUpdates: true,
   };
   let pendingUpdate = null;
+
+  function applyCustomization(s) {
+    // 1. Акцентный цвет
+    const accent = s.accentColor || "indigo";
+    document.documentElement.dataset.accent = accent;
+
+    // 2. Размер шрифта
+    const font = s.fontSize || "medium";
+    document.documentElement.dataset.font = font;
+
+    // 3. Плотность результатов
+    const density = s.density || "normal";
+    document.documentElement.dataset.density = density;
+
+    // 4. Фоновые сферы
+    document.documentElement.dataset.ambient = s.ambientBlobs !== false ? "true" : "false";
+
+    // 5. Размытие стекла
+    document.documentElement.dataset.glass = s.glassmorphism !== false ? "true" : "false";
+
+    // 6. Тема оформления
+    if (s.theme === "system") {
+      const prefersDark = window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches;
+      applyTheme(prefersDark ? "dark" : "light");
+    } else {
+      applyTheme(s.theme || "light");
+    }
+  }
 
   function openModal(tab = "general") {
     modal.classList.add("open");
@@ -2173,11 +2444,22 @@ window.addEventListener("popstate", () => {
   });
 
   if (openBtn) openBtn.addEventListener("click", () => openModal("general"));
+  if (cornerBtn) cornerBtn.addEventListener("click", () => openModal("updates"));
   if (closeBtn) closeBtn.addEventListener("click", closeModal);
   if (cancelBtn) cancelBtn.addEventListener("click", closeModal);
 
   modal.addEventListener("click", (e) => {
     if (e.target === modal) closeModal();
+  });
+
+  // Переключение палитры акцента
+  accentSwatches.forEach((swatch) => {
+    swatch.addEventListener("click", () => {
+      accentSwatches.forEach((s) => s.classList.remove("active"));
+      swatch.classList.add("active");
+      currentSettings.accentColor = swatch.dataset.accent;
+      document.documentElement.dataset.accent = swatch.dataset.accent;
+    });
   });
 
   async function loadSettingsIntoUI() {
@@ -2196,14 +2478,37 @@ window.addEventListener("popstate", () => {
     if (selEngine) selEngine.value = currentSettings.engine || "auto";
     if (selRegion) selRegion.value = currentSettings.region || "ru-ru";
     if (selTheme) selTheme.value = currentSettings.theme || "system";
+    if (selFontSize) selFontSize.value = currentSettings.fontSize || "medium";
+    if (selDensity) selDensity.value = currentSettings.density || "normal";
+    if (chkAmbient) chkAmbient.checked = currentSettings.ambientBlobs !== false;
+    if (chkGlass) chkGlass.checked = currentSettings.glassmorphism !== false;
+    if (chkWiki) chkWiki.checked = currentSettings.showWikiCards !== false;
+    if (chkInstant) chkInstant.checked = currentSettings.showInstantAnswers !== false;
+    if (chkSuggestions) chkSuggestions.checked = currentSettings.showSuggestions !== false;
     if (chkAuto) chkAuto.checked = currentSettings.autoCheckUpdates !== false;
+
+    // Выделяем активный акцент
+    accentSwatches.forEach((swatch) => {
+      swatch.classList.toggle("active", swatch.dataset.accent === (currentSettings.accentColor || "indigo"));
+    });
+
+    applyCustomization(currentSettings);
   }
 
   async function saveSettingsFromUI() {
+    const activeAccent = document.querySelector(".accent-swatch.active");
     currentSettings = {
       engine: selEngine ? selEngine.value : "auto",
       region: selRegion ? selRegion.value : "ru-ru",
       theme: selTheme ? selTheme.value : "system",
+      accentColor: activeAccent ? activeAccent.dataset.accent : "indigo",
+      fontSize: selFontSize ? selFontSize.value : "medium",
+      density: selDensity ? selDensity.value : "normal",
+      ambientBlobs: chkAmbient ? chkAmbient.checked : true,
+      glassmorphism: chkGlass ? chkGlass.checked : true,
+      showWikiCards: chkWiki ? chkWiki.checked : true,
+      showInstantAnswers: chkInstant ? chkInstant.checked : true,
+      showSuggestions: chkSuggestions ? chkSuggestions.checked : true,
       autoCheckUpdates: chkAuto ? chkAuto.checked : true,
     };
 
@@ -2214,14 +2519,7 @@ window.addEventListener("popstate", () => {
       localStorage.setItem("iskatel-settings", JSON.stringify(currentSettings));
     } catch (_) {}
 
-    // Применяем тему
-    if (currentSettings.theme === "system") {
-      const prefersDark = window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches;
-      applyTheme(prefersDark ? "dark" : "light");
-    } else {
-      applyTheme(currentSettings.theme);
-    }
-
+    applyCustomization(currentSettings);
     closeModal();
   }
 
@@ -2287,7 +2585,6 @@ window.addEventListener("popstate", () => {
         }
 
         if (!manual) {
-          // Если фоновая проверка нашла обновление — открываем модалку на вкладке обновлений
           openModal("updates");
         }
       } else {
@@ -2295,7 +2592,7 @@ window.addEventListener("popstate", () => {
         if (manual) {
           statusCard.style.display = "block";
           statusIcon.textContent = "✅";
-          statusTitle.textContent = "У вас установлена последняя версия";
+          statusTitle.textContent = "У вас установлена актуальная версия";
           statusBody.textContent = `Искатель ${res.currentVersion} — обновлений не требуется.`;
           releaseInfo.style.display = "none";
         }
@@ -2368,15 +2665,22 @@ window.addEventListener("popstate", () => {
     });
   }
 
-  // Автопроверка при старте приложения
+  // Загрузка сохраненных настроек и автопроверка при старте
   setTimeout(async () => {
     await loadSettingsIntoUI();
     if (currentSettings.autoCheckUpdates !== false) {
       performUpdateCheck(false);
     }
-  }, 2000);
+  }, 1000);
 })();
 
 </script>
+
+  <!-- Угловой бейдж версии v2.0 в углу экрана -->
+  <button type="button" class="corner-version" id="cornerVersion" aria-label="Версия Искатель 2.0. Нажмите для открытия настроек">
+    <span class="corner-version-dot" aria-hidden="true"></span>
+    <span class="corner-version-label">v2.0</span>
+  </button>
+
 </body>
 </html>

@@ -1545,12 +1545,15 @@ function createWindow() {
       preload: path.join(__dirname, "preload.js"),
       contextIsolation: true,
       nodeIntegration: false,
+      webviewTag: true,
     },
   });
 
-  // ссылки открываются в системном браузере по умолчанию
+  // Перехватываем открытие окон и перенаправляем во вкладки внутри Proton
   mainWindow.webContents.setWindowOpenHandler(({ url }) => {
-    if (url.startsWith("http")) shell.openExternal(url);
+    if (mainWindow && !mainWindow.isDestroyed() && url && url.startsWith("http")) {
+      mainWindow.webContents.send("iskatel:open-tab-url", url);
+    }
     return { action: "deny" };
   });
 

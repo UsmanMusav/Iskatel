@@ -12,6 +12,13 @@ contextBridge.exposeInMainWorld("iskatelAPI", {
   testAIProvider: (params) => ipcRenderer.invoke("iskatel:ai-test-provider", params),
   askCopilot: (params) => ipcRenderer.invoke("iskatel:ai-copilot", params),
 
+  // Открытие вкладок внутри браузера
+  onOpenTabUrl: (callback) => {
+    const handler = (_event, url) => callback(url);
+    ipcRenderer.on("iskatel:open-tab-url", handler);
+    return () => ipcRenderer.removeListener("iskatel:open-tab-url", handler);
+  },
+
   // Платформа и приложение
   platform: process.platform,
   arch: process.arch,

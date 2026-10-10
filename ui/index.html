@@ -1961,6 +1961,117 @@ body.has-custom-bg .ambient {
   background: var(--accent-soft);
 }
 
+/* ==========================================================================
+   РЕЖИМ ПРОСМОТРА САЙТОВ ВНУТРИ ВКЛАДОК (IN-APP WEB VIEW)
+   ========================================================================== */
+.view-web {
+  position: absolute;
+  top: 86px;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  width: 100%;
+  height: calc(100vh - 86px);
+  background: var(--card-solid);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  z-index: 10;
+}
+
+.view-web[hidden] {
+  display: none !important;
+}
+
+.web-views-wrap {
+  position: relative;
+  flex: 1;
+  width: 100%;
+  height: 100%;
+  background: #ffffff;
+}
+
+.web-views-wrap webview {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  border: none;
+}
+
+/* Полоса прогресса загрузки страницы */
+.web-load-bar {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 3px;
+  background: linear-gradient(90deg, var(--accent) 0%, #38bdf8 50%, #10b981 100%);
+  background-size: 200% 100%;
+  animation: webLoadAnim 1.2s infinite ease-in-out;
+  z-index: 60;
+}
+
+@keyframes webLoadAnim {
+  0% { transform: scaleX(0.1); transform-origin: left; }
+  50% { transform: scaleX(0.8); transform-origin: left; }
+  100% { transform: scaleX(1); transform-origin: right; }
+}
+
+/* Карточка ошибки внутри WebView */
+.web-error-card {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 32px 40px;
+  text-align: center;
+  max-width: 460px;
+  box-shadow: var(--shadow-lg);
+  z-index: 70;
+}
+
+.web-error-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background: rgba(239, 68, 68, 0.12);
+  color: var(--danger);
+  margin-bottom: 14px;
+}
+
+.web-error-card h3 {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--text);
+  margin-bottom: 8px;
+}
+
+.web-error-card p {
+  font-size: 13.5px;
+  color: var(--text-2);
+  line-height: 1.5;
+}
+
+.chrome-tab-spinner {
+  animation: spin 0.8s linear infinite;
+  color: var(--accent);
+}
+
+.chrome-tab-favicon-img {
+  width: 14px;
+  height: 14px;
+  border-radius: 2px;
+  object-fit: contain;
+}
+
 /* Скелетоны загрузки */
 .skeletons {
   margin-bottom: 20px;
@@ -2404,6 +2515,12 @@ body.has-custom-bg .ambient {
           <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/>
         </svg>
       </button>
+      <button type="button" class="chrome-nav-btn" id="navHomeBtn" title="Главная страница" aria-label="Главная">
+        <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+          <polyline points="9 22 9 12 15 12 15 22"/>
+        </svg>
+      </button>
     </div>
 
     <!-- Омнибокс (Адресная / Поисковая строка) -->
@@ -2708,6 +2825,28 @@ body.has-custom-bg .ambient {
         <!-- Боковая колонка (Википедия и справка) -->
         <div class="side-col" id="sideCol" hidden>
           <div id="wikiCard" class="wiki-card"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- РЕЖИМ ПРОСМОТРА САЙТОВ ВНУТРИ ВКЛАДОК (IN-APP WEB VIEW) -->
+    <section class="view view-web" id="webView" hidden>
+      <!-- Контейнер для вебвью активных вкладок -->
+      <div class="web-views-wrap" id="webViewsWrap"></div>
+
+      <!-- Полоса прогресса загрузки страницы -->
+      <div class="web-load-bar" id="webLoadBar" hidden></div>
+
+      <!-- Карточка ошибки загрузки страницы -->
+      <div class="web-error-card" id="webErrorCard" hidden>
+        <div class="web-error-icon">
+          <svg viewBox="0 0 24 24" width="36" height="36" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+        </div>
+        <h3 id="webErrorTitle">Не удалось загрузить веб-страницу</h3>
+        <p id="webErrorDesc">Проверьте подключение к сети или правильность веб-адреса.</p>
+        <div style="display:flex; gap:10px; justify-content:center; margin-top:16px;">
+          <button type="button" class="btn-primary" id="webRetryBtn">Повторить попытку</button>
+          <button type="button" class="btn-secondary" id="webBackToSearchBtn">Вернуться к поиску</button>
         </div>
       </div>
     </section>
@@ -3578,7 +3717,34 @@ function initVoiceSearch() {
 }
 
 /* ==========================================================================
-   СИСТЕМА CHROME-ВКЛАДОК И НАВИГАЦИИ (TAB MANAGER)
+   УТИЛИТЫ ДЛЯ ОПРЕДЕЛЕНИЯ ВЕБ-АДРЕСОВ (URL DETECTION & NORMALIZATION)
+   ========================================================================== */
+function isWebUrl(str) {
+  if (!str) return false;
+  str = str.trim();
+  if (/^https?:\/\//i.test(str)) return true;
+  if (/^file:\/\//i.test(str)) return true;
+  if (/^localhost(:\d+)?(\/.*)?$/i.test(str)) return true;
+  if (/^(\d{1,3}\.){3}\d{1,3}(:\d+)?(\/.*)?$/.test(str)) return true;
+  if (/^[a-zA-Z0-9-]+(\.[a-zA-Z0-9-]+)+(\/.*)?$/i.test(str) && !/\s/.test(str)) {
+    const host = str.split("/")[0].split(":")[0];
+    const parts = host.split(".");
+    const last = parts[parts.length - 1];
+    if (last && last.length >= 2 && /^[a-zA-Z]+$/.test(last)) {
+      return true;
+    }
+  }
+  return false;
+}
+
+function normalizeWebUrl(str) {
+  str = str.trim();
+  if (/^https?:\/\//i.test(str) || /^file:\/\//i.test(str)) return str;
+  return "https://" + str;
+}
+
+/* ==========================================================================
+   СИСТЕМА CHROME-ВКЛАДОК И ВСТРОЕННОГО БРАУЗЕРА (TAB & WEBVIEW MANAGER)
    ========================================================================== */
 const TabManager = {
   tabs: [],
@@ -3600,6 +3766,9 @@ const TabManager = {
         id: "tab_" + (++this.counter),
         title: "Новая вкладка",
         query: "",
+        url: "",
+        favicon: "",
+        isLoading: false,
         view: "home",
         page: 0,
         scrollPos: 0,
@@ -3628,6 +3797,8 @@ const TabManager = {
         id: t.id,
         title: t.title,
         query: t.query,
+        url: t.url || "",
+        favicon: t.favicon || "",
         view: t.view,
         page: t.page || 0,
         scrollPos: t.scrollPos || 0,
@@ -3654,12 +3825,20 @@ const TabManager = {
     const id = "tab_" + (++this.counter) + "_" + Date.now();
     const newTab = {
       id,
-      title: opts.title || "Новая вкладка",
-      query: opts.query || "",
-      view: opts.view || "home",
+      title: opts.title || (opts.url ? opts.url : "Новая вкладка"),
+      query: opts.query || (opts.url ? opts.url : ""),
+      url: opts.url || "",
+      favicon: opts.favicon || "",
+      isLoading: false,
+      view: opts.view || (opts.url ? "web" : "home"),
       page: opts.page || 0,
       scrollPos: 0,
-      history: [{ view: opts.view || "home", query: opts.query || "", title: opts.title || "Новая вкладка" }],
+      history: [{
+        view: opts.view || (opts.url ? "web" : "home"),
+        query: opts.query || opts.url || "",
+        url: opts.url || "",
+        title: opts.title || (opts.url ? opts.url : "Новая вкладка")
+      }],
       historyIndex: 0,
       resultsHtml: "",
       resultsInfoHtml: "",
@@ -3695,6 +3874,8 @@ const TabManager = {
       cur.wikiHtml = $("wikiCard") ? $("wikiCard").innerHTML : "";
       cur.hasWiki = $("sideCol") ? !$("sideCol").hidden : false;
       cur.canLoadMore = $("moreWrap") ? !$("moreWrap").hidden : false;
+    } else if (document.body.dataset.view === "web") {
+      cur.view = "web";
     } else {
       cur.view = "home";
     }
@@ -3715,16 +3896,28 @@ const TabManager = {
     if (!tab) return;
 
     stopSpeaking();
-    document.title = (tab.query ? tab.query + " — " : "") + "Proton";
+    document.title = (tab.title ? tab.title + " — " : "") + "Proton";
 
-    setInputs(tab.query || "");
+    setInputs(tab.url || tab.query || "");
     updateNavButtons(tab);
 
-    if (tab.view === "results") {
+    if (tab.view === "web") {
+      document.body.dataset.view = "web";
+      if ($("homeView")) $("homeView").hidden = true;
+      if ($("resultsView")) $("resultsView").hidden = true;
+      if ($("webView")) $("webView").hidden = false;
+      this.showWebViewForTab(tab);
+    } else if (tab.view === "results") {
       document.body.dataset.view = "results";
       if ($("homeView")) $("homeView").hidden = true;
       if ($("resultsView")) $("resultsView").hidden = false;
+      if ($("webView")) $("webView").hidden = true;
       if ($("skeletons")) $("skeletons").hidden = true;
+
+      const wrap = $("webViewsWrap");
+      if (wrap) {
+        wrap.querySelectorAll("webview").forEach(el => el.style.display = "none");
+      }
 
       if ($("resultsList")) $("resultsList").innerHTML = tab.resultsHtml || "";
       if ($("resultsInfo")) $("resultsInfo").innerHTML = tab.resultsInfoHtml || "";
@@ -3753,15 +3946,204 @@ const TabManager = {
       document.body.dataset.view = "home";
       if ($("homeView")) $("homeView").hidden = false;
       if ($("resultsView")) $("resultsView").hidden = true;
+      if ($("webView")) $("webView").hidden = true;
+
+      const wrap = $("webViewsWrap");
+      if (wrap) {
+        wrap.querySelectorAll("webview").forEach(el => el.style.display = "none");
+      }
+
       window.scrollTo({ top: 0 });
       if ($("homeInput")) $("homeInput").focus();
     }
+  },
+
+  showWebViewForTab(tab) {
+    const wrap = $("webViewsWrap");
+    if (!wrap) return;
+
+    wrap.querySelectorAll("webview").forEach(el => {
+      if (el.dataset.tabId !== tab.id) {
+        el.style.display = "none";
+      }
+    });
+
+    let wv = wrap.querySelector(`webview[data-tab-id="${tab.id}"]`);
+    if (!wv) {
+      wv = document.createElement("webview");
+      wv.dataset.tabId = tab.id;
+      wv.setAttribute("src", tab.url || "about:blank");
+      wv.setAttribute("allowpopups", "true");
+      wv.style.position = "absolute";
+      wv.style.top = "0";
+      wv.style.left = "0";
+      wv.style.width = "100%";
+      wv.style.height = "100%";
+      wv.style.border = "none";
+      wv.style.display = "block";
+      this.attachWebviewEvents(wv, tab);
+      wrap.appendChild(wv);
+    } else {
+      wv.style.display = "block";
+      if (tab.url && wv.getAttribute("src") !== tab.url) {
+        try {
+          if (typeof wv.loadURL === "function") wv.loadURL(tab.url);
+          else wv.setAttribute("src", tab.url);
+        } catch (_) {
+          wv.setAttribute("src", tab.url);
+        }
+      }
+    }
+    updateNavButtons(tab);
+  },
+
+  attachWebviewEvents(wv, tab) {
+    const loadBar = $("webLoadBar");
+    const errorCard = $("webErrorCard");
+
+    wv.addEventListener("did-start-loading", () => {
+      tab.isLoading = true;
+      if (this.activeTabId === tab.id) {
+        if (loadBar) loadBar.hidden = false;
+        if (errorCard) errorCard.hidden = true;
+      }
+      this.renderTabs();
+    });
+
+    wv.addEventListener("did-stop-loading", () => {
+      tab.isLoading = false;
+      if (this.activeTabId === tab.id) {
+        if (loadBar) loadBar.hidden = true;
+      }
+      this.renderTabs();
+      updateNavButtons(tab);
+    });
+
+    wv.addEventListener("did-fail-load", (e) => {
+      if (e.errorCode === -3) return; // ERR_ABORTED
+      tab.isLoading = false;
+      if (this.activeTabId === tab.id) {
+        if (loadBar) loadBar.hidden = true;
+        if (errorCard) {
+          errorCard.hidden = false;
+          const desc = $("webErrorDesc");
+          if (desc) {
+            desc.textContent = e.errorDescription
+              ? `Код ошибки: ${e.errorCode} (${e.errorDescription})`
+              : "Проверьте подключение к сети или правильность веб-адреса.";
+          }
+        }
+      }
+      this.renderTabs();
+      updateNavButtons(tab);
+    });
+
+    wv.addEventListener("page-title-updated", (e) => {
+      if (e.title) {
+        tab.title = e.title;
+        if (this.activeTabId === tab.id) {
+          document.title = e.title + " — Proton";
+        }
+        this.renderTabs();
+        this.saveState();
+      }
+    });
+
+    wv.addEventListener("page-favicon-updated", (e) => {
+      if (e.favicons && e.favicons.length > 0) {
+        tab.favicon = e.favicons[0];
+        this.renderTabs();
+        this.saveState();
+      }
+    });
+
+    wv.addEventListener("did-navigate", (e) => {
+      if (e.url) {
+        tab.url = e.url;
+        tab.query = e.url;
+        if (this.activeTabId === tab.id) {
+          setInputs(e.url);
+          document.title = (tab.title || e.url) + " — Proton";
+        }
+        this.saveState();
+        updateNavButtons(tab);
+      }
+    });
+
+    wv.addEventListener("did-navigate-in-page", (e) => {
+      if (e.url && e.isMainFrame) {
+        tab.url = e.url;
+        tab.query = e.url;
+        if (this.activeTabId === tab.id) {
+          setInputs(e.url);
+        }
+        this.saveState();
+        updateNavButtons(tab);
+      }
+    });
+
+    wv.addEventListener("new-window", (e) => {
+      e.preventDefault();
+      if (e.url && e.url.startsWith("http")) {
+        this.createTab({
+          title: "Загрузка...",
+          url: e.url,
+          view: "web",
+          activate: true
+        });
+      }
+    });
+  },
+
+  navigateToUrl(url, opts = {}) {
+    if (!url) return;
+    url = normalizeWebUrl(url);
+    let cur = this.getActiveTab();
+    if (!cur) {
+      cur = this.createTab({ url, title: opts.title, view: "web", activate: true });
+      return;
+    }
+
+    this.saveCurrentTabDOM();
+
+    cur.view = "web";
+    cur.url = url;
+    cur.query = url;
+    if (opts.title) {
+      cur.title = opts.title;
+    } else {
+      try {
+        cur.title = new URL(url).hostname;
+      } catch (_) {
+        cur.title = url;
+      }
+    }
+
+    if (!cur.history) cur.history = [];
+    cur.history.push({ view: "web", url, title: cur.title, query: url });
+    cur.historyIndex = cur.history.length - 1;
+
+    document.body.dataset.view = "web";
+    if ($("homeView")) $("homeView").hidden = true;
+    if ($("resultsView")) $("resultsView").hidden = true;
+    if ($("webView")) $("webView").hidden = false;
+
+    setInputs(url);
+    this.renderTabs();
+    this.showWebViewForTab(cur);
+    this.saveState();
   },
 
   closeTab(tabId) {
     stopSpeaking();
     const idx = this.tabs.findIndex(t => t.id === tabId);
     if (idx === -1) return;
+
+    const wrap = $("webViewsWrap");
+    if (wrap) {
+      const wv = wrap.querySelector(`webview[data-tab-id="${tabId}"]`);
+      if (wv) wv.remove();
+    }
 
     this.tabs.splice(idx, 1);
 
@@ -3788,6 +4170,7 @@ const TabManager = {
     this.createTab({
       title: tab.title,
       query: tab.query,
+      url: tab.url,
       view: tab.view,
       page: tab.page,
       activate: true
@@ -3795,6 +4178,12 @@ const TabManager = {
   },
 
   closeOtherTabs(tabId) {
+    const wrap = $("webViewsWrap");
+    if (wrap) {
+      wrap.querySelectorAll("webview").forEach(el => {
+        if (el.dataset.tabId !== tabId) el.remove();
+      });
+    }
     this.tabs = this.tabs.filter(t => t.id === tabId);
     this.activeTabId = tabId;
     this.renderTabs();
@@ -3811,7 +4200,16 @@ const TabManager = {
       setTimeout(() => reloadBtn.classList.remove("spinning"), 700);
     }
 
-    if (cur.view === "results" && cur.query) {
+    if (cur.view === "web") {
+      const wrap = $("webViewsWrap");
+      const wv = wrap ? wrap.querySelector(`webview[data-tab-id="${cur.id}"]`) : null;
+      if (wv) {
+        try {
+          if (cur.isLoading && typeof wv.stop === "function") wv.stop();
+          else if (typeof wv.reload === "function") wv.reload();
+        } catch (_) {}
+      }
+    } else if (cur.view === "results" && cur.query) {
       runSearch(cur.query, { page: 0, fromTab: true });
     } else {
       renderRecent();
@@ -3822,6 +4220,7 @@ const TabManager = {
     const cur = this.getActiveTab();
     if (!cur) return;
     cur.query = query;
+    cur.url = "";
     cur.title = query || "Новая вкладка";
     cur.view = "results";
     if (!cur.history) cur.history = [];
@@ -3844,9 +4243,18 @@ const TabManager = {
       tabEl.setAttribute("role", "tab");
       tabEl.title = tab.title || "Новая вкладка";
 
-      const iconSvg = (tab.query)
-        ? `<svg viewBox="0 0 24 24" width="13" height="13" fill="currentColor"><path d="M10.5 3a7.5 7.5 0 0 1 5.94 12.09l4.24 4.24a1 1 0 0 1-1.41 1.41l-4.24-4.24A7.5 7.5 0 1 1 10.5 3Zm0 2a5.5 5.5 0 1 0 0 11 5.5 5.5 0 0 0 0-11Z"/></svg>`
-        : `<svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>`;
+      let iconSvg = "";
+      if (tab.isLoading) {
+        iconSvg = `<svg class="chrome-tab-spinner" viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10" stroke-opacity="0.25"/><path d="M12 2a10 10 0 0 1 10 10" stroke-linecap="round"/></svg>`;
+      } else if (tab.favicon) {
+        iconSvg = `<img class="chrome-tab-favicon-img" src="${escapeHtml(tab.favicon)}" alt="" onerror="this.style.display='none'">`;
+      } else if (tab.view === "web") {
+        iconSvg = `<svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>`;
+      } else if (tab.query) {
+        iconSvg = `<svg viewBox="0 0 24 24" width="13" height="13" fill="currentColor"><path d="M10.5 3a7.5 7.5 0 0 1 5.94 12.09l4.24 4.24a1 1 0 0 1-1.41 1.41l-4.24-4.24A7.5 7.5 0 1 1 10.5 3Zm0 2a5.5 5.5 0 1 0 0 11 5.5 5.5 0 0 0 0-11Z"/></svg>`;
+      } else {
+        iconSvg = `<svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>`;
+      }
 
       tabEl.innerHTML = `
         <div class="chrome-tab-favicon">${iconSvg}</div>
@@ -3906,6 +4314,11 @@ const TabManager = {
       reloadBtn.addEventListener("click", () => this.reloadActiveTab());
     }
 
+    const homeBtn = $("navHomeBtn");
+    if (homeBtn) {
+      homeBtn.addEventListener("click", () => showHome());
+    }
+
     const backBtn = $("navBackBtn");
     if (backBtn) {
       backBtn.addEventListener("click", () => this.navBack());
@@ -3914,6 +4327,54 @@ const TabManager = {
     const fwdBtn = $("navForwardBtn");
     if (fwdBtn) {
       fwdBtn.addEventListener("click", () => this.navForward());
+    }
+
+    const retryBtn = $("webRetryBtn");
+    if (retryBtn) {
+      retryBtn.addEventListener("click", () => {
+        const cur = this.getActiveTab();
+        if (!cur) return;
+        const wrap = $("webViewsWrap");
+        const wv = wrap ? wrap.querySelector(`webview[data-tab-id="${cur.id}"]`) : null;
+        if (wv && cur.url) {
+          if ($("webErrorCard")) $("webErrorCard").hidden = true;
+          try {
+            if (typeof wv.loadURL === "function") wv.loadURL(cur.url);
+            else wv.setAttribute("src", cur.url);
+          } catch (_) {
+            wv.setAttribute("src", cur.url);
+          }
+        }
+      });
+    }
+
+    const backSearchBtn = $("webBackToSearchBtn");
+    if (backSearchBtn) {
+      backSearchBtn.addEventListener("click", () => {
+        const cur = this.getActiveTab();
+        if (!cur) return;
+        if (cur.resultsHtml) {
+          cur.view = "results";
+          this.renderTabs();
+          this.restoreTab(cur.id);
+        } else {
+          showHome();
+        }
+      });
+    }
+
+    // Слушатель открытия внешних ссылок прямо во вкладках Proton
+    if (window.iskatelAPI && typeof window.iskatelAPI.onOpenTabUrl === "function") {
+      window.iskatelAPI.onOpenTabUrl((url) => {
+        if (url && typeof url === "string") {
+          this.createTab({
+            title: "Загрузка...",
+            url: url,
+            view: "web",
+            activate: true
+          });
+        }
+      });
     }
 
     const strip = $("chromeTabStrip");
@@ -3957,11 +4418,31 @@ const TabManager = {
 
   navBack() {
     const cur = this.getActiveTab();
-    if (!cur || !cur.history || cur.historyIndex <= 0) return;
+    if (!cur) return;
+    if (cur.view === "web") {
+      const wrap = $("webViewsWrap");
+      const wv = wrap ? wrap.querySelector(`webview[data-tab-id="${cur.id}"]`) : null;
+      try {
+        if (wv && typeof wv.canGoBack === "function" && wv.canGoBack()) {
+          wv.goBack();
+          return;
+        }
+      } catch (_) {}
+      if (cur.resultsHtml) {
+        cur.view = "results";
+        this.renderTabs();
+        this.restoreTab(cur.id);
+        return;
+      }
+      showHome();
+      return;
+    }
+    if (!cur.history || cur.historyIndex <= 0) return;
     cur.historyIndex--;
     const step = cur.history[cur.historyIndex];
     cur.view = step.view;
     cur.query = step.query;
+    cur.url = step.url || "";
     cur.title = step.title;
     this.renderTabs();
     this.restoreTab(cur.id);
@@ -3970,11 +4451,23 @@ const TabManager = {
 
   navForward() {
     const cur = this.getActiveTab();
-    if (!cur || !cur.history || cur.historyIndex >= cur.history.length - 1) return;
+    if (!cur) return;
+    if (cur.view === "web") {
+      const wrap = $("webViewsWrap");
+      const wv = wrap ? wrap.querySelector(`webview[data-tab-id="${cur.id}"]`) : null;
+      try {
+        if (wv && typeof wv.canGoForward === "function" && wv.canGoForward()) {
+          wv.goForward();
+          return;
+        }
+      } catch (_) {}
+    }
+    if (!cur.history || cur.historyIndex >= cur.history.length - 1) return;
     cur.historyIndex++;
     const step = cur.history[cur.historyIndex];
     cur.view = step.view;
     cur.query = step.query;
+    cur.url = step.url || "";
     cur.title = step.title;
     this.renderTabs();
     this.restoreTab(cur.id);
@@ -3985,11 +4478,25 @@ const TabManager = {
 function updateNavButtons(tab) {
   const backBtn = $("navBackBtn");
   const fwdBtn = $("navForwardBtn");
-  if (backBtn) {
-    backBtn.disabled = !tab.history || tab.historyIndex <= 0;
-  }
-  if (fwdBtn) {
-    fwdBtn.disabled = !tab.history || tab.historyIndex >= (tab.history.length - 1);
+  if (!tab) return;
+  if (tab.view === "web") {
+    const wrap = $("webViewsWrap");
+    const wv = wrap ? wrap.querySelector(`webview[data-tab-id="${tab.id}"]`) : null;
+    let canBack = false;
+    let canFwd = false;
+    try {
+      if (wv && typeof wv.canGoBack === "function") canBack = wv.canGoBack();
+      if (wv && typeof wv.canGoForward === "function") canFwd = wv.canGoForward();
+    } catch (_) {}
+    if (backBtn) backBtn.disabled = !canBack && !tab.resultsHtml;
+    if (fwdBtn) fwdBtn.disabled = !canFwd;
+  } else {
+    if (backBtn) {
+      backBtn.disabled = !tab.history || tab.historyIndex <= 0;
+    }
+    if (fwdBtn) {
+      fwdBtn.disabled = !tab.history || tab.historyIndex >= (tab.history.length - 1);
+    }
   }
 }
 
@@ -4080,6 +4587,24 @@ function showHome() {
   document.body.dataset.view = "home";
   if ($("homeView")) $("homeView").hidden = false;
   if ($("resultsView")) $("resultsView").hidden = true;
+  if ($("webView")) $("webView").hidden = true;
+
+  const wrap = $("webViewsWrap");
+  if (wrap) {
+    wrap.querySelectorAll("webview").forEach(el => el.style.display = "none");
+  }
+
+  const cur = TabManager.getActiveTab();
+  if (cur) {
+    cur.view = "home";
+    cur.title = "Новая вкладка";
+    cur.query = "";
+    cur.url = "";
+    TabManager.renderTabs();
+    TabManager.saveState();
+    updateNavButtons(cur);
+  }
+
   state.query = "";
   state.page = 0;
   setInputs("");
@@ -4091,6 +4616,12 @@ function showResults() {
   document.body.dataset.view = "results";
   if ($("homeView")) $("homeView").hidden = true;
   if ($("resultsView")) $("resultsView").hidden = false;
+  if ($("webView")) $("webView").hidden = true;
+
+  const wrap = $("webViewsWrap");
+  if (wrap) {
+    wrap.querySelectorAll("webview").forEach(el => el.style.display = "none");
+  }
 }
 
 async function runSearch(query, { page = 0, append = false, fromTab = false } = {}) {
@@ -4098,6 +4629,12 @@ async function runSearch(query, { page = 0, append = false, fromTab = false } = 
   if (!query) {
     const inp = document.body.dataset.view === "home" ? $("homeInput") : $("omniboxInput");
     if (inp) inp.focus();
+    return;
+  }
+
+  // Если введён валидный веб-адрес, открываем его напрямую во вкладке внутри Proton
+  if (!append && isWebUrl(query)) {
+    TabManager.navigateToUrl(query);
     return;
   }
 
@@ -4229,6 +4766,37 @@ function renderResults(data, append) {
   const container = $("resultsList");
   if (!container) return;
 
+  if (!container._protonWebBound) {
+    container._protonWebBound = true;
+    container.addEventListener("click", (e) => {
+      const link = e.target.closest("a");
+      if (!link || !link.href || !link.href.startsWith("http")) return;
+      e.preventDefault();
+      const targetUrl = link.href;
+      const title = link.textContent.trim() || targetUrl;
+      const isNewTab = e.ctrlKey || e.metaKey;
+      if (isNewTab) {
+        TabManager.createTab({ title, url: targetUrl, view: "web", activate: true });
+      } else {
+        TabManager.navigateToUrl(targetUrl, { title });
+      }
+    });
+
+    container.addEventListener("auxclick", (e) => {
+      if (e.button === 1) {
+        const link = e.target.closest("a");
+        if (!link || !link.href || !link.href.startsWith("http")) return;
+        e.preventDefault();
+        TabManager.createTab({
+          title: link.textContent.trim() || link.href,
+          url: link.href,
+          view: "web",
+          activate: true
+        });
+      }
+    });
+  }
+
   results.forEach(item => {
     const div = document.createElement("div");
     div.className = "result-item";
@@ -4286,6 +4854,21 @@ function renderAnswer(instant) {
     <h3 class="answer-title">${escapeHtml(instant.heading || instant.answer)}</h3>
     ${instant.text ? `<p class="answer-text">${escapeHtml(instant.text)}</p>` : ""}
   `;
+
+  if (!card._protonWebBound) {
+    card._protonWebBound = true;
+    card.addEventListener("click", (e) => {
+      const link = e.target.closest("a");
+      if (!link || !link.href || !link.href.startsWith("http")) return;
+      e.preventDefault();
+      const isNewTab = e.ctrlKey || e.metaKey || e.button === 1;
+      if (isNewTab) {
+        TabManager.createTab({ title: link.textContent.trim() || link.href, url: link.href, view: "web", activate: true });
+      } else {
+        TabManager.navigateToUrl(link.href, { title: link.textContent.trim() });
+      }
+    });
+  }
 }
 
 function renderWiki(wiki) {
@@ -4300,6 +4883,21 @@ function renderWiki(wiki) {
     <p class="answer-text" style="font-size:13px;">${escapeHtml(wiki.extract)}</p>
     <a href="${escapeHtml(wiki.url)}" target="_blank" style="display:inline-block; margin-top:10px; font-size:12.5px; font-weight:600;">Читать в Википедии →</a>
   `;
+
+  if (!card._protonWebBound) {
+    card._protonWebBound = true;
+    card.addEventListener("click", (e) => {
+      const link = e.target.closest("a");
+      if (!link || !link.href || !link.href.startsWith("http")) return;
+      e.preventDefault();
+      const isNewTab = e.ctrlKey || e.metaKey || e.button === 1;
+      if (isNewTab) {
+        TabManager.createTab({ title: link.textContent.trim() || link.href, url: link.href, view: "web", activate: true });
+      } else {
+        TabManager.navigateToUrl(link.href, { title: link.textContent.trim() });
+      }
+    });
+  }
 }
 
 /* ==========================================================================
@@ -4447,6 +5045,41 @@ function bindAICardEvents() {
       collapseBtn.innerHTML = isCollapsed
         ? `<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 15 12 9 18 15"/></svg>`
         : `<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>`;
+    });
+  }
+
+  const aiSourcesList = $("aiSourcesList");
+  if (aiSourcesList && !aiSourcesList._bound) {
+    aiSourcesList._bound = true;
+    aiSourcesList.addEventListener("click", (e) => {
+      const chip = e.target.closest(".ai-source-chip, a");
+      if (!chip || !chip.href || !chip.href.startsWith("http")) return;
+      e.preventDefault();
+      const isNewTab = e.ctrlKey || e.metaKey;
+      if (isNewTab) {
+        TabManager.createTab({
+          title: chip.title || chip.textContent.trim(),
+          url: chip.href,
+          view: "web",
+          activate: true
+        });
+      } else {
+        TabManager.navigateToUrl(chip.href, { title: chip.title || chip.textContent.trim() });
+      }
+    });
+
+    aiSourcesList.addEventListener("auxclick", (e) => {
+      if (e.button === 1) {
+        const chip = e.target.closest(".ai-source-chip, a");
+        if (!chip || !chip.href || !chip.href.startsWith("http")) return;
+        e.preventDefault();
+        TabManager.createTab({
+          title: chip.title || chip.textContent.trim(),
+          url: chip.href,
+          view: "web",
+          activate: true
+        });
+      }
     });
   }
 }
@@ -4749,6 +5382,30 @@ const Copilot = {
         else if (act === "explain") this.ask("Объясни эту тему простыми и понятными словами.");
         else if (act === "compare") this.ask("Какие есть плюсы, минусы и особенности?");
         else if (act === "translate") this.ask("Переведи ключевые термины и выдели международные названия.");
+      });
+    }
+
+    const msgContainer = $("copilotMessages");
+    if (msgContainer && !msgContainer._protonWebBound) {
+      msgContainer._protonWebBound = true;
+      msgContainer.addEventListener("click", (e) => {
+        const link = e.target.closest("a");
+        if (!link || !link.href || !link.href.startsWith("http")) return;
+        e.preventDefault();
+        const isNewTab = e.ctrlKey || e.metaKey;
+        if (isNewTab) {
+          TabManager.createTab({ title: link.textContent.trim() || link.href, url: link.href, view: "web", activate: true });
+        } else {
+          TabManager.navigateToUrl(link.href, { title: link.textContent.trim() });
+        }
+      });
+      msgContainer.addEventListener("auxclick", (e) => {
+        if (e.button === 1) {
+          const link = e.target.closest("a");
+          if (!link || !link.href || !link.href.startsWith("http")) return;
+          e.preventDefault();
+          TabManager.createTab({ title: link.textContent.trim() || link.href, url: link.href, view: "web", activate: true });
+        }
       });
     }
 
@@ -5142,6 +5799,32 @@ function updateBookmarksUI() {
   const empty = $("bookmarksEmptyState");
   if (!container) return;
 
+  if (!container._protonWebBound) {
+    container._protonWebBound = true;
+    container.addEventListener("click", (e) => {
+      const link = e.target.closest("a");
+      if (!link || !link.href || !link.href.startsWith("http")) return;
+      e.preventDefault();
+      closeModal("bookmarksModal");
+      const isNewTab = e.ctrlKey || e.metaKey;
+      if (isNewTab) {
+        TabManager.createTab({ title: link.textContent.trim() || link.href, url: link.href, view: "web", activate: true });
+      } else {
+        TabManager.navigateToUrl(link.href, { title: link.textContent.trim() });
+      }
+    });
+
+    container.addEventListener("auxclick", (e) => {
+      if (e.button === 1) {
+        const link = e.target.closest("a");
+        if (!link || !link.href || !link.href.startsWith("http")) return;
+        e.preventDefault();
+        closeModal("bookmarksModal");
+        TabManager.createTab({ title: link.textContent.trim() || link.href, url: link.href, view: "web", activate: true });
+      }
+    });
+  }
+
   container.innerHTML = "";
   if (!list.length) {
     if (empty) empty.style.display = "block";
@@ -5532,11 +6215,8 @@ function initSettings() {
 
       if (!updateInfo || !updateInfo.asset || !updateInfo.asset.downloadUrl) {
         if (updateInfo && updateInfo.htmlUrl) {
-          if (window.iskatelAPI && window.iskatelAPI.openExternal) {
-            window.iskatelAPI.openExternal(updateInfo.htmlUrl);
-          } else {
-            window.open(updateInfo.htmlUrl, "_blank");
-          }
+          closeModal("updateModal");
+          TabManager.createTab({ title: "Обновление Proton", url: updateInfo.htmlUrl, view: "web", activate: true });
         }
         return;
       }
@@ -5588,11 +6268,8 @@ function initSettings() {
   if (openReleasePageBtn) {
     openReleasePageBtn.addEventListener("click", () => {
       const url = (updateInfo && updateInfo.htmlUrl) || "https://github.com/UsmanMusav/Iskatel/releases/latest";
-      if (window.iskatelAPI && window.iskatelAPI.openExternal) {
-        window.iskatelAPI.openExternal(url);
-      } else {
-        window.open(url, "_blank");
-      }
+      closeModal("updateModal");
+      TabManager.createTab({ title: "Обновление Proton", url, view: "web", activate: true });
     });
   }
 }

@@ -15,7 +15,7 @@ const crypto = require("crypto");
 
 app.setName("Proton");
 
-const APP_VERSION = "2.12.0";
+const APP_VERSION = "2.12.1";
 const GITHUB_REPO = "UsmanMusav/Iskatel";
 const LATEST_RELEASE_URL = `https://api.github.com/repos/${GITHUB_REPO}/releases/latest`;
 
@@ -1825,6 +1825,7 @@ app.whenReady().then(() => {
 
   guardSession(session.defaultSession);
   guardSession(session.fromPartition("persist:iskatel_session"));
+  guardSession(session.fromPartition("persist:proton"));
   guardSession(session.fromPartition("incognito"));
 
   shield.loadBlocklist(app.getPath("userData")).then(() => scheduleShieldStats()).catch(() => {});

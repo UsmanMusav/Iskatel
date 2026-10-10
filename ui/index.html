@@ -1962,42 +1962,78 @@ body.has-custom-bg .ambient {
 }
 
 /* ==========================================================================
-   РЕЖИМ ПРОСМОТРА САЙТОВ ВНУТРИ ВКЛАДОК (IN-APP WEB VIEW)
+   РЕЖИМ ПРОСМОТРА САЙТОВ ВНУТРИ ВКЛАДОК (IN-APP WEB VIEW, 100% FULLSCREEN)
    ========================================================================== */
+body[data-view="web"] {
+  height: 100vh !important;
+  overflow: hidden !important;
+}
+
+body[data-view="web"] .main {
+  display: none !important;
+}
+
 .view-web {
-  position: absolute;
+  position: fixed;
   top: 86px;
   left: 0;
   right: 0;
   bottom: 0;
-  width: 100%;
+  width: 100vw;
   height: calc(100vh - 86px);
-  background: var(--card-solid);
+  background: #ffffff;
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  z-index: 10;
+  z-index: 50;
+  transition: right 0.28s cubic-bezier(0.16, 1, 0.3, 1), width 0.28s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .view-web[hidden] {
   display: none !important;
 }
 
+body.copilot-open .view-web {
+  right: 380px;
+  width: calc(100vw - 380px);
+}
+
 .web-views-wrap {
-  position: relative;
-  flex: 1;
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
   width: 100%;
   height: 100%;
   background: #ffffff;
+  overflow: hidden;
 }
 
 .web-views-wrap webview {
   position: absolute;
   top: 0;
   left: 0;
+  right: 0;
+  bottom: 0;
   width: 100%;
   height: 100%;
+  min-width: 100%;
+  min-height: 100%;
   border: none;
+  background: #ffffff;
+  display: flex !important;
+  visibility: hidden;
+  opacity: 0;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.web-views-wrap webview.active-webview {
+  visibility: visible !important;
+  opacity: 1 !important;
+  pointer-events: auto !important;
+  z-index: 2 !important;
 }
 
 /* Полоса прогресса загрузки страницы */
@@ -2829,29 +2865,29 @@ body.has-custom-bg .ambient {
       </div>
     </section>
 
-    <!-- РЕЖИМ ПРОСМОТРА САЙТОВ ВНУТРИ ВКЛАДОК (IN-APP WEB VIEW) -->
-    <section class="view view-web" id="webView" hidden>
-      <!-- Контейнер для вебвью активных вкладок -->
-      <div class="web-views-wrap" id="webViewsWrap"></div>
-
-      <!-- Полоса прогресса загрузки страницы -->
-      <div class="web-load-bar" id="webLoadBar" hidden></div>
-
-      <!-- Карточка ошибки загрузки страницы -->
-      <div class="web-error-card" id="webErrorCard" hidden>
-        <div class="web-error-icon">
-          <svg viewBox="0 0 24 24" width="36" height="36" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-        </div>
-        <h3 id="webErrorTitle">Не удалось загрузить веб-страницу</h3>
-        <p id="webErrorDesc">Проверьте подключение к сети или правильность веб-адреса.</p>
-        <div style="display:flex; gap:10px; justify-content:center; margin-top:16px;">
-          <button type="button" class="btn-primary" id="webRetryBtn">Повторить попытку</button>
-          <button type="button" class="btn-secondary" id="webBackToSearchBtn">Вернуться к поиску</button>
-        </div>
-      </div>
-    </section>
-
   </main>
+
+  <!-- РЕЖИМ ПРОСМОТРА САЙТОВ ВНУТРИ ВКЛАДОК (IN-APP WEB VIEW, FULLSCREEN 100%) -->
+  <section class="view-web" id="webView" hidden>
+    <!-- Контейнер для вебвью активных вкладок -->
+    <div class="web-views-wrap" id="webViewsWrap"></div>
+
+    <!-- Полоса прогресса загрузки страницы -->
+    <div class="web-load-bar" id="webLoadBar" hidden></div>
+
+    <!-- Карточка ошибки загрузки страницы -->
+    <div class="web-error-card" id="webErrorCard" hidden>
+      <div class="web-error-icon">
+        <svg viewBox="0 0 24 24" width="36" height="36" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+      </div>
+      <h3 id="webErrorTitle">Не удалось загрузить веб-страницу</h3>
+      <p id="webErrorDesc">Проверьте подключение к сети или правильность веб-адреса.</p>
+      <div style="display:flex; gap:10px; justify-content:center; margin-top:16px;">
+        <button type="button" class="btn-primary" id="webRetryBtn">Повторить попытку</button>
+        <button type="button" class="btn-secondary" id="webBackToSearchBtn">Вернуться к поиску</button>
+      </div>
+    </div>
+  </section>
 
   <!-- БОКОВАЯ ПАНЕЛЬ ИИ-КОПИЛОТА (AI COPILOT SIDE-PANEL) -->
   <aside class="copilot-panel" id="copilotPanel" aria-label="ИИ-Копилот Proton" hidden>
@@ -3916,7 +3952,7 @@ const TabManager = {
 
       const wrap = $("webViewsWrap");
       if (wrap) {
-        wrap.querySelectorAll("webview").forEach(el => el.style.display = "none");
+        wrap.querySelectorAll("webview").forEach(el => el.classList.remove("active-webview"));
       }
 
       if ($("resultsList")) $("resultsList").innerHTML = tab.resultsHtml || "";
@@ -3950,7 +3986,7 @@ const TabManager = {
 
       const wrap = $("webViewsWrap");
       if (wrap) {
-        wrap.querySelectorAll("webview").forEach(el => el.style.display = "none");
+        wrap.querySelectorAll("webview").forEach(el => el.classList.remove("active-webview"));
       }
 
       window.scrollTo({ top: 0 });
@@ -3962,38 +3998,28 @@ const TabManager = {
     const wrap = $("webViewsWrap");
     if (!wrap) return;
 
-    wrap.querySelectorAll("webview").forEach(el => {
-      if (el.dataset.tabId !== tab.id) {
-        el.style.display = "none";
-      }
-    });
-
     let wv = wrap.querySelector(`webview[data-tab-id="${tab.id}"]`);
     if (!wv) {
       wv = document.createElement("webview");
       wv.dataset.tabId = tab.id;
       wv.setAttribute("src", tab.url || "about:blank");
       wv.setAttribute("allowpopups", "true");
-      wv.style.position = "absolute";
-      wv.style.top = "0";
-      wv.style.left = "0";
-      wv.style.width = "100%";
-      wv.style.height = "100%";
-      wv.style.border = "none";
-      wv.style.display = "block";
+      wv.setAttribute("autosize", "on");
+      wv.setAttribute("partition", "persist:iskatel_session");
+      wv.className = "active-webview";
       this.attachWebviewEvents(wv, tab);
       wrap.appendChild(wv);
     } else {
-      wv.style.display = "block";
-      if (tab.url && wv.getAttribute("src") !== tab.url) {
-        try {
-          if (typeof wv.loadURL === "function") wv.loadURL(tab.url);
-          else wv.setAttribute("src", tab.url);
-        } catch (_) {
-          wv.setAttribute("src", tab.url);
-        }
-      }
+      wv.classList.add("active-webview");
     }
+
+    // Деактивируем все остальные webview (visibility:hidden, без display:none!)
+    wrap.querySelectorAll("webview").forEach(el => {
+      if (el.dataset.tabId !== tab.id) {
+        el.classList.remove("active-webview");
+      }
+    });
+
     updateNavButtons(tab);
   },
 
@@ -4017,6 +4043,28 @@ const TabManager = {
       }
       this.renderTabs();
       updateNavButtons(tab);
+    });
+
+    wv.addEventListener("dom-ready", () => {
+      updateNavButtons(tab);
+    });
+
+    wv.addEventListener("enter-html-full-screen", () => {
+      const viewWeb = $("webView");
+      if (viewWeb) {
+        viewWeb.style.top = "0";
+        viewWeb.style.height = "100vh";
+        viewWeb.style.zIndex = "99999";
+      }
+    });
+
+    wv.addEventListener("leave-html-full-screen", () => {
+      const viewWeb = $("webView");
+      if (viewWeb) {
+        viewWeb.style.top = "86px";
+        viewWeb.style.height = "calc(100vh - 86px)";
+        viewWeb.style.zIndex = "50";
+      }
     });
 
     wv.addEventListener("did-fail-load", (e) => {
@@ -4130,7 +4178,26 @@ const TabManager = {
 
     setInputs(url);
     this.renderTabs();
-    this.showWebViewForTab(cur);
+
+    // Если webview для этой вкладки уже существует, загружаем в него новый URL
+    const wrap = $("webViewsWrap");
+    const existingWv = wrap ? wrap.querySelector(`webview[data-tab-id="${cur.id}"]`) : null;
+    if (existingWv) {
+      existingWv.classList.add("active-webview");
+      wrap.querySelectorAll("webview").forEach(el => {
+        if (el.dataset.tabId !== cur.id) el.classList.remove("active-webview");
+      });
+      try {
+        if (typeof existingWv.loadURL === "function") existingWv.loadURL(url);
+        else existingWv.setAttribute("src", url);
+      } catch (_) {
+        existingWv.setAttribute("src", url);
+      }
+      updateNavButtons(cur);
+    } else {
+      this.showWebViewForTab(cur);
+    }
+
     this.saveState();
   },
 
@@ -4591,7 +4658,7 @@ function showHome() {
 
   const wrap = $("webViewsWrap");
   if (wrap) {
-    wrap.querySelectorAll("webview").forEach(el => el.style.display = "none");
+    wrap.querySelectorAll("webview").forEach(el => el.classList.remove("active-webview"));
   }
 
   const cur = TabManager.getActiveTab();
@@ -4620,7 +4687,7 @@ function showResults() {
 
   const wrap = $("webViewsWrap");
   if (wrap) {
-    wrap.querySelectorAll("webview").forEach(el => el.style.display = "none");
+    wrap.querySelectorAll("webview").forEach(el => el.classList.remove("active-webview"));
   }
 }
 
@@ -5447,6 +5514,7 @@ const Copilot = {
     if (!panel) return;
     panel.hidden = false;
     this.isOpen = true;
+    document.body.classList.add("copilot-open");
     if (toggleBtn) toggleBtn.classList.add("active");
     this.updateEngineBadge();
     const input = $("copilotInput");
@@ -5459,6 +5527,7 @@ const Copilot = {
     if (!panel) return;
     panel.hidden = true;
     this.isOpen = false;
+    document.body.classList.remove("copilot-open");
     if (toggleBtn) toggleBtn.classList.remove("active");
   },
 

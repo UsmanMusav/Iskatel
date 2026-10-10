@@ -1563,20 +1563,29 @@ function createWindow() {
 /* ---------- регистрация IPC и запуск ---------- */
 
 app.whenReady().then(() => {
-  // Разрешаем доступ к микрофону для голосового поиска
-  session.defaultSession.setPermissionRequestHandler((webContents, permission, callback) => {
-    if (permission === "media" || permission === "microphone") {
-      callback(true);
-    } else {
-      callback(false);
-    }
+  // Настраиваем чистый User-Agent Google Chrome, чтобы сайты не блокировали и не отдавали урезанные версии
+  const baseUA = session.defaultSession.getUserAgent();
+  const cleanUA = baseUA.replace(/Electron\/\S+\s*/i, "").replace(/Proton\/\S+\s*/i, "").replace(/iskatel\/\S+\s*/i, "");
+  session.defaultSession.setUserAgent(cleanUA);
+
+  // Разрешаем доступ к микрофону, звуку, видео и полноэкранному режиму для сайтов и вебвью
+  session.defaultSession.setPermissionRequestHandler((_webContents, _permission, callback) => {
+    callback(true);
   });
 
-  session.defaultSession.setPermissionCheckHandler((webContents, permission) => {
-    if (permission === "media" || permission === "microphone") {
-      return true;
-    }
-    return false;
+  session.defaultSession.setPermissionCheckHandler((_webContents, _permission) => {
+    return true;
+  });
+
+  // Перехватываем создание новых окон во всех webContents (включая <webview>) и открываем во вкладках Proton
+  app.on("web-contents-created", (_event, contents) => {
+    contents.setUserAgent(cleanUA);
+    contents.setWindowOpenHandler(({ url }) => {
+      if (mainWindow && !mainWindow.isDestroyed() && url && url.startsWith("http")) {
+        mainWindow.webContents.send("iskatel:open-tab-url", url);
+      }
+      return { action: "deny" };
+    });
   });
 
   // Поиск и саджест

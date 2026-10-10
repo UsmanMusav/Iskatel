@@ -11,6 +11,11 @@ contextBridge.exposeInMainWorld("iskatelAPI", {
   askAI: (params) => ipcRenderer.invoke("iskatel:ai-ask", params),
   testAIProvider: (params) => ipcRenderer.invoke("iskatel:ai-test-provider", params),
   askCopilot: (params) => ipcRenderer.invoke("iskatel:ai-copilot", params),
+  onToggleCopilot: (callback) => {
+    const handler = () => callback();
+    ipcRenderer.on("iskatel:toggle-copilot", handler);
+    return () => ipcRenderer.removeListener("iskatel:toggle-copilot", handler);
+  },
 
   // Открытие вкладок внутри браузера
   onOpenTabUrl: (callback) => {

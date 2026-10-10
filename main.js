@@ -15,7 +15,7 @@ const crypto = require("crypto");
 
 app.setName("Proton");
 
-const APP_VERSION = "2.11.4";
+const APP_VERSION = "2.12.0";
 const GITHUB_REPO = "UsmanMusav/Iskatel";
 const LATEST_RELEASE_URL = `https://api.github.com/repos/${GITHUB_REPO}/releases/latest`;
 
@@ -287,6 +287,10 @@ const DEFAULT_SETTINGS = {
   aiApiKey: "",
   aiModel: "",
   aiCustomEndpoint: "",
+  showHeroSubtitle: false,
+  showQuickTags: false,
+  showRecent: false,
+  showSettingsButton: false,
 };
 
 function getSettingsPath() {

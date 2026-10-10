@@ -6,7 +6,7 @@
   <title>Proton — Быстрый браузер</title>
   <style>
 /* ==========================================================================
-   PROTON BROWSER v2.11.4
+   PROTON BROWSER v2.12.0
    - Полное устранение блокировки кликов (display: none для всех закрытых модалок)
    - Гарантированный запуск init() независимо от document.readyState
    - Голосовой ввод (Voice Search) с пульсирующей анимацией записи
@@ -758,6 +758,14 @@ body.has-custom-bg .ambient {
 }
 .chrome-icon-btn.has-blocks .shield-count { display: block; background: #dc2626; }
 .chrome-icon-btn { position: relative; }
+
+/* author display:grid/flex beats the hidden attribute, so force it */
+#settingsBtn[hidden],
+#heroSub[hidden],
+#quickTags[hidden],
+#recentBlock[hidden] {
+  display: none !important;
+}
 
 body.incognito .chrome-tab-strip,
 body.incognito .chrome-toolbar {
@@ -2802,7 +2810,7 @@ body.copilot-open .main {
       </button>
 
       <!-- Кнопка настроек -->
-      <button type="button" class="chrome-icon-btn" id="settingsBtn" aria-label="Настройки и обновления" title="Настройки">
+      <button type="button" class="chrome-icon-btn" id="settingsBtn" aria-label="Настройки и обновления" title="Настройки" hidden>
         <svg viewBox="0 0 24 24" aria-hidden="true" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <circle cx="12" cy="12" r="3"/>
           <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/>
@@ -2865,7 +2873,7 @@ body.copilot-open .main {
         <!-- Стильный заголовок, который НИКОГДА не сливается с фоном -->
         <div class="hero-title-container">
           <h1 class="hero-title">Proton</h1>
-          <p class="hero-sub">Быстрый · Приватный · Минималистичный</p>
+          <p class="hero-sub" id="heroSub" hidden>Быстрый · Приватный · Минималистичный</p>
         </div>
 
         <!-- Поисковая форма на главной -->
@@ -3153,7 +3161,7 @@ body.copilot-open .main {
 
   <!-- ПОДВАЛ -->
   <footer class="footer">
-    <span>Proton Browser &copy; 2026 · Версия 2.11.4 · Без рекламы и трекеров</span>
+    <span>Proton Browser &copy; 2026 · Версия 2.12.0 · Без рекламы и трекеров</span>
   </footer>
 
   <!-- МОДАЛЬНОЕ ОКНО НАСТРОЕК (display: none !important когда закрыто) -->
@@ -3162,7 +3170,7 @@ body.copilot-open .main {
       <div class="modal-header">
         <div class="modal-title-wrap">
           <h2 class="modal-title" id="settingsTitle">Настройки Proton</h2>
-          <span class="badge-version" id="settingsVersionBadge">v2.11.4</span>
+          <span class="badge-version" id="settingsVersionBadge">v2.12.0</span>
         </div>
         <button type="button" class="modal-close" id="settingsCloseBtn" aria-label="Закрыть">
           <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
@@ -3200,13 +3208,8 @@ body.copilot-open .main {
             </select>
           </div>
 
-          <!-- ПУНКТ ВКЛЮЧЕНИЯ/ВЫКЛЮЧЕНИЯ БЫСТРЫХ ВКЛАДОК КАТЕГОРИЙ -->
           <div class="setting-group">
-            <label class="setting-checkbox-label">
-              <input type="checkbox" id="settingShowQuickTags">
-              <span>Показывать быстрые категории на главной странице (Новости, Погода и др.)</span>
-            </label>
-            <p class="setting-desc">По умолчанию выключено. Включите, если хотите видеть быстрые кнопки тем под строкой поиска.</p>
+            <p class="setting-desc">Подзаголовок главной, быстрые категории, недавние запросы и кнопка настроек в шапке настраиваются во вкладке «Оформление и фон». По умолчанию они выключены.</p>
           </div>
 
           <div class="setting-group">
@@ -3306,6 +3309,39 @@ body.copilot-open .main {
 
         <!-- Вкладка: Оформление и фон -->
         <div class="tab-panel" id="tabAppearance" role="tabpanel">
+
+          <div class="setting-group">
+            <label class="setting-label">Главная страница</label>
+            <p class="setting-desc">Эти элементы выключены по умолчанию. Название Proton и строка поиска остаются на месте.</p>
+          </div>
+          <div class="setting-group">
+            <label class="setting-checkbox-label">
+              <input type="checkbox" id="settingShowHeroSub">
+              <span>Показывать подзаголовок «Быстрый · Приватный · Минималистичный»</span>
+            </label>
+            <p class="setting-desc">По умолчанию выключено.</p>
+          </div>
+          <div class="setting-group">
+            <label class="setting-checkbox-label">
+              <input type="checkbox" id="settingShowQuickTags">
+              <span>Показывать быстрые категории (Погода, Новости, Нейросети и др.)</span>
+            </label>
+            <p class="setting-desc">По умолчанию выключено.</p>
+          </div>
+          <div class="setting-group">
+            <label class="setting-checkbox-label">
+              <input type="checkbox" id="settingShowRecent">
+              <span>Показывать недавние запросы</span>
+            </label>
+            <p class="setting-desc">По умолчанию выключено. Сама история поиска при этом не удаляется.</p>
+          </div>
+          <div class="setting-group">
+            <label class="setting-checkbox-label">
+              <input type="checkbox" id="settingShowSettingsButton">
+              <span>Показывать кнопку настроек (шестерёнку) в шапке</span>
+            </label>
+            <p class="setting-desc">По умолчанию выключено. Настройки открываются из меню профиля («Настройки и оформление») и по Ctrl+,. Если вы не вошли в аккаунт, шестерёнка остаётся на экране — иначе настройки было бы не открыть.</p>
+          </div>
 
           <!-- БЛОК СВОЕЙ ФОТОГРАФИИ НА ФОН -->
           <div class="setting-group">
@@ -3408,7 +3444,7 @@ body.copilot-open .main {
             </div>
             <h3 style="font-size:18px; margin-bottom:4px;">Proton Desktop</h3>
             <p style="color:var(--text-3); font-size:12.5px; margin-bottom:16px;">
-              Текущая установленная версия: <b style="color:var(--text);">v2.11.4</b>
+              Текущая установленная версия: <b style="color:var(--text);">v2.12.0</b>
             </p>
             <button type="button" class="btn-primary" id="checkUpdatesBtn" style="margin:0 auto;">
               <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/></svg>
@@ -3545,7 +3581,7 @@ body.copilot-open .main {
   </div>
 
   <!-- ==========================================================================
-       JAVASCRIPT ЛОГИКА PROTON v2.11.4
+       JAVASCRIPT ЛОГИКА PROTON v2.12.0
        ========================================================================== -->
   <script>
 "use strict";
@@ -4673,6 +4709,9 @@ const TabManager = {
       if (isCmdOrCtrl && e.shiftKey && e.key.toLowerCase() === "n") {
         e.preventDefault();
         if (window.iskatelAPI && window.iskatelAPI.openIncognito) window.iskatelAPI.openIncognito();
+      } else if (isCmdOrCtrl && !e.shiftKey && !e.altKey && (e.key === "," || e.code === "Comma")) {
+        e.preventDefault();
+        if (typeof openSettings === "function") openSettings("appearance");
       } else if (isCmdOrCtrl && e.key.toLowerCase() === "t") {
         e.preventDefault();
         this.createTab({ activate: true });
@@ -6189,12 +6228,33 @@ function pushRecent(q) {
   renderRecent();
 }
 
+function isLoggedIn() {
+  try {
+    return !!JSON.parse(localStorage.getItem("proton-user") || "null");
+  } catch (_) {
+    return false;
+  }
+}
+
+function applyHomeChrome(s, loggedIn) {
+  s = s || getSettings();
+  if (loggedIn === undefined) loggedIn = isLoggedIn();
+  const sub = $("heroSub");
+  if (sub) sub.hidden = s.showHeroSubtitle !== true;
+  const quickTagsEl = $("quickTags");
+  if (quickTagsEl) quickTagsEl.hidden = s.showQuickTags !== true;
+  const gear = $("settingsBtn");
+  if (gear) gear.hidden = !(s.showSettingsButton === true || !loggedIn);
+  renderRecent();
+}
+
 function renderRecent() {
   const row = $("recentRow");
   const block = $("recentBlock");
   if (!row || !block) return;
   const arr = getRecent();
-  if (!arr.length) {
+  const show = getSettings().showRecent === true && arr.length > 0;
+  if (!show) {
     block.hidden = true;
     return;
   }
@@ -6429,6 +6489,7 @@ function updateUserUI(user) {
     if (authBtn) authBtn.style.display = "inline-flex";
     if (userWrap) userWrap.style.display = "none";
   }
+  applyHomeChrome(null, !!user);
 }
 
 /* ==========================================================================
@@ -6453,7 +6514,10 @@ function loadSettings() {
   if ($("settingShowInstant")) $("settingShowInstant").checked = s.showInstant !== false;
   if ($("settingShowSuggestions")) $("settingShowSuggestions").checked = s.showSuggestions !== false;
   if ($("settingAmbientBlobs")) $("settingAmbientBlobs").checked = s.ambientBlobs !== false;
+  if ($("settingShowHeroSub")) $("settingShowHeroSub").checked = s.showHeroSubtitle === true;
   if ($("settingShowQuickTags")) $("settingShowQuickTags").checked = s.showQuickTags === true;
+  if ($("settingShowRecent")) $("settingShowRecent").checked = s.showRecent === true;
+  if ($("settingShowSettingsButton")) $("settingShowSettingsButton").checked = s.showSettingsButton === true;
 
   // ИИ-помощник
   if ($("settingAiEnabled")) $("settingAiEnabled").checked = s.aiEnabled !== false;
@@ -6480,7 +6544,10 @@ function saveSettings() {
     showInstant: $("settingShowInstant") ? $("settingShowInstant").checked : true,
     showSuggestions: $("settingShowSuggestions") ? $("settingShowSuggestions").checked : true,
     ambientBlobs: $("settingAmbientBlobs") ? $("settingAmbientBlobs").checked : true,
+    showHeroSubtitle: $("settingShowHeroSub") ? $("settingShowHeroSub").checked : false,
     showQuickTags: $("settingShowQuickTags") ? $("settingShowQuickTags").checked : false,
+    showRecent: $("settingShowRecent") ? $("settingShowRecent").checked : false,
+    showSettingsButton: $("settingShowSettingsButton") ? $("settingShowSettingsButton").checked : false,
     aiEnabled: $("settingAiEnabled") ? $("settingAiEnabled").checked : true,
     aiAutoSpeak: $("settingAiAutoSpeak") ? $("settingAiAutoSpeak").checked : false,
     aiProvider: $("settingAiProvider") ? $("settingAiProvider").value : "builtin",
@@ -6502,10 +6569,7 @@ function saveSettings() {
   document.documentElement.setAttribute("data-density", s.density);
   document.documentElement.setAttribute("data-ambient", s.ambientBlobs ? "true" : "false");
 
-  const quickTagsEl = $("quickTags");
-  if (quickTagsEl) {
-    quickTagsEl.hidden = !s.showQuickTags;
-  }
+  applyHomeChrome(s);
 
   if (typeof Copilot !== "undefined") {
     Copilot.updateEngineBadge();
@@ -6638,7 +6702,7 @@ function initSettings() {
             if (updateProgressWrap) updateProgressWrap.style.display = "none";
             if (updateFoundCard) updateFoundCard.style.display = "block";
           } else {
-            if (updateStatusText) updateStatusText.innerHTML = `<span style="color:#10b981;">У вас установлена самая последняя версия Proton (v2.11.4)!</span>`;
+            if (updateStatusText) updateStatusText.innerHTML = `<span style="color:#10b981;">У вас установлена самая последняя версия Proton (v2.12.0)!</span>`;
           }
         } else {
           checkUpdatesBtn.disabled = false;
@@ -6940,10 +7004,7 @@ function init() {
   if (s.density) document.documentElement.setAttribute("data-density", s.density);
   if (s.ambientBlobs === false) document.documentElement.setAttribute("data-ambient", "false");
 
-  const quickTagsEl = $("quickTags");
-  if (quickTagsEl) {
-    quickTagsEl.hidden = (s.showQuickTags !== true);
-  }
+  applyHomeChrome(s);
 
   // Клик по логотипу — переход на домашнюю страницу
   const heroLogoBtn = $("heroLogoBtn");

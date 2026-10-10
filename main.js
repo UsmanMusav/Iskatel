@@ -15,7 +15,7 @@ const crypto = require("crypto");
 
 app.setName("Proton");
 
-const APP_VERSION = "3.1.0";
+const APP_VERSION = "3.1.1";
 const GITHUB_REPO = "UsmanMusav/Iskatel";
 const LATEST_RELEASE_URL = `https://api.github.com/repos/${GITHUB_REPO}/releases/latest`;
 
@@ -1904,7 +1904,13 @@ app.whenReady().then(() => {
   ipcMain.handle("iskatel:auth-get-current-user", () => loadSession());
   ipcMain.handle("iskatel:auth-register", (_e, params) => registerAccount(params || {}));
   ipcMain.handle("iskatel:auth-login", (_e, params) => loginAccount(params || {}));
-  ipcMain.handle("iskatel:auth-google-login", (_e, params) => googleSignIn(params || {}));
+  ipcMain.handle("iskatel:auth-google-login", (event, params) => {
+    const url = event && event.sender ? String(event.sender.getURL() || "") : "";
+    if (/[?&]incognito=1(?:&|$)/.test(url)) {
+      return { ok: false, error: "В инкогнито вход через Google недоступен." };
+    }
+    return googleSignIn(params || {});
+  });
   ipcMain.handle("iskatel:auth-logout", () => {
     saveSession(null);
     return { ok: true };

@@ -6,7 +6,7 @@
   <title>Proton — Быстрый браузер</title>
   <style>
 /* ==========================================================================
-   PROTON BROWSER v3.1.0
+   PROTON BROWSER v3.1.1
    - Полное устранение блокировки кликов (display: none для всех закрытых модалок)
    - Гарантированный запуск init() независимо от document.readyState
    - Голосовой ввод (Voice Search) с пульсирующей анимацией записи
@@ -769,6 +769,14 @@ body.incognito .chrome-toolbar {
   background: #202124;
 }
 body.incognito .chrome-tab-strip { border-bottom-color: #3c4043; }
+body.incognito #authOpenBtn,
+body.incognito #googleQuickSignInBtn,
+body.incognito #customBgSettings,
+body.incognito .custom-bg-layer,
+body.incognito .custom-bg-overlay {
+  display: none !important;
+  pointer-events: none !important;
+}
 .incognito-badge {
   align-self: center;
   margin: 0 8px 6px 0;
@@ -3351,7 +3359,7 @@ body.copilot-open .main {
       <div class="modal-header">
         <div class="modal-title-wrap">
           <h2 class="modal-title" id="settingsTitle">Настройки Proton</h2>
-          <span class="badge-version" id="settingsVersionBadge">v3.1.0</span>
+          <span class="badge-version" id="settingsVersionBadge">v3.1.1</span>
         </div>
         <button type="button" class="modal-close" id="settingsCloseBtn" aria-label="Закрыть">
           <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
@@ -3587,7 +3595,7 @@ body.copilot-open .main {
           </div>
 
           <!-- БЛОК СВОЕЙ ФОТОГРАФИИ НА ФОН -->
-          <div class="setting-group">
+          <div class="setting-group" id="customBgSettings">
             <label class="setting-label">Фоновое изображение (Свои обои)</label>
             <p class="setting-desc">Установите собственную фотографию или картинку на задний фон поисковика с настройкой масштабирования, размытия и затемнения.</p>
             
@@ -3687,7 +3695,7 @@ body.copilot-open .main {
             </div>
             <h3 style="font-size:18px; margin-bottom:4px;">Proton Desktop</h3>
             <p style="color:var(--text-3); font-size:12.5px; margin-bottom:16px;">
-              Текущая установленная версия: <b style="color:var(--text);">v3.1.0</b>
+              Текущая установленная версия: <b style="color:var(--text);">v3.1.1</b>
             </p>
             <button type="button" class="btn-primary" id="checkUpdatesBtn" style="margin:0 auto;">
               <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/></svg>
@@ -3924,6 +3932,7 @@ function closeSettings() {
 }
 
 function openAuth() {
+  if (typeof IS_INCOGNITO !== "undefined" && IS_INCOGNITO) return;
   openModal("authModal");
 }
 
@@ -4078,6 +4087,13 @@ const WallpaperManager = {
   },
 
   init() {
+    if (typeof IS_INCOGNITO !== "undefined" && IS_INCOGNITO) {
+      this.config.image = "";
+      this.apply();
+      const box = $("customBgSettings");
+      if (box) box.hidden = true;
+      return;
+    }
     try {
       const saved = JSON.parse(localStorage.getItem("proton-custom-bg") || "null");
       if (saved && saved.image) {
@@ -6696,8 +6712,13 @@ function initAuth() {
   }
 
   const googleBtn = $("googleQuickSignInBtn");
+  if (typeof IS_INCOGNITO !== "undefined" && IS_INCOGNITO) {
+    if (authOpenBtn) authOpenBtn.hidden = true;
+    if (googleBtn) googleBtn.hidden = true;
+  }
   if (googleBtn) {
     googleBtn.addEventListener("click", () => {
+      if (typeof IS_INCOGNITO !== "undefined" && IS_INCOGNITO) return;
       const fakeUser = {
         name: "Пользователь Proton",
         email: "user.proton@gmail.com",
@@ -7024,7 +7045,7 @@ function initSettings() {
             if (updateProgressWrap) updateProgressWrap.style.display = "none";
             if (updateFoundCard) updateFoundCard.style.display = "block";
           } else {
-            if (updateStatusText) updateStatusText.innerHTML = `<span style="color:#10b981;">У вас установлена самая последняя версия Proton (v${escapeHtml(info.currentVersion || "3.1.0")})!</span>`;
+            if (updateStatusText) updateStatusText.innerHTML = `<span style="color:#10b981;">У вас установлена самая последняя версия Proton (v${escapeHtml(info.currentVersion || "3.1.1")})!</span>`;
           }
         } else {
           checkUpdatesBtn.disabled = false;

@@ -5,6 +5,7 @@
    Текущая версия: 2.8.2 (Комплексное исправление интерфейса, надежный поиск, кликабельность) */
 
 const { app, BrowserWindow, ipcMain, shell, session } = require("electron");
+const shield = require("./shield");
 const path = require("path");
 const fs = require("fs");
 const https = require("https");
@@ -14,7 +15,7 @@ const crypto = require("crypto");
 
 app.setName("Proton");
 
-const APP_VERSION = "2.10.0";
+const APP_VERSION = "2.11.4";
 const GITHUB_REPO = "UsmanMusav/Iskatel";
 const LATEST_RELEASE_URL = `https://api.github.com/repos/${GITHUB_REPO}/releases/latest`;
 
@@ -1588,71 +1589,269 @@ async function launchSystemInstaller(filePath) {
 
 let mainWindow = null;
 
-function createWindow() {
-  mainWindow = new BrowserWindow({
+function notifyWindows(channel, payload) {
+  for (const win of BrowserWindow.getAllWindows()) {
+    if (!win.isDestroyed()) {
+      try { win.webContents.send(channel, payload); } catch (_) {}
+    }
+  }
+}
+
+const permissionWaiters = new Map();
+const urlBypass = new Set();
+const guardedSessions = new WeakSet();
+let shieldBadgeTimer = null;
+
+function scheduleShieldStats() {
+  if (shieldBadgeTimer) return;
+  shieldBadgeTimer = setTimeout(() => {
+    shieldBadgeTimer = null;
+    notifyWindows("iskatel:shield-stats", shield.getStats());
+  }, 350);
+}
+
+function wipeIncognitoSessions() {
+  for (const part of ["incognito", "incognito-ui"]) {
+    const ses = session.fromPartition(part);
+    Promise.resolve(ses.clearStorageData()).catch(() => {});
+    Promise.resolve(ses.clearCache()).catch(() => {});
+  }
+}
+
+function isAppUiContents(contents) {
+  try {
+    const url = contents && typeof contents.getURL === "function" ? contents.getURL() : "";
+    return String(url || "").startsWith("file://");
+  } catch (_) {
+    return false;
+  }
+}
+
+function promptSitePermission(contents, permission, requestingUrl) {
+  const hostContents = (contents && contents.hostWebContents) || contents;
+  const win = hostContents ? BrowserWindow.fromWebContents(hostContents) : null;
+  if (!win || win.isDestroyed()) return Promise.resolve(false);
+  const id = crypto.randomBytes(6).toString("hex");
+  return new Promise((resolve) => {
+    permissionWaiters.set(id, resolve);
+    win.webContents.send("iskatel:permission-request", {
+      id,
+      permission,
+      url: requestingUrl || "",
+      host: shield.hostOf(requestingUrl || "")
+    });
+    setTimeout(() => {
+      if (permissionWaiters.has(id)) {
+        permissionWaiters.delete(id);
+        resolve(false);
+      }
+    }, 25000);
+  });
+}
+
+function guardSession(ses) {
+  if (!ses || guardedSessions.has(ses)) return;
+  guardedSessions.add(ses);
+
+  ses.setPermissionRequestHandler((webContents, permission, callback, details) => {
+    const decision = shield.permissionDecision(isAppUiContents(webContents), permission);
+    if (decision === "allow") {
+      callback(true);
+      return;
+    }
+    if (decision === "deny") {
+      shield.note("permissionsDenied");
+      scheduleShieldStats();
+      callback(false);
+      return;
+    }
+    const requestingUrl = (details && (details.requestingUrl || details.securityOrigin)) || "";
+    promptSitePermission(webContents, permission, requestingUrl).then((allow) => {
+      if (!allow) {
+        shield.note("permissionsDenied");
+        scheduleShieldStats();
+      }
+      callback(!!allow);
+    });
+  });
+
+  ses.setPermissionCheckHandler((webContents, permission) => {
+    const decision = shield.permissionDecision(isAppUiContents(webContents), permission);
+    return decision === "allow" || decision === "ask";
+  });
+
+  ses.webRequest.onBeforeRequest({ urls: ["http://*/*", "https://*/*"] }, (details, callback) => {
+    const verdict = shield.assessUrl(details.url);
+    if (!verdict.block) {
+      callback({ cancel: false });
+      return;
+    }
+    if (urlBypass.has(details.url)) {
+      urlBypass.delete(details.url);
+      callback({ cancel: false });
+      return;
+    }
+    const mainFrame = details.resourceType === "mainFrame";
+    shield.note(mainFrame ? "blockedPages" : "blockedResources");
+    scheduleShieldStats();
+    if (mainFrame) notifyWindows("iskatel:navigation-blocked", verdict);
+    callback({ cancel: true });
+  });
+
+  ses.on("will-download", (_event, item) => {
+    const filename = shield.safeFilename(item.getFilename());
+    const sourceUrl = item.getURL();
+    const dir = path.join(app.getPath("userData"), "quarantine");
+    try { fs.mkdirSync(dir, { recursive: true }); } catch (_) {}
+    const qPath = shield.quarantinePath(dir, filename);
+    item.setSavePath(qPath);
+    item.once("done", (_e, state) => {
+      if (state !== "completed") {
+        try { fs.unlinkSync(qPath); } catch (_) {}
+        return;
+      }
+      shield.note("downloadsScanned");
+      const verdict = shield.scanDownloadFile(qPath, filename, sourceUrl);
+      if (verdict.threat && verdict.level === "block") {
+        shield.note("downloadsQuarantined");
+        scheduleShieldStats();
+        notifyWindows("iskatel:shield-event", {
+          level: "block",
+          title: "Загрузка остановлена",
+          text: filename + " — " + verdict.reason + ". Файл оставлен в карантине и не открыт."
+        });
+        return;
+      }
+      const downloads = app.getPath("downloads");
+      let dest = path.join(downloads, filename);
+      try {
+        if (fs.existsSync(dest)) {
+          const ext = path.extname(filename);
+          const stem = path.basename(filename, ext);
+          dest = path.join(downloads, stem + "-" + Date.now().toString(36) + ext);
+        }
+        fs.renameSync(qPath, dest);
+      } catch (_) {
+        dest = qPath;
+      }
+      scheduleShieldStats();
+      notifyWindows("iskatel:shield-event", {
+        level: verdict.threat ? "warn" : "ok",
+        title: verdict.threat ? "Файл проверен с предупреждением" : "Файл проверен",
+        text: verdict.threat
+          ? filename + " — " + verdict.reason + ". Сохранён в «Загрузки», но не запущен."
+          : filename + " — угроз не найдено. Сохранён в «Загрузки»."
+      });
+    });
+  });
+}
+
+function ownerWindow(contents) {
+  const host = contents && (contents.hostWebContents || contents);
+  const win = host ? BrowserWindow.fromWebContents(host) : null;
+  if (win && !win.isDestroyed()) return win;
+  if (mainWindow && !mainWindow.isDestroyed()) return mainWindow;
+  const all = BrowserWindow.getAllWindows();
+  return all.length ? all[0] : null;
+}
+
+function bindBrowserWindow(win, { incognito = false } = {}) {
+  win.webContents.setWindowOpenHandler(({ url }) => {
+    if (win && !win.isDestroyed() && url && /^https?:/i.test(url)) {
+      win.webContents.send("iskatel:open-tab-url", url);
+    }
+    return { action: "deny" };
+  });
+
+  win.webContents.on("will-navigate", (event, url) => {
+    if (!String(url || "").startsWith("file://")) event.preventDefault();
+  });
+
+  win.webContents.on("will-attach-webview", (event, webPreferences, params) => {
+    delete webPreferences.preload;
+    webPreferences.nodeIntegration = false;
+    webPreferences.nodeIntegrationInSubFrames = false;
+    webPreferences.contextIsolation = true;
+    webPreferences.sandbox = true;
+    webPreferences.webSecurity = true;
+    webPreferences.allowRunningInsecureContent = false;
+    const src = String((params && params.src) || "");
+    if (/^(file|javascript|data|filesystem|chrome|chrome-extension):/i.test(src)) {
+      event.preventDefault();
+    }
+  });
+
+  if (incognito) win.on("closed", () => wipeIncognitoSessions());
+}
+
+function createWindow(opts = {}) {
+  const incognito = !!opts.incognito;
+  const win = new BrowserWindow({
     width: 1280,
     height: 880,
     minWidth: 720,
     minHeight: 560,
-    title: "Proton",
-    backgroundColor: "#16171d",
+    title: incognito ? "Инкогнито — Proton" : "Proton",
+    backgroundColor: incognito ? "#202124" : "#16171d",
     autoHideMenuBar: true,
     webPreferences: {
       preload: path.join(__dirname, "preload.js"),
       contextIsolation: true,
       nodeIntegration: false,
       webviewTag: true,
+      partition: incognito ? "incognito-ui" : undefined,
     },
   });
 
-  // Перехватываем открытие окон и перенаправляем во вкладки внутри Proton
-  mainWindow.webContents.setWindowOpenHandler(({ url }) => {
-    if (mainWindow && !mainWindow.isDestroyed() && url && url.startsWith("http")) {
-      mainWindow.webContents.send("iskatel:open-tab-url", url);
-    }
-    return { action: "deny" };
-  });
-
-  mainWindow.loadFile(path.join(__dirname, "ui", "index.html"));
+  if (!incognito) mainWindow = win;
+  bindBrowserWindow(win, { incognito });
+  win.loadFile(
+    path.join(__dirname, "ui", "index.html"),
+    incognito ? { query: { incognito: "1" } } : undefined
+  );
+  return win;
 }
 
 /* ---------- регистрация IPC и запуск ---------- */
 
 app.whenReady().then(() => {
-  // Настраиваем чистый User-Agent Google Chrome, чтобы сайты не блокировали и не отдавали урезанные версии
   const baseUA = session.defaultSession.getUserAgent();
   const cleanUA = baseUA.replace(/Electron\/\S+\s*/i, "").replace(/Proton\/\S+\s*/i, "").replace(/iskatel\/\S+\s*/i, "");
   session.defaultSession.setUserAgent(cleanUA);
 
-  // Разрешаем доступ к микрофону, звуку, видео и полноэкранному режиму для сайтов и вебвью
-  session.defaultSession.setPermissionRequestHandler((_webContents, _permission, callback) => {
-    callback(true);
-  });
+  guardSession(session.defaultSession);
+  guardSession(session.fromPartition("persist:iskatel_session"));
+  guardSession(session.fromPartition("incognito"));
 
-  session.defaultSession.setPermissionCheckHandler((_webContents, _permission) => {
-    return true;
-  });
+  shield.loadBlocklist(app.getPath("userData")).then(() => scheduleShieldStats()).catch(() => {});
 
-  // Перехватываем создание новых окон во всех webContents (включая <webview>) и открываем во вкладках Proton
   app.on("web-contents-created", (_event, contents) => {
-    contents.setUserAgent(cleanUA);
+    try { contents.setUserAgent(cleanUA); } catch (_) {}
+    try { if (contents.session) guardSession(contents.session); } catch (_) {}
+
     contents.setWindowOpenHandler(({ url }) => {
-      if (mainWindow && !mainWindow.isDestroyed() && url && url.startsWith("http")) {
-        mainWindow.webContents.send("iskatel:open-tab-url", url);
+      const win = ownerWindow(contents);
+      if (win && !win.isDestroyed() && url && /^https?:/i.test(url)) {
+        win.webContents.send("iskatel:open-tab-url", url);
       }
       return { action: "deny" };
     });
 
-    // Ctrl/Cmd+J должен открывать Копилот даже когда фокус внутри сайта
     contents.on("before-input-event", (event, input) => {
       if (!input || input.type !== "keyDown") return;
-      if (!mainWindow || mainWindow.isDestroyed()) return;
-      if (contents.id === mainWindow.webContents.id) return;
+      const win = ownerWindow(contents);
+      if (!win || win.isDestroyed()) return;
+      if (contents.id === win.webContents.id) return;
       const key = String(input.key || "").toLowerCase();
       const accel = input.control || input.meta;
+      if (accel && input.shift && !input.alt && key === "n") {
+        event.preventDefault();
+        createWindow({ incognito: true });
+        return;
+      }
       if (accel && !input.alt && !input.shift && key === "j") {
         event.preventDefault();
-        mainWindow.webContents.send("iskatel:toggle-copilot");
+        win.webContents.send("iskatel:toggle-copilot");
       }
     });
   });
@@ -1677,6 +1876,27 @@ app.whenReady().then(() => {
 
   // Метаданные
   ipcMain.handle("iskatel:get-version", () => APP_VERSION);
+
+  ipcMain.handle("iskatel:open-incognito", () => {
+    createWindow({ incognito: true });
+    return { ok: true };
+  });
+  ipcMain.handle("iskatel:shield-check-url", (_e, url) => shield.assessUrl(url));
+  ipcMain.handle("iskatel:shield-status", () => shield.getStats());
+  ipcMain.handle("iskatel:shield-allow-once", (_e, url) => {
+    const clean = String(url || "");
+    if (clean) urlBypass.add(clean);
+    return { ok: true };
+  });
+  ipcMain.handle("iskatel:permission-reply", (_e, payload) => {
+    const id = payload && payload.id;
+    const resolve = permissionWaiters.get(id);
+    if (resolve) {
+      permissionWaiters.delete(id);
+      resolve(!!(payload && payload.allow));
+    }
+    return { ok: true };
+  });
 
   // Авторизация и аккаунты (v2.5)
   ipcMain.handle("iskatel:auth-get-current-user", () => loadSession());

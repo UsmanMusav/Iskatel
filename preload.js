@@ -54,4 +54,30 @@ contextBridge.exposeInMainWorld("iskatelAPI", {
     return () => ipcRenderer.removeListener("iskatel:download-progress", handler);
   },
   openExternal: (url) => ipcRenderer.invoke("iskatel:open-external", url),
+
+  openIncognito: () => ipcRenderer.invoke("iskatel:open-incognito"),
+  checkUrl: (url) => ipcRenderer.invoke("iskatel:shield-check-url", url),
+  shieldStatus: () => ipcRenderer.invoke("iskatel:shield-status"),
+  allowUrlOnce: (url) => ipcRenderer.invoke("iskatel:shield-allow-once", url),
+  replyPermission: (payload) => ipcRenderer.invoke("iskatel:permission-reply", payload),
+  onNavigationBlocked: (callback) => {
+    const handler = (_event, data) => callback(data);
+    ipcRenderer.on("iskatel:navigation-blocked", handler);
+    return () => ipcRenderer.removeListener("iskatel:navigation-blocked", handler);
+  },
+  onShieldStats: (callback) => {
+    const handler = (_event, data) => callback(data);
+    ipcRenderer.on("iskatel:shield-stats", handler);
+    return () => ipcRenderer.removeListener("iskatel:shield-stats", handler);
+  },
+  onShieldEvent: (callback) => {
+    const handler = (_event, data) => callback(data);
+    ipcRenderer.on("iskatel:shield-event", handler);
+    return () => ipcRenderer.removeListener("iskatel:shield-event", handler);
+  },
+  onPermissionRequest: (callback) => {
+    const handler = (_event, data) => callback(data);
+    ipcRenderer.on("iskatel:permission-request", handler);
+    return () => ipcRenderer.removeListener("iskatel:permission-request", handler);
+  },
 });

@@ -6,7 +6,7 @@
   <title>Proton — Быстрый браузер</title>
   <style>
 /* ==========================================================================
-   PROTON BROWSER v2.11.3
+   PROTON BROWSER v2.11.4
    - Полное устранение блокировки кликов (display: none для всех закрытых модалок)
    - Гарантированный запуск init() независимо от document.readyState
    - Голосовой ввод (Voice Search) с пульсирующей анимацией записи
@@ -736,6 +736,114 @@ body.has-custom-bg .ambient {
   background: var(--card-solid);
   color: var(--text);
   transform: scale(1.08);
+}
+.chrome-icon-btn.active {
+  background: var(--accent-soft);
+  color: var(--accent);
+}
+.chrome-icon-btn .shield-count {
+  position: absolute;
+  top: 2px;
+  right: 1px;
+  min-width: 14px;
+  height: 14px;
+  padding: 0 3px;
+  border-radius: 8px;
+  background: #16a34a;
+  color: #fff;
+  font-size: 9px;
+  font-weight: 700;
+  line-height: 14px;
+  display: none;
+}
+.chrome-icon-btn.has-blocks .shield-count { display: block; background: #dc2626; }
+.chrome-icon-btn { position: relative; }
+
+body.incognito .chrome-tab-strip,
+body.incognito .chrome-toolbar {
+  background: #202124;
+}
+body.incognito .chrome-tab-strip { border-bottom-color: #3c4043; }
+.incognito-badge {
+  align-self: center;
+  margin: 0 8px 6px 0;
+  padding: 3px 8px;
+  border-radius: 999px;
+  background: #3c4043;
+  color: #e8eaed;
+  font-size: 11px;
+  font-weight: 650;
+  letter-spacing: 0.2px;
+  white-space: nowrap;
+}
+body.incognito .chrome-tabs-track { max-width: calc(100% - 130px); }
+
+.shield-panel, .permission-bar, .shield-toast {
+  position: fixed;
+  z-index: 1200;
+  background: var(--card-solid, #1c1d25);
+  color: var(--text, #f4f4f5);
+  border: 1px solid var(--border, rgba(255,255,255,0.12));
+  box-shadow: 0 16px 40px rgba(0,0,0,0.35);
+}
+.shield-panel {
+  top: 92px;
+  right: 14px;
+  width: min(360px, calc(100vw - 28px));
+  border-radius: 14px;
+  padding: 14px 14px 12px;
+}
+.shield-panel h3 { margin: 0 0 4px; font-size: 15px; }
+.shield-panel p, .shield-row { font-size: 12.5px; line-height: 1.45; color: var(--text-2, #c4c4cc); }
+.shield-row { display: flex; justify-content: space-between; gap: 12px; padding: 7px 0; border-bottom: 1px solid var(--border, rgba(255,255,255,0.08)); }
+.shield-row b { color: var(--text, #fff); font-weight: 650; }
+.permission-bar {
+  top: 92px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: min(520px, calc(100vw - 24px));
+  border-radius: 12px;
+  padding: 12px 14px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.permission-bar p { margin: 0; font-size: 13px; flex: 1; }
+.shield-toast {
+  left: 16px;
+  bottom: 16px;
+  width: min(380px, calc(100vw - 32px));
+  border-radius: 12px;
+  padding: 12px 14px;
+}
+.shield-toast strong { display: block; margin-bottom: 4px; }
+.shield-toast.warn { border-color: #d97706; }
+.shield-toast.block { border-color: #dc2626; }
+.threat-card {
+  position: absolute;
+  inset: 0;
+  z-index: 80;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(10, 10, 12, 0.72);
+  padding: 24px;
+}
+.threat-card-inner {
+  width: min(480px, 100%);
+  background: var(--card, #1c1d25);
+  border: 1px solid #dc2626;
+  border-radius: 16px;
+  padding: 28px 24px;
+  text-align: center;
+}
+.threat-card-inner h3 { margin: 8px 0; font-size: 20px; }
+.threat-card-inner p { color: var(--text-2, #c4c4cc); font-size: 14px; line-height: 1.5; }
+.threat-url {
+  margin: 10px 0 16px;
+  font-size: 12px;
+  word-break: break-all;
+  color: #fca5a5;
 }
 
 /* Кнопка входа Google */
@@ -2568,6 +2676,7 @@ body.copilot-open .main {
     <div class="chrome-tabs-track" id="chromeTabsTrack" role="tablist">
       <!-- Вкладки создаются динамически -->
     </div>
+    <span class="incognito-badge" id="incognitoBadge" hidden>Инкогнито</span>
     <button type="button" class="chrome-new-tab-btn" id="chromeNewTabBtn" title="Новая вкладка (Ctrl+T)" aria-label="Новая вкладка">
       <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
     </button>
@@ -2669,6 +2778,14 @@ body.copilot-open .main {
           </button>
         </div>
       </div>
+
+      <button type="button" class="chrome-icon-btn" id="shieldBtn" aria-label="Защита и антивирус" title="Защита Proton">
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3l7 3v6c0 4.5-2.8 7.6-7 9-4.2-1.4-7-4.5-7-9V6l7-3z"/><path d="M9 12l2 2 4-4"/></svg>
+        <span class="shield-count" id="shieldCount">0</span>
+      </button>
+      <button type="button" class="chrome-icon-btn" id="incognitoBtn" aria-label="Новое окно инкогнито" title="Инкогнито (Ctrl+Shift+N)">
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 10h16l-1.2 2.2A8 8 0 0 1 4 12.2L4 10z"/><path d="M8 14.5a2 2 0 1 0 .1 0"/><path d="M15 14.5a2 2 0 1 0 .1 0"/><path d="M9 18c.8.7 1.8 1 3 1s2.2-.3 3-1"/></svg>
+      </button>
 
       <!-- Кнопка ИИ-Копилота (боковая панель) -->
       <button type="button" class="chrome-icon-btn" id="copilotToggleBtn" aria-label="ИИ-Копилот" title="ИИ-Копилот (Ctrl+J)">
@@ -2927,7 +3044,45 @@ body.copilot-open .main {
         <button type="button" class="btn-secondary" id="webBackToSearchBtn">Вернуться к поиску</button>
       </div>
     </div>
+
+    <div class="threat-card" id="threatCard" hidden>
+      <div class="threat-card-inner">
+        <div class="web-error-icon">
+          <svg viewBox="0 0 24 24" width="36" height="36" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3l7 3v6c0 4.5-2.8 7.6-7 9-4.2-1.4-7-4.5-7-9V6l7-3z"/></svg>
+        </div>
+        <h3 id="threatTitle">Сайт заблокирован</h3>
+        <p id="threatDesc">Антивирус Proton остановил переход.</p>
+        <div class="threat-url" id="threatUrl"></div>
+        <div style="display:flex; gap:10px; justify-content:center; flex-wrap:wrap;">
+          <button type="button" class="btn-primary" id="threatBackBtn">Назад</button>
+          <button type="button" class="btn-secondary" id="threatAllowBtn">Всё равно открыть</button>
+        </div>
+      </div>
+    </div>
   </section>
+
+  <aside class="shield-panel" id="shieldPanel" hidden>
+    <h3>Защита Proton</h3>
+    <p>Сайты работают в песочнице и не получают доступ к файлам и коду приложения. Загрузки проверяются до открытия. Это защита браузера, а не замена системного антивируса.</p>
+    <div class="shield-row"><span>Заблокировано страниц</span><b id="shieldBlockedPages">0</b></div>
+    <div class="shield-row"><span>Остановлено опасных запросов</span><b id="shieldBlockedRes">0</b></div>
+    <div class="shield-row"><span>Проверено загрузок</span><b id="shieldScanned">0</b></div>
+    <div class="shield-row"><span>В карантине</span><b id="shieldQuarantine">0</b></div>
+    <div class="shield-row"><span>База адресов</span><b id="shieldFeed">локальные правила</b></div>
+    <div style="display:flex; gap:8px; margin-top:12px;">
+      <button type="button" class="btn-primary" id="shieldScanBtn">Проверить страницу</button>
+      <button type="button" class="btn-secondary" id="shieldCloseBtn">Закрыть</button>
+    </div>
+  </aside>
+  <div class="permission-bar" id="permissionBar" hidden>
+    <p id="permissionText">Сайт запрашивает разрешение.</p>
+    <button type="button" class="btn-secondary" id="permissionDenyBtn">Запретить</button>
+    <button type="button" class="btn-primary" id="permissionAllowBtn">Разрешить</button>
+  </div>
+  <div class="shield-toast" id="shieldToast" hidden>
+    <strong id="shieldToastTitle">Защита</strong>
+    <span id="shieldToastText"></span>
+  </div>
 
   <!-- БОКОВАЯ ПАНЕЛЬ ИИ-КОПИЛОТА (AI COPILOT SIDE-PANEL) -->
   <aside class="copilot-panel" id="copilotPanel" aria-label="ИИ-Копилот Proton" hidden>
@@ -2998,7 +3153,7 @@ body.copilot-open .main {
 
   <!-- ПОДВАЛ -->
   <footer class="footer">
-    <span>Proton Browser &copy; 2026 · Версия 2.11.3 · Без рекламы и трекеров</span>
+    <span>Proton Browser &copy; 2026 · Версия 2.11.4 · Без рекламы и трекеров</span>
   </footer>
 
   <!-- МОДАЛЬНОЕ ОКНО НАСТРОЕК (display: none !important когда закрыто) -->
@@ -3007,7 +3162,7 @@ body.copilot-open .main {
       <div class="modal-header">
         <div class="modal-title-wrap">
           <h2 class="modal-title" id="settingsTitle">Настройки Proton</h2>
-          <span class="badge-version" id="settingsVersionBadge">v2.11.3</span>
+          <span class="badge-version" id="settingsVersionBadge">v2.11.4</span>
         </div>
         <button type="button" class="modal-close" id="settingsCloseBtn" aria-label="Закрыть">
           <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
@@ -3253,7 +3408,7 @@ body.copilot-open .main {
             </div>
             <h3 style="font-size:18px; margin-bottom:4px;">Proton Desktop</h3>
             <p style="color:var(--text-3); font-size:12.5px; margin-bottom:16px;">
-              Текущая установленная версия: <b style="color:var(--text);">v2.11.3</b>
+              Текущая установленная версия: <b style="color:var(--text);">v2.11.4</b>
             </p>
             <button type="button" class="btn-primary" id="checkUpdatesBtn" style="margin:0 auto;">
               <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/></svg>
@@ -3390,7 +3545,7 @@ body.copilot-open .main {
   </div>
 
   <!-- ==========================================================================
-       JAVASCRIPT ЛОГИКА PROTON v2.11.3
+       JAVASCRIPT ЛОГИКА PROTON v2.11.4
        ========================================================================== -->
   <script>
 "use strict";
@@ -3868,6 +4023,7 @@ const TabManager = {
   },
 
   saveState() {
+    if (IS_INCOGNITO) return;
     try {
       const cleanTabs = this.tabs.map(t => ({
         id: t.id,
@@ -4039,12 +4195,14 @@ const TabManager = {
     if (!wrap) return;
 
     let wv = wrap.querySelector(`webview[data-tab-id="${tab.id}"]`);
+    const created = !wv;
     if (!wv) {
       wv = document.createElement("webview");
       wv.dataset.tabId = tab.id;
-      wv.setAttribute("src", tab.url || "about:blank");
+      wv.setAttribute("src", "about:blank");
       wv.setAttribute("allowpopups", "true");
-      wv.setAttribute("partition", "persist:iskatel_session");
+      wv.setAttribute("partition", PROTON_WEB_PARTITION);
+      wv.setAttribute("webpreferences", "contextIsolation=yes,nodeIntegration=no,sandbox=yes");
       wv.className = "active-webview";
       this.attachWebviewEvents(wv, tab);
       wrap.appendChild(wv);
@@ -4060,9 +4218,29 @@ const TabManager = {
     });
 
     updateNavButtons(tab);
+    if (tab.url) this.openInWebview(wv, tab);
     if (typeof Copilot !== "undefined" && Copilot.syncLayout) {
       Copilot.syncLayout();
       setTimeout(() => Copilot.syncLayout(), 80);
+    }
+  },
+
+  async openInWebview(wv, tab) {
+    const url = tab && tab.url;
+    if (!wv || !url) return;
+    if (!tab.shieldBypass && window.ProtonShield) {
+      const blocked = await ProtonShield.shouldBlock(url);
+      if (blocked) {
+        if (this.activeTabId === tab.id) ProtonShield.showBlock(blocked);
+        return;
+      }
+    }
+    tab.shieldBypass = false;
+    try {
+      if (typeof wv.loadURL === "function") wv.loadURL(url);
+      else wv.setAttribute("src", url);
+    } catch (_) {
+      wv.setAttribute("src", url);
     }
   },
 
@@ -4224,12 +4402,8 @@ const TabManager = {
       wrap.querySelectorAll("webview").forEach(el => {
         if (el.dataset.tabId !== cur.id) el.classList.remove("active-webview");
       });
-      try {
-        if (typeof existingWv.loadURL === "function") existingWv.loadURL(url);
-        else existingWv.setAttribute("src", url);
-      } catch (_) {
-        existingWv.setAttribute("src", url);
-      }
+      cur.shieldBypass = !!opts.shieldBypass;
+      this.openInWebview(existingWv, cur);
       updateNavButtons(cur);
     } else {
       this.showWebViewForTab(cur);
@@ -4496,7 +4670,10 @@ const TabManager = {
 
     window.addEventListener("keydown", (e) => {
       const isCmdOrCtrl = e.ctrlKey || e.metaKey;
-      if (isCmdOrCtrl && e.key.toLowerCase() === "t") {
+      if (isCmdOrCtrl && e.shiftKey && e.key.toLowerCase() === "n") {
+        e.preventDefault();
+        if (window.iskatelAPI && window.iskatelAPI.openIncognito) window.iskatelAPI.openIncognito();
+      } else if (isCmdOrCtrl && e.key.toLowerCase() === "t") {
         e.preventDefault();
         this.createTab({ activate: true });
       } else if (isCmdOrCtrl && e.key.toLowerCase() === "w") {
@@ -6461,7 +6638,7 @@ function initSettings() {
             if (updateProgressWrap) updateProgressWrap.style.display = "none";
             if (updateFoundCard) updateFoundCard.style.display = "block";
           } else {
-            if (updateStatusText) updateStatusText.innerHTML = `<span style="color:#10b981;">У вас установлена самая последняя версия Proton (v2.11.3)!</span>`;
+            if (updateStatusText) updateStatusText.innerHTML = `<span style="color:#10b981;">У вас установлена самая последняя версия Proton (v2.11.4)!</span>`;
           }
         } else {
           checkUpdatesBtn.disabled = false;
@@ -6556,6 +6733,191 @@ function getSettings() {
   } catch (_) { return {}; }
 }
 
+const ProtonShield = {
+  panelOpen: false,
+  pendingPermission: null,
+
+  async shouldBlock(url) {
+    if (!window.iskatelAPI || !window.iskatelAPI.checkUrl) return null;
+    try {
+      const verdict = await window.iskatelAPI.checkUrl(url);
+      if (verdict && verdict.block) return verdict;
+    } catch (_) {}
+    return null;
+  },
+
+  showBlock(verdict) {
+    document.body.dataset.view = "web";
+    if ($("homeView")) $("homeView").hidden = true;
+    if ($("resultsView")) $("resultsView").hidden = true;
+    if ($("webView")) $("webView").hidden = false;
+    if ($("webErrorCard")) $("webErrorCard").hidden = true;
+    const card = $("threatCard");
+    if (!card) return;
+    card.hidden = false;
+    if ($("threatTitle")) $("threatTitle").textContent = "Сайт заблокирован";
+    if ($("threatDesc")) $("threatDesc").textContent = (verdict && verdict.reason) || "Антивирус Proton остановил переход.";
+    if ($("threatUrl")) $("threatUrl").textContent = (verdict && verdict.url) || "";
+    card.dataset.url = (verdict && verdict.url) || "";
+  },
+
+  hideBlock() {
+    const card = $("threatCard");
+    if (card) card.hidden = true;
+  },
+
+  toast(level, title, text) {
+    const el = $("shieldToast");
+    if (!el) return;
+    el.className = "shield-toast " + (level || "ok");
+    if ($("shieldToastTitle")) $("shieldToastTitle").textContent = title || "Защита";
+    if ($("shieldToastText")) $("shieldToastText").textContent = text || "";
+    el.hidden = false;
+    clearTimeout(this._toastTimer);
+    this._toastTimer = setTimeout(() => { el.hidden = true; }, 6500);
+  },
+
+  renderStats(stats) {
+    if (!stats) return;
+    const pages = stats.blockedPages || 0;
+    const extra = stats.blockedResources || 0;
+    const total = pages + extra + (stats.downloadsQuarantined || 0);
+    if ($("shieldBlockedPages")) $("shieldBlockedPages").textContent = String(pages);
+    if ($("shieldBlockedRes")) $("shieldBlockedRes").textContent = String(extra);
+    if ($("shieldScanned")) $("shieldScanned").textContent = String(stats.downloadsScanned || 0);
+    if ($("shieldQuarantine")) $("shieldQuarantine").textContent = String(stats.downloadsQuarantined || 0);
+    if ($("shieldFeed")) $("shieldFeed").textContent = stats.feedSource || "локальные правила";
+    const count = $("shieldCount");
+    const btn = $("shieldBtn");
+    if (count) count.textContent = total > 99 ? "99+" : String(total);
+    if (btn) btn.classList.toggle("has-blocks", total > 0);
+  },
+
+  togglePanel(force) {
+    const panel = $("shieldPanel");
+    if (!panel) return;
+    this.panelOpen = typeof force === "boolean" ? force : !this.panelOpen;
+    panel.hidden = !this.panelOpen;
+    if (this.panelOpen && window.iskatelAPI && window.iskatelAPI.shieldStatus) {
+      window.iskatelAPI.shieldStatus().then((stats) => this.renderStats(stats)).catch(() => {});
+    }
+  },
+
+  askPermission(data) {
+    this.pendingPermission = data || {};
+    const bar = $("permissionBar");
+    if (!bar) return;
+    const names = {
+      media: "камере и микрофону",
+      microphone: "микрофону",
+      camera: "камере",
+      geolocation: "геолокации",
+      notifications: "уведомлениям",
+      "clipboard-read": "буферу обмена",
+      "display-capture": "записи экрана"
+    };
+    const what = names[this.pendingPermission.permission] || "дополнительному доступу";
+    if ($("permissionText")) {
+      $("permissionText").textContent = (this.pendingPermission.host || "Сайт") + " запрашивает доступ к " + what + ".";
+    }
+    bar.hidden = false;
+  },
+
+  answerPermission(allow) {
+    const pending = this.pendingPermission;
+    this.pendingPermission = null;
+    if ($("permissionBar")) $("permissionBar").hidden = true;
+    if (pending && window.iskatelAPI && window.iskatelAPI.replyPermission) {
+      window.iskatelAPI.replyPermission({ id: pending.id, allow: !!allow });
+    }
+  },
+
+  init() {
+    if (IS_INCOGNITO) {
+      document.body.classList.add("incognito");
+      document.title = "Инкогнито — Proton";
+      if ($("incognitoBadge")) $("incognitoBadge").hidden = false;
+      if ($("omniboxInput")) $("omniboxInput").placeholder = "Инкогнито — запрос не сохранится";
+      if ($("homeInput")) $("homeInput").placeholder = "Инкогнито — поиск не сохранится";
+    }
+
+    const shieldBtn = $("shieldBtn");
+    if (shieldBtn) shieldBtn.addEventListener("click", () => this.togglePanel());
+    const closeBtn = $("shieldCloseBtn");
+    if (closeBtn) closeBtn.addEventListener("click", () => this.togglePanel(false));
+    const scanBtn = $("shieldScanBtn");
+    if (scanBtn) {
+      scanBtn.addEventListener("click", async () => {
+        const tab = TabManager.getActiveTab();
+        const url = (tab && tab.url) || ($("omniboxInput") && $("omniboxInput").value) || "";
+        if (!url || !/^https?:/i.test(url)) {
+          this.toast("ok", "Проверка", "Откройте сайт, чтобы проверить его адрес.");
+          return;
+        }
+        const blocked = await this.shouldBlock(url);
+        if (blocked) this.showBlock(blocked);
+        else this.toast("ok", "Угроз не найдено", url);
+      });
+    }
+    const incognitoBtn = $("incognitoBtn");
+    if (incognitoBtn) {
+      incognitoBtn.addEventListener("click", () => {
+        if (window.iskatelAPI && window.iskatelAPI.openIncognito) window.iskatelAPI.openIncognito();
+      });
+    }
+    const backBtn = $("threatBackBtn");
+    if (backBtn) {
+      backBtn.addEventListener("click", () => {
+        this.hideBlock();
+        if (typeof TabManager !== "undefined") TabManager.navBack();
+      });
+    }
+    const allowBtn = $("threatAllowBtn");
+    if (allowBtn) {
+      allowBtn.addEventListener("click", async () => {
+        const url = $("threatCard") && $("threatCard").dataset.url;
+        if (!url) return;
+        if (window.iskatelAPI && window.iskatelAPI.allowUrlOnce) {
+          await window.iskatelAPI.allowUrlOnce(url);
+        }
+        this.hideBlock();
+        const tab = TabManager.getActiveTab();
+        if (!tab) return;
+        tab.url = url;
+        tab.view = "web";
+        tab.shieldBypass = true;
+        const wrap = $("webViewsWrap");
+        const wv = wrap ? wrap.querySelector('webview[data-tab-id="' + tab.id + '"]') : null;
+        if (wv) TabManager.openInWebview(wv, tab);
+        else TabManager.showWebViewForTab(tab);
+      });
+    }
+    const denyPerm = $("permissionDenyBtn");
+    const allowPerm = $("permissionAllowBtn");
+    if (denyPerm) denyPerm.addEventListener("click", () => this.answerPermission(false));
+    if (allowPerm) allowPerm.addEventListener("click", () => this.answerPermission(true));
+
+    if (window.iskatelAPI) {
+      if (window.iskatelAPI.onNavigationBlocked) {
+        window.iskatelAPI.onNavigationBlocked((verdict) => this.showBlock(verdict || {}));
+      }
+      if (window.iskatelAPI.onShieldStats) {
+        window.iskatelAPI.onShieldStats((stats) => this.renderStats(stats));
+      }
+      if (window.iskatelAPI.onShieldEvent) {
+        window.iskatelAPI.onShieldEvent((ev) => this.toast(ev && ev.level, ev && ev.title, ev && ev.text));
+      }
+      if (window.iskatelAPI.onPermissionRequest) {
+        window.iskatelAPI.onPermissionRequest((data) => this.askPermission(data || {}));
+      }
+      if (window.iskatelAPI.shieldStatus) {
+        window.iskatelAPI.shieldStatus().then((stats) => this.renderStats(stats)).catch(() => {});
+      }
+    }
+  }
+};
+window.ProtonShield = ProtonShield;
+
 /* ==========================================================================
    ИНИЦИАЛИЗАЦИЯ И СВЯЗЫВАНИЕ ЭЛЕМЕНТОВ
    ========================================================================== */
@@ -6563,6 +6925,7 @@ function init() {
   try { initThemeStyles(); } catch (e) { console.error("initThemeStyles error:", e); }
   try { WallpaperManager.init(); } catch (e) { console.error("WallpaperManager error:", e); }
   try { TabManager.init(); } catch (e) { console.error("TabManager error:", e); }
+  try { ProtonShield.init(); } catch (e) { console.error("ProtonShield error:", e); }
   try { initAuth(); } catch (e) { console.error("initAuth error:", e); }
   try { initSettings(); } catch (e) { console.error("initSettings error:", e); }
   try { bindAICardEvents(); } catch (e) { console.error("bindAICardEvents error:", e); }
@@ -6712,6 +7075,20 @@ function init() {
 // Запуск инициализации гарантированно: и если загружается, и если уже загружен
 if (document.readyState === "loading") {
   document.addEventListener("DOMContentLoaded", init);
+} else {
+  init();
+}
+  </script>
+</body>
+</html>
+
+} else {
+  init();
+}
+  </script>
+</body>
+</html>
+ventListener("DOMContentLoaded", init);
 } else {
   init();
 }

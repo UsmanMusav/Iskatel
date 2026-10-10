@@ -6,7 +6,7 @@
   <title>Proton — Быстрый браузер</title>
   <style>
 /* ==========================================================================
-   PROTON BROWSER v2.12.1
+   PROTON BROWSER v3.0.0
    - Полное устранение блокировки кликов (display: none для всех закрытых модалок)
    - Гарантированный запуск init() независимо от document.readyState
    - Голосовой ввод (Voice Search) с пульсирующей анимацией записи
@@ -1084,12 +1084,97 @@ body.incognito .chrome-tabs-track { max-width: calc(100% - 130px); }
   user-select: none;
 }
 
-.hero-sub {
+.hero-sub,
+.hero-greeting {
   margin: 0;
   color: var(--hero-sub-color);
   font-size: 15px;
-  letter-spacing: 0.05em;
+  letter-spacing: 0.02em;
   font-weight: 500;
+}
+.hero {
+  position: relative;
+}
+.home-block {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.home-block .hero-title-container {
+  margin-bottom: 0;
+}
+.home-block[data-home-block="greeting"] {
+  margin: 8px 0 22px;
+}
+.hero.is-arranged {
+  display: block;
+}
+.hero.is-arranged .home-block,
+.hero.is-editing .home-block {
+  position: absolute;
+  width: max-content;
+  max-width: min(640px, 92%);
+  margin: 0;
+  z-index: 2;
+}
+.hero.is-arranged .home-block[data-home-block="search"],
+.hero.is-arranged .home-block[data-home-block="tags"],
+.hero.is-arranged .home-block[data-home-block="recent"],
+.hero.is-editing .home-block[data-home-block="search"],
+.hero.is-editing .home-block[data-home-block="tags"],
+.hero.is-editing .home-block[data-home-block="recent"] {
+  width: min(640px, 92%);
+}
+.hero.is-editing .home-block {
+  cursor: grab;
+  outline: 1px dashed rgba(255, 255, 255, 0.38);
+  border-radius: 16px;
+  touch-action: none;
+  z-index: 3;
+  padding: 6px;
+}
+.hero.is-editing .home-block.is-dragging {
+  cursor: grabbing;
+  z-index: 6;
+  outline-color: rgba(255, 255, 255, 0.85);
+}
+.home-arrange-btn,
+.home-edit-bar button {
+  border: 1px solid var(--border);
+  background: var(--card-solid);
+  color: var(--text-2);
+  border-radius: 999px;
+  font-size: 12.5px;
+  cursor: pointer;
+  padding: 7px 12px;
+}
+.home-arrange-btn {
+  position: absolute;
+  top: 14px;
+  right: 16px;
+  z-index: 7;
+}
+.home-edit-bar {
+  position: absolute;
+  left: 16px;
+  right: 16px;
+  bottom: 16px;
+  z-index: 8;
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  padding: 10px 12px;
+  border-radius: 14px;
+  background: var(--card-solid);
+  border: 1px solid var(--border);
+  color: var(--text-2);
+  font-size: 12.5px;
+}
+.hero.is-editing .home-arrange-btn {
+  display: none;
 }
 
 .hero-form {
@@ -1715,6 +1800,8 @@ body.incognito .chrome-tabs-track { max-width: calc(100% - 130px); }
    БОКОВАЯ ПАНЕЛЬ ИИ-КОПИЛОТА (AI COPILOT SIDE-PANEL)
    ========================================================================== */
 .copilot-panel {
+  display: none !important;
+  pointer-events: none !important;
   position: fixed;
   top: 86px;
   right: 0;
@@ -2772,6 +2859,10 @@ body.copilot-open .main {
             <span>Мои закладки</span>
             <span class="user-menu-count" id="menuBookmarksCount">0</span>
           </button>
+          <button type="button" class="user-menu-item" id="menuArrangeHomeBtn">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 8h16M4 16h10"/><circle cx="8" cy="8" r="2"/><circle cx="16" cy="16" r="2"/></svg>
+            <span>Настроить главный экран</span>
+          </button>
           <button type="button" class="user-menu-item" id="menuSettingsBtn">
             <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
             <span>Настройки и оформление</span>
@@ -2790,20 +2881,6 @@ body.copilot-open .main {
       </button>
       <button type="button" class="chrome-icon-btn" id="incognitoBtn" aria-label="Новое окно инкогнито" title="Инкогнито (Ctrl+Shift+N)">
         <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 10h16l-1.2 2.2A8 8 0 0 1 4 12.2L4 10z"/><path d="M8 14.5a2 2 0 1 0 .1 0"/><path d="M15 14.5a2 2 0 1 0 .1 0"/><path d="M9 18c.8.7 1.8 1 3 1s2.2-.3 3-1"/></svg>
-      </button>
-
-      <!-- Кнопка ИИ-Копилота (боковая панель) -->
-      <button type="button" class="chrome-icon-btn" id="copilotToggleBtn" aria-label="ИИ-Копилот" title="ИИ-Копилот (Ctrl+J)">
-        <svg viewBox="0 0 24 24" width="18" height="18" fill="none">
-          <path d="M12 2L14.4 8.6L21 11L14.4 13.4L12 20L9.6 13.4L3 11L9.6 8.6L12 2Z" fill="url(#copilotTopGrad)" stroke="currentColor" stroke-width="1.2"/>
-          <defs>
-            <linearGradient id="copilotTopGrad" x1="3" y1="2" x2="21" y2="20" gradientUnits="userSpaceOnUse">
-              <stop stop-color="#8b5cf6"/>
-              <stop offset="0.5" stop-color="#3b82f6"/>
-              <stop offset="1" stop-color="#06b6d4"/>
-            </linearGradient>
-          </defs>
-        </svg>
       </button>
 
       <!-- Кнопка настроек -->
@@ -2849,69 +2926,83 @@ body.copilot-open .main {
 
     <!-- ГЛАВНАЯ СТРАНИЦА (HOME VIEW) -->
     <section class="view view-home" id="homeView">
-      <div class="hero">
+      <div class="hero" id="homeCanvas">
+        <button type="button" class="home-arrange-btn" id="homeArrangeBtn">Настроить экран</button>
 
-        <!-- Квантовый логотип с орбитальными кольцами -->
-        <div class="hero-logo-wrap" id="heroLogoBtn" title="Proton">
-          <svg viewBox="0 0 54 54" aria-hidden="true">
-            <defs>
-              <linearGradient id="gProtonHero" x1="0" y1="0" x2="1" y2="1">
-                <stop offset="0%" stop-color="#ffffff"/>
-                <stop offset="100%" stop-color="#94a3b8"/>
-              </linearGradient>
-            </defs>
-            <rect x="3" y="3" width="48" height="48" rx="14" fill="var(--hero-logo-bg)" stroke="rgba(255, 255, 255, 0.18)" stroke-width="1.5"/>
-            <circle cx="27" cy="27" r="7" fill="url(#gProtonHero)"/>
-            <ellipse cx="27" cy="27" rx="17" ry="7" fill="none" stroke="#ffffff" stroke-width="2" transform="rotate(-30 27 27)" stroke-dasharray="3 2" opacity="0.85"/>
-            <ellipse cx="27" cy="27" rx="17" ry="7" fill="none" stroke="#cbd5e1" stroke-width="2" transform="rotate(30 27 27)" stroke-dasharray="3 2" opacity="0.85"/>
-          </svg>
-        </div>
-
-        <!-- Стильный заголовок, который НИКОГДА не сливается с фоном -->
-        <div class="hero-title-container">
-          <h1 class="hero-title">Proton</h1>
-          <p class="hero-sub" id="heroSub" hidden>Быстрый · Приватный · Минималистичный</p>
-        </div>
-
-        <!-- Поисковая форма на главной -->
-        <form class="hero-form" id="homeForm" autocomplete="off" action="javascript:void(0);" onsubmit="return false;">
-          <div class="search-box-lg">
-            <svg class="ico-search" viewBox="0 0 24 24" aria-hidden="true"><path d="M10.5 3a7.5 7.5 0 0 1 5.94 12.09l4.24 4.24a1 1 0 0 1-1.41 1.41l-4.24-4.24A7.5 7.5 0 1 1 10.5 3Zm0 2a5.5 5.5 0 1 0 0 11 5.5 5.5 0 0 0 0-11Z"/></svg>
-            <input type="search" id="homeInput" name="q" placeholder="Поиск в интернете или веб-адрес…" aria-label="Поисковый запрос" spellcheck="false" autofocus>
-            <button type="button" class="clear-btn" id="homeClear" aria-label="Очистить" hidden>
-              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-            </button>
-            <!-- Кнопка голосового поиска на главной -->
-            <button type="button" class="voice-search-btn" id="homeVoiceBtn" title="Голосовой ввод" aria-label="Голосовой ввод">
-              <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>
-            </button>
-            <button type="submit" class="search-submit-btn" id="homeSubmitBtn" aria-label="Найти">
-              <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                <line x1="5" y1="12" x2="19" y2="12"></line>
-                <polyline points="12 5 19 12 12 19"></polyline>
-              </svg>
-            </button>
+        <div class="home-block" data-home-block="logo">
+          <div class="hero-logo-wrap" id="heroLogoBtn" title="Proton">
+            <svg viewBox="0 0 54 54" aria-hidden="true">
+              <defs>
+                <linearGradient id="gProtonHero" x1="0" y1="0" x2="1" y2="1">
+                  <stop offset="0%" stop-color="#ffffff"/>
+                  <stop offset="100%" stop-color="#94a3b8"/>
+                </linearGradient>
+              </defs>
+              <rect x="3" y="3" width="48" height="48" rx="14" fill="var(--hero-logo-bg)" stroke="rgba(255, 255, 255, 0.18)" stroke-width="1.5"/>
+              <circle cx="27" cy="27" r="7" fill="url(#gProtonHero)"/>
+              <ellipse cx="27" cy="27" rx="17" ry="7" fill="none" stroke="#ffffff" stroke-width="2" transform="rotate(-30 27 27)" stroke-dasharray="3 2" opacity="0.85"/>
+              <ellipse cx="27" cy="27" rx="17" ry="7" fill="none" stroke="#cbd5e1" stroke-width="2" transform="rotate(30 27 27)" stroke-dasharray="3 2" opacity="0.85"/>
+            </svg>
           </div>
-          <div class="suggest-box" id="homeSuggest" role="listbox" hidden></div>
-        </form>
-
-        <!-- Быстрые категории (ОТКЛЮЧЕНЫ ПО УМОЛЧАНИЮ) -->
-        <div class="quick-tags" id="quickTags" hidden>
-          <span class="quick-chip" data-query="Погода в Астрахани">Погода</span>
-          <span class="quick-chip" data-query="Главные мировые новости">Новости</span>
-          <span class="quick-chip" data-query="Нейросети и искусственный интеллект">Нейросети</span>
-          <span class="quick-chip" data-query="GitHub">GitHub</span>
-          <span class="quick-chip" data-query="Курс доллара и валют">Валюта</span>
-          <span class="quick-chip" data-query="Википедия на русском">Википедия</span>
         </div>
 
-        <!-- Недавние запросы -->
-        <div class="recent-block" id="recentBlock" hidden>
-          <div class="recent-head">
-            <span>Недавние запросы:</span>
-            <button type="button" class="link-btn" id="clearRecent">очистить</button>
+        <div class="home-block" data-home-block="title">
+          <div class="hero-title-container">
+            <h1 class="hero-title" id="heroTitle">Proton</h1>
           </div>
-          <div class="quick-row" id="recentRow"></div>
+        </div>
+
+        <div class="home-block" data-home-block="greeting">
+          <p class="hero-greeting" id="heroGreeting">Добрый день</p>
+        </div>
+
+        <div class="home-block" data-home-block="search">
+          <form class="hero-form" id="homeForm" autocomplete="off" action="javascript:void(0);" onsubmit="return false;">
+            <div class="search-box-lg">
+              <svg class="ico-search" viewBox="0 0 24 24" aria-hidden="true"><path d="M10.5 3a7.5 7.5 0 0 1 5.94 12.09l4.24 4.24a1 1 0 0 1-1.41 1.41l-4.24-4.24A7.5 7.5 0 1 1 10.5 3Zm0 2a5.5 5.5 0 1 0 0 11 5.5 5.5 0 0 0 0-11Z"/></svg>
+              <input type="search" id="homeInput" name="q" placeholder="Поиск в интернете или веб-адрес…" aria-label="Поисковый запрос" spellcheck="false" autofocus>
+              <button type="button" class="clear-btn" id="homeClear" aria-label="Очистить" hidden>
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+              </button>
+              <button type="button" class="voice-search-btn" id="homeVoiceBtn" title="Голосовой ввод" aria-label="Голосовой ввод">
+                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>
+              </button>
+              <button type="submit" class="search-submit-btn" id="homeSubmitBtn" aria-label="Найти">
+                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                  <line x1="5" y1="12" x2="19" y2="12"></line>
+                  <polyline points="12 5 19 12 12 19"></polyline>
+                </svg>
+              </button>
+            </div>
+            <div class="suggest-box" id="homeSuggest" role="listbox" hidden></div>
+          </form>
+        </div>
+
+        <div class="home-block" data-home-block="tags">
+          <div class="quick-tags" id="quickTags" hidden>
+            <span class="quick-chip" data-query="Погода в Астрахани">Погода</span>
+            <span class="quick-chip" data-query="Главные мировые новости">Новости</span>
+            <span class="quick-chip" data-query="Нейросети и искусственный интеллект">Нейросети</span>
+            <span class="quick-chip" data-query="GitHub">GitHub</span>
+            <span class="quick-chip" data-query="Курс доллара и валют">Валюта</span>
+            <span class="quick-chip" data-query="Википедия на русском">Википедия</span>
+          </div>
+        </div>
+
+        <div class="home-block" data-home-block="recent">
+          <div class="recent-block" id="recentBlock" hidden>
+            <div class="recent-head">
+              <span>Недавние запросы:</span>
+              <button type="button" class="link-btn" id="clearRecent">очистить</button>
+            </div>
+            <div class="quick-row" id="recentRow"></div>
+          </div>
+        </div>
+
+        <div class="home-edit-bar" id="homeEditBar" hidden>
+          <span>Перетащите название, приветствие, поиск и кнопки.</span>
+          <button type="button" id="homeEditDone">Готово</button>
+          <button type="button" id="homeEditReset">Сбросить</button>
         </div>
       </div>
     </section>
@@ -3158,7 +3249,7 @@ body.copilot-open .main {
 
   <!-- ПОДВАЛ -->
   <footer class="footer">
-    <span>Proton Browser &copy; 2026 · Версия 2.12.1 · Без рекламы и трекеров</span>
+    <span>Proton Browser &copy; 2026 · Версия 3.0.0 · Без рекламы и трекеров</span>
   </footer>
 
   <!-- МОДАЛЬНОЕ ОКНО НАСТРОЕК (display: none !important когда закрыто) -->
@@ -3167,7 +3258,7 @@ body.copilot-open .main {
       <div class="modal-header">
         <div class="modal-title-wrap">
           <h2 class="modal-title" id="settingsTitle">Настройки Proton</h2>
-          <span class="badge-version" id="settingsVersionBadge">v2.12.1</span>
+          <span class="badge-version" id="settingsVersionBadge">v3.0.0</span>
         </div>
         <button type="button" class="modal-close" id="settingsCloseBtn" aria-label="Закрыть">
           <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
@@ -3309,14 +3400,32 @@ body.copilot-open .main {
 
           <div class="setting-group">
             <label class="setting-label">Главная страница</label>
-            <p class="setting-desc">Эти элементы выключены по умолчанию. Название Proton и строка поиска остаются на месте.</p>
+            <p class="setting-desc">Название, приветствие, поиск и кнопки можно перетащить. Быстрые категории и недавние запросы остаются выключенными, пока вы их не включите.</p>
           </div>
           <div class="setting-group">
             <label class="setting-checkbox-label">
-              <input type="checkbox" id="settingShowHeroSub">
-              <span>Показывать подзаголовок «Быстрый · Приватный · Минималистичный»</span>
+              <input type="checkbox" id="settingShowGreeting" checked>
+              <span>Показывать приветствие</span>
             </label>
-            <p class="setting-desc">По умолчанию выключено.</p>
+            <p class="setting-desc">Вместо старого подзаголовка. По умолчанию включено.</p>
+          </div>
+          <div class="setting-group">
+            <label class="setting-label" for="settingGreetingMode">Какое приветствие показывать</label>
+            <select class="setting-select" id="settingGreetingMode">
+              <option value="auto">Несколько, по времени суток</option>
+              <option value="Доброе утро">Доброе утро</option>
+              <option value="Добрый день">Добрый день</option>
+              <option value="Добрый вечер">Добрый вечер</option>
+              <option value="Доброй ночи">Доброй ночи</option>
+              <option value="Рады вас видеть">Рады вас видеть</option>
+              <option value="С возвращением">С возвращением</option>
+              <option value="Что будем искать?">Что будем искать?</option>
+              <option value="Хорошего дня">Хорошего дня</option>
+            </select>
+          </div>
+          <div class="setting-group" style="display:flex; gap:8px; flex-wrap:wrap;">
+            <button type="button" class="btn-secondary" id="settingsArrangeHomeBtn">Расставить блоки на главной</button>
+            <button type="button" class="btn-secondary" id="settingsResetHomeBtn">Вернуть обычное расположение</button>
           </div>
           <div class="setting-group">
             <label class="setting-checkbox-label">
@@ -4013,7 +4122,9 @@ function initVoiceSearch() {
         setInputs(transcript);
         if (e.results[0] && e.results[0].isFinal) {
           stopVoice();
-          runSearch(transcript);
+          if (targetInput && targetInput.id === "homeInput") searchFromHome(transcript);
+          else if (document.body.dataset.view === "home") searchFromHome(transcript);
+          else runSearch(transcript);
         }
       };
 
@@ -4993,6 +5104,7 @@ function showHome() {
   hideSuggest();
   window.scrollTo({ top: 0 });
   scheduleWebviewFrames();
+  refreshGreeting(true);
 }
 
 function showResults() {
@@ -5763,6 +5875,10 @@ const Copilot = {
   _lastToggleAt: 0,
 
   init() {
+    const panel = $("copilotPanel");
+    if (panel) panel.hidden = true;
+    document.body.classList.remove("copilot-open");
+    return;
     const toggleBtn = $("copilotToggleBtn");
     const closeBtn = $("copilotCloseBtn");
     const newChatBtn = $("copilotNewChatBtn");
@@ -5924,6 +6040,9 @@ const Copilot = {
 
   open() {
     const panel = $("copilotPanel");
+    if (panel) panel.hidden = true;
+    document.body.classList.remove("copilot-open");
+    return;
     const toggleBtn = $("copilotToggleBtn");
     if (!panel) return;
     panel.hidden = false;
@@ -6225,7 +6344,8 @@ async function fetchSuggest(q, box, input) {
       item.addEventListener("click", () => {
         input.value = s;
         box.hidden = true;
-        runSearch(s);
+        if (input.id === "homeInput" || document.body.dataset.view === "home") searchFromHome(s);
+        else runSearch(s);
       });
       box.appendChild(item);
     });
@@ -6269,8 +6389,7 @@ function isLoggedIn() {
 function applyHomeChrome(s, loggedIn) {
   s = s || getSettings();
   if (loggedIn === undefined) loggedIn = isLoggedIn();
-  const sub = $("heroSub");
-  if (sub) sub.hidden = s.showHeroSubtitle !== true;
+  refreshGreeting(false);
   const quickTagsEl = $("quickTags");
   if (quickTagsEl) quickTagsEl.hidden = s.showQuickTags !== true;
   const gear = $("settingsBtn");
@@ -6293,7 +6412,7 @@ function renderRecent() {
     const chip = document.createElement("span");
     chip.className = "quick-chip";
     chip.textContent = q;
-    chip.addEventListener("click", () => runSearch(q));
+    chip.addEventListener("click", () => searchFromHome(q));
     row.appendChild(chip);
   });
   block.hidden = false;
@@ -6544,7 +6663,8 @@ function loadSettings() {
   if ($("settingShowInstant")) $("settingShowInstant").checked = s.showInstant !== false;
   if ($("settingShowSuggestions")) $("settingShowSuggestions").checked = s.showSuggestions !== false;
   if ($("settingAmbientBlobs")) $("settingAmbientBlobs").checked = s.ambientBlobs !== false;
-  if ($("settingShowHeroSub")) $("settingShowHeroSub").checked = s.showHeroSubtitle === true;
+  if ($("settingShowGreeting")) $("settingShowGreeting").checked = s.showGreeting !== false;
+  if ($("settingGreetingMode")) $("settingGreetingMode").value = s.greetingMode || "auto";
   if ($("settingShowQuickTags")) $("settingShowQuickTags").checked = s.showQuickTags === true;
   if ($("settingShowRecent")) $("settingShowRecent").checked = s.showRecent === true;
   if ($("settingShowSettingsButton")) $("settingShowSettingsButton").checked = s.showSettingsButton === true;
@@ -6574,7 +6694,8 @@ function saveSettings() {
     showInstant: $("settingShowInstant") ? $("settingShowInstant").checked : true,
     showSuggestions: $("settingShowSuggestions") ? $("settingShowSuggestions").checked : true,
     ambientBlobs: $("settingAmbientBlobs") ? $("settingAmbientBlobs").checked : true,
-    showHeroSubtitle: $("settingShowHeroSub") ? $("settingShowHeroSub").checked : false,
+    showGreeting: $("settingShowGreeting") ? $("settingShowGreeting").checked : true,
+    greetingMode: $("settingGreetingMode") ? $("settingGreetingMode").value : "auto",
     showQuickTags: $("settingShowQuickTags") ? $("settingShowQuickTags").checked : false,
     showRecent: $("settingShowRecent") ? $("settingShowRecent").checked : false,
     showSettingsButton: $("settingShowSettingsButton") ? $("settingShowSettingsButton").checked : false,
@@ -7015,6 +7136,255 @@ window.ProtonShield = ProtonShield;
 /* ==========================================================================
    ИНИЦИАЛИЗАЦИЯ И СВЯЗЫВАНИЕ ЭЛЕМЕНТОВ
    ========================================================================== */
+
+/* ==========================================================================
+   ПРИВЕТСТВИЕ И ПОИСК С ГЛАВНОЙ (v3.0.0)
+   ========================================================================== */
+const GREETING_POOLS = {
+  night: ["Доброй ночи", "Спокойной ночи", "Тихой ночи"],
+  morning: ["Доброе утро", "С добрым утром", "Хорошего утра"],
+  day: ["Добрый день", "Хорошего дня", "Рады вас видеть"],
+  evening: ["Добрый вечер", "Приятного вечера", "С возвращением"]
+};
+const GREETING_EXTRA = ["Что будем искать?", "С возвращением", "Рады вас видеть", "Хорошего дня"];
+
+function greetingName() {
+  try {
+    const user = JSON.parse(localStorage.getItem("proton-user") || "null");
+    const name = user && user.name ? String(user.name).trim().split(/\s+/)[0] : "";
+    return name || "";
+  } catch (_) {
+    return "";
+  }
+}
+
+function composeGreeting(base) {
+  const name = greetingName();
+  if (!name || /[?]$/.test(base) || base.indexOf(name) !== -1) return base;
+  return base + ", " + name;
+}
+
+function pickGreeting(force) {
+  const s = getSettings();
+  const mode = s.greetingMode || "auto";
+  if (mode && mode !== "auto") return composeGreeting(mode);
+  if (!force && pickGreeting.cached) return pickGreeting.cached;
+  const hour = new Date().getHours();
+  let pool = GREETING_POOLS.day;
+  if (hour < 5 || hour >= 23) pool = GREETING_POOLS.night;
+  else if (hour < 12) pool = GREETING_POOLS.morning;
+  else if (hour >= 18) pool = GREETING_POOLS.evening;
+  const all = pool.concat(GREETING_EXTRA);
+  const base = all[Math.floor(Math.random() * all.length)];
+  pickGreeting.cached = composeGreeting(base);
+  return pickGreeting.cached;
+}
+
+function refreshGreeting(force) {
+  const el = $("heroGreeting");
+  if (!el) return;
+  const s = getSettings();
+  const show = s.showGreeting !== false;
+  el.hidden = !show;
+  if (show) el.textContent = pickGreeting(!!force);
+}
+
+function engineSearchUrl(query) {
+  const s = getSettings();
+  const engine = String(s.engine || "auto").toLowerCase();
+  const q = encodeURIComponent(query);
+  const region = String(s.region || "ru-ru");
+  if (engine === "bing") {
+    const lang = region.indexOf("us") === 0 ? "en" : (region.indexOf("de") === 0 ? "de" : "ru");
+    return "https://www.bing.com/search?q=" + q + "&setlang=" + lang;
+  }
+  if (engine === "google") {
+    const hl = region.indexOf("us") === 0 ? "en" : (region.indexOf("de") === 0 ? "de" : "ru");
+    return "https://www.google.com/search?q=" + q + "&hl=" + hl;
+  }
+  return "https://duckduckgo.com/?q=" + q + "&kl=" + encodeURIComponent(region || "ru-ru");
+}
+
+function searchFromHome(query) {
+  query = String(query || "").trim();
+  if (!query) return;
+  if (typeof isWebUrl === "function" && isWebUrl(query)) {
+    TabManager.navigateToUrl(query);
+    return;
+  }
+  try { pushRecent(query); } catch (_) {}
+  TabManager.navigateToUrl(engineSearchUrl(query), { title: query });
+}
+
+const HomeLayout = {
+  KEY: "proton-home-layout",
+  editing: false,
+  layout: null,
+  drag: null,
+
+  load() {
+    try {
+      const raw = JSON.parse(localStorage.getItem(this.KEY) || "null");
+      if (raw && raw.blocks) this.layout = raw;
+    } catch (_) {}
+  },
+
+  save() {
+    try {
+      if (this.layout) localStorage.setItem(this.KEY, JSON.stringify(this.layout));
+      else localStorage.removeItem(this.KEY);
+    } catch (_) {}
+  },
+
+  clamp(n) {
+    return Math.max(8, Math.min(92, Math.round(n * 10) / 10));
+  },
+
+  fallback(id) {
+    const map = {
+      logo: { x: 50, y: 22 },
+      title: { x: 50, y: 36 },
+      greeting: { x: 50, y: 46 },
+      search: { x: 50, y: 58 },
+      tags: { x: 50, y: 72 },
+      recent: { x: 50, y: 84 }
+    };
+    return map[id] || { x: 50, y: 50 };
+  },
+
+  apply() {
+    const hero = $("homeCanvas");
+    if (!hero) return;
+    const arranged = !!(this.layout && this.layout.blocks);
+    hero.classList.toggle("is-arranged", arranged || this.editing);
+    hero.classList.toggle("is-editing", this.editing);
+    const bar = $("homeEditBar");
+    if (bar) bar.hidden = !this.editing;
+    hero.querySelectorAll(".home-block").forEach((el) => {
+      const id = el.dataset.homeBlock;
+      const pos = arranged && this.layout.blocks[id] ? this.layout.blocks[id] : null;
+      if ((arranged || this.editing) && pos) {
+        el.style.left = pos.x + "%";
+        el.style.top = pos.y + "%";
+        el.style.transform = "translate(-50%, -50%)";
+      } else {
+        el.style.left = "";
+        el.style.top = "";
+        el.style.transform = "";
+      }
+    });
+  },
+
+  snapshot() {
+    const hero = $("homeCanvas");
+    if (!hero) return;
+    const rect = hero.getBoundingClientRect();
+    const blocks = {};
+    hero.querySelectorAll(".home-block").forEach((el) => {
+      const id = el.dataset.homeBlock;
+      if (!id) return;
+      const r = el.getBoundingClientRect();
+      if (!rect.width || !rect.height || !r.width || !r.height) {
+        blocks[id] = this.fallback(id);
+        return;
+      }
+      blocks[id] = {
+        x: this.clamp(((r.left + r.width / 2 - rect.left) / rect.width) * 100),
+        y: this.clamp(((r.top + r.height / 2 - rect.top) / rect.height) * 100)
+      };
+    });
+    this.layout = { blocks };
+  },
+
+  startEdit() {
+    try { showHome(); } catch (_) {}
+    ["quickTags", "recentBlock", "heroGreeting"].forEach((id) => {
+      const el = $(id);
+      if (el) el.hidden = false;
+    });
+    if (!this.layout) this.snapshot();
+    this.editing = true;
+    this.apply();
+    try { closeModal("settingsModal"); } catch (_) {}
+    const menu = $("userDropdownMenu");
+    if (menu) menu.style.display = "none";
+  },
+
+  finishEdit() {
+    this.editing = false;
+    this.save();
+    this.apply();
+    try { applyHomeChrome(); } catch (_) {}
+  },
+
+  reset() {
+    this.layout = null;
+    this.editing = false;
+    try { localStorage.removeItem(this.KEY); } catch (_) {}
+    this.apply();
+    try { applyHomeChrome(); } catch (_) {}
+  },
+
+  init() {
+    this.load();
+    this.apply();
+    const hero = $("homeCanvas");
+    if (!hero || hero.dataset.bound === "1") return;
+    hero.dataset.bound = "1";
+    hero.addEventListener("pointerdown", (e) => {
+      if (!this.editing) return;
+      const block = e.target.closest(".home-block");
+      if (!block || !hero.contains(block)) return;
+      e.preventDefault();
+      const pos = this.layout && this.layout.blocks ? this.layout.blocks[block.dataset.homeBlock] : null;
+      this.drag = {
+        id: block.dataset.homeBlock,
+        el: block,
+        dx: e.clientX,
+        dy: e.clientY,
+        x: pos ? pos.x : 50,
+        y: pos ? pos.y : 50
+      };
+      block.classList.add("is-dragging");
+      try { block.setPointerCapture(e.pointerId); } catch (_) {}
+    });
+    hero.addEventListener("pointermove", (e) => {
+      if (!this.drag) return;
+      const rect = hero.getBoundingClientRect();
+      if (!rect.width || !rect.height) return;
+      const x = this.clamp(this.drag.x + ((e.clientX - this.drag.dx) / rect.width) * 100);
+      const y = this.clamp(this.drag.y + ((e.clientY - this.drag.dy) / rect.height) * 100);
+      if (!this.layout) this.layout = { blocks: {} };
+      if (!this.layout.blocks) this.layout.blocks = {};
+      this.layout.blocks[this.drag.id] = { x: x, y: y };
+      this.drag.el.style.left = x + "%";
+      this.drag.el.style.top = y + "%";
+      this.drag.el.style.transform = "translate(-50%, -50%)";
+    });
+    const endDrag = () => {
+      if (!this.drag) return;
+      this.drag.el.classList.remove("is-dragging");
+      this.drag = null;
+      this.save();
+    };
+    hero.addEventListener("pointerup", endDrag);
+    hero.addEventListener("pointercancel", endDrag);
+
+    const arrange = $("homeArrangeBtn");
+    if (arrange) arrange.addEventListener("click", () => this.startEdit());
+    const done = $("homeEditDone");
+    if (done) done.addEventListener("click", () => this.finishEdit());
+    const reset = $("homeEditReset");
+    if (reset) reset.addEventListener("click", () => this.reset());
+    const menuArrange = $("menuArrangeHomeBtn");
+    if (menuArrange) menuArrange.addEventListener("click", () => this.startEdit());
+    const settingsArrange = $("settingsArrangeHomeBtn");
+    if (settingsArrange) settingsArrange.addEventListener("click", () => this.startEdit());
+    const settingsReset = $("settingsResetHomeBtn");
+    if (settingsReset) settingsReset.addEventListener("click", () => this.reset());
+  }
+};
+
 function init() {
   try { initThemeStyles(); } catch (e) { console.error("initThemeStyles error:", e); }
   try { WallpaperManager.init(); } catch (e) { console.error("WallpaperManager error:", e); }
@@ -7025,6 +7395,8 @@ function init() {
   try { bindAICardEvents(); } catch (e) { console.error("bindAICardEvents error:", e); }
   try { populateVoiceList(); } catch (e) { console.error("populateVoiceList error:", e); }
   try { Copilot.init(); } catch (e) { console.error("Copilot error:", e); }
+  try { HomeLayout.init(); } catch (e) { console.error("HomeLayout error:", e); }
+  try { refreshGreeting(true); } catch (e) { console.error("greeting error:", e); }
   try { initVoiceSearch(); } catch (e) { console.error("initVoiceSearch error:", e); }
   try { updateBookmarksUI(); } catch (e) { console.error("updateBookmarksUI error:", e); }
   try { renderRecent(); } catch (e) { console.error("renderRecent error:", e); }
@@ -7049,7 +7421,7 @@ function init() {
   if (homeForm) {
     homeForm.addEventListener("submit", (e) => {
       e.preventDefault();
-      runSearch($("homeInput") ? $("homeInput").value : "");
+      searchFromHome($("homeInput") ? $("homeInput").value : "");
     });
   }
 
@@ -7057,7 +7429,8 @@ function init() {
   if (omniboxForm) {
     omniboxForm.addEventListener("submit", (e) => {
       e.preventDefault();
-      runSearch($("omniboxInput") ? $("omniboxInput").value : "");
+      if (document.body.dataset.view === "home") searchFromHome($("omniboxInput") ? $("omniboxInput").value : "");
+      else runSearch($("omniboxInput") ? $("omniboxInput").value : "");
     });
   }
 
@@ -7088,7 +7461,7 @@ function init() {
 
   document.querySelectorAll(".quick-chip[data-query]").forEach(chip => {
     chip.addEventListener("click", () => {
-      runSearch(chip.dataset.query);
+      searchFromHome(chip.dataset.query);
     });
   });
 

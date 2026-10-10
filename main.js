@@ -15,7 +15,7 @@ const crypto = require("crypto");
 
 app.setName("Proton");
 
-const APP_VERSION = "2.12.1";
+const APP_VERSION = "3.0.0";
 const GITHUB_REPO = "UsmanMusav/Iskatel";
 const LATEST_RELEASE_URL = `https://api.github.com/repos/${GITHUB_REPO}/releases/latest`;
 
@@ -1854,10 +1854,7 @@ app.whenReady().then(() => {
         createWindow({ incognito: true });
         return;
       }
-      if (accel && !input.alt && !input.shift && key === "j") {
-        event.preventDefault();
-        win.webContents.send("iskatel:toggle-copilot");
-      }
+
     });
   });
 

@@ -6,7 +6,7 @@
   <title>Proton — Быстрый браузер</title>
   <style>
 /* ==========================================================================
-   PROTON BROWSER v2.9.0
+   PROTON BROWSER v2.10.0
    - Полное устранение блокировки кликов (display: none для всех закрытых модалок)
    - Гарантированный запуск init() независимо от document.readyState
    - Голосовой ввод (Voice Search) с пульсирующей анимацией записи
@@ -1598,6 +1598,369 @@ body.has-custom-bg .ambient {
   flex-shrink: 0;
 }
 
+/* ==========================================================================
+   БОКОВАЯ ПАНЕЛЬ ИИ-КОПИЛОТА (AI COPILOT SIDE-PANEL)
+   ========================================================================== */
+.copilot-panel {
+  position: fixed;
+  top: 86px;
+  right: 0;
+  bottom: 0;
+  width: 380px;
+  max-width: 90vw;
+  background: var(--card-solid);
+  border-left: 1px solid var(--border);
+  box-shadow: -8px 0 32px rgba(0, 0, 0, 0.22);
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  transition: transform 0.28s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.2s ease;
+  animation: copilotSlideIn 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.copilot-panel[hidden] {
+  display: none !important;
+}
+
+@keyframes copilotSlideIn {
+  from { transform: translateX(100%); opacity: 0; }
+  to { transform: translateX(0); opacity: 1; }
+}
+
+.copilot-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--border);
+  background: var(--bg-soft);
+  flex-shrink: 0;
+}
+
+.copilot-brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.copilot-spark-badge {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  background: var(--accent-soft);
+  color: var(--accent);
+}
+
+.copilot-title-wrap {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.copilot-title {
+  font-size: 14.5px;
+  font-weight: 700;
+  color: var(--text);
+  letter-spacing: -0.2px;
+}
+
+.copilot-engine-badge {
+  font-size: 10.5px;
+  font-weight: 600;
+  padding: 1px 7px;
+  border-radius: 10px;
+  background: var(--accent-soft);
+  color: var(--accent);
+}
+
+.copilot-head-actions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.copilot-icon-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 7px;
+  background: transparent;
+  border: none;
+  color: var(--text-2);
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.copilot-icon-btn:hover {
+  background: var(--tab-hover-bg);
+  color: var(--text);
+}
+
+/* Быстрые чипы */
+.copilot-chips-bar {
+  display: flex;
+  gap: 6px;
+  padding: 10px 14px;
+  overflow-x: auto;
+  border-bottom: 1px solid var(--border);
+  background: var(--bg);
+  flex-shrink: 0;
+  scrollbar-width: none;
+}
+.copilot-chips-bar::-webkit-scrollbar {
+  display: none;
+}
+
+.copilot-chip {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 10px;
+  border-radius: 14px;
+  background: var(--card);
+  border: 1px solid var(--border);
+  color: var(--text-2);
+  font-size: 11.5px;
+  font-weight: 500;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.copilot-chip:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+  background: var(--accent-soft);
+}
+
+/* Список сообщений */
+.copilot-messages {
+  flex: 1;
+  overflow-y: auto;
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.copilot-welcome-card {
+  text-align: center;
+  padding: 24px 14px;
+  background: var(--bg-soft);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  margin-top: 10px;
+}
+
+.copilot-welcome-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  background: var(--accent-soft);
+  color: var(--accent);
+  margin-bottom: 10px;
+}
+
+.copilot-welcome-card h4 {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--text);
+  margin-bottom: 6px;
+}
+
+.copilot-welcome-card p {
+  font-size: 12.5px;
+  color: var(--text-2);
+  line-height: 1.5;
+}
+
+/* Сообщения */
+.copilot-msg {
+  display: flex;
+  flex-direction: column;
+  max-width: 90%;
+  animation: fadeIn 0.2s ease;
+}
+
+.copilot-msg.user {
+  align-self: flex-end;
+}
+
+.copilot-msg.assistant {
+  align-self: flex-start;
+  max-width: 95%;
+}
+
+.copilot-bubble {
+  padding: 10px 14px;
+  border-radius: 12px;
+  font-size: 13.5px;
+  line-height: 1.55;
+  word-break: break-word;
+  white-space: pre-wrap;
+}
+
+.copilot-msg.user .copilot-bubble {
+  background: var(--accent);
+  color: #ffffff;
+  border-bottom-right-radius: 3px;
+}
+
+.copilot-msg.assistant .copilot-bubble {
+  background: var(--bg-soft);
+  border: 1px solid var(--border);
+  color: var(--text);
+  border-bottom-left-radius: 3px;
+}
+
+.copilot-msg-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 6px;
+}
+
+.copilot-msg-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 8px;
+  border-radius: 6px;
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--text-2);
+  font-size: 11px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.copilot-msg-btn:hover {
+  background: var(--tab-hover-bg);
+  color: var(--text);
+}
+
+.copilot-msg-btn.speaking {
+  background: var(--accent-soft);
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+/* Индикатор печати */
+.copilot-typing {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 10px 14px;
+  background: var(--bg-soft);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  width: fit-content;
+}
+
+.copilot-typing-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--accent);
+  animation: cpDotPulse 1.2s infinite ease-in-out;
+}
+.copilot-typing-dot:nth-child(2) { animation-delay: 0.2s; }
+.copilot-typing-dot:nth-child(3) { animation-delay: 0.4s; }
+
+@keyframes cpDotPulse {
+  0%, 80%, 100% { transform: scale(0.6); opacity: 0.4; }
+  40% { transform: scale(1.1); opacity: 1; }
+}
+
+/* Поле ввода */
+.copilot-input-wrap {
+  padding: 12px 14px;
+  background: var(--bg-soft);
+  border-top: 1px solid var(--border);
+  flex-shrink: 0;
+}
+
+.copilot-form {
+  position: relative;
+  display: flex;
+  align-items: center;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 6px 10px;
+  transition: border-color 0.2s ease;
+}
+
+.copilot-form:focus-within {
+  border-color: var(--accent);
+}
+
+.copilot-textarea {
+  flex: 1;
+  background: transparent;
+  border: none;
+  outline: none;
+  font-size: 13.5px;
+  color: var(--text);
+  resize: none;
+  max-height: 100px;
+  line-height: 1.4;
+  font-family: inherit;
+  padding: 4px 6px;
+}
+
+.copilot-textarea::placeholder {
+  color: var(--text-3);
+}
+
+.copilot-form-actions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.copilot-voice-btn, .copilot-send-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 8px;
+  background: transparent;
+  border: none;
+  color: var(--text-2);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.copilot-voice-btn:hover {
+  color: var(--accent);
+  background: var(--accent-soft);
+}
+
+.copilot-voice-btn.listening {
+  color: #ef4444;
+  background: rgba(239, 68, 68, 0.12);
+  animation: pulseVoice 1.2s infinite;
+}
+
+.copilot-send-btn {
+  color: var(--accent);
+}
+
+.copilot-send-btn:hover {
+  background: var(--accent-soft);
+}
+
 /* Скелетоны загрузки */
 .skeletons {
   margin-bottom: 20px;
@@ -2114,6 +2477,20 @@ body.has-custom-bg .ambient {
         </div>
       </div>
 
+      <!-- Кнопка ИИ-Копилота (боковая панель) -->
+      <button type="button" class="chrome-icon-btn" id="copilotToggleBtn" aria-label="ИИ-Копилот" title="ИИ-Копилот (Ctrl+J)">
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="none">
+          <path d="M12 2L14.4 8.6L21 11L14.4 13.4L12 20L9.6 13.4L3 11L9.6 8.6L12 2Z" fill="url(#copilotTopGrad)" stroke="currentColor" stroke-width="1.2"/>
+          <defs>
+            <linearGradient id="copilotTopGrad" x1="3" y1="2" x2="21" y2="20" gradientUnits="userSpaceOnUse">
+              <stop stop-color="#8b5cf6"/>
+              <stop offset="0.5" stop-color="#3b82f6"/>
+              <stop offset="1" stop-color="#06b6d4"/>
+            </linearGradient>
+          </defs>
+        </svg>
+      </button>
+
       <!-- Кнопка настроек -->
       <button type="button" class="chrome-icon-btn" id="settingsBtn" aria-label="Настройки и обновления" title="Настройки">
         <svg viewBox="0 0 24 24" aria-hidden="true" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -2337,9 +2714,76 @@ body.has-custom-bg .ambient {
 
   </main>
 
+  <!-- БОКОВАЯ ПАНЕЛЬ ИИ-КОПИЛОТА (AI COPILOT SIDE-PANEL) -->
+  <aside class="copilot-panel" id="copilotPanel" aria-label="ИИ-Копилот Proton" hidden>
+    <div class="copilot-header">
+      <div class="copilot-brand">
+        <div class="copilot-spark-badge">
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none">
+            <path d="M12 2L14.4 8.6L21 11L14.4 13.4L12 20L9.6 13.4L3 11L9.6 8.6L12 2Z" fill="url(#cpSparkGrad)" stroke="currentColor" stroke-width="1.2"/>
+            <defs>
+              <linearGradient id="cpSparkGrad" x1="3" y1="2" x2="21" y2="20" gradientUnits="userSpaceOnUse">
+                <stop stop-color="#8b5cf6"/>
+                <stop offset="0.5" stop-color="#3b82f6"/>
+                <stop offset="1" stop-color="#06b6d4"/>
+              </linearGradient>
+            </defs>
+          </svg>
+        </div>
+        <div class="copilot-title-wrap">
+          <span class="copilot-title">Proton Copilot</span>
+          <span class="copilot-engine-badge" id="copilotEngineBadge">Нейросеть</span>
+        </div>
+      </div>
+      <div class="copilot-head-actions">
+        <button type="button" class="copilot-icon-btn" id="copilotNewChatBtn" title="Новый диалог" aria-label="Очистить диалог">
+          <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
+        </button>
+        <button type="button" class="copilot-icon-btn" id="copilotCloseBtn" title="Закрыть панель (Ctrl+J)" aria-label="Закрыть Копилот">
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- Быстрые действия / чипы-подсказки -->
+    <div class="copilot-chips-bar" id="copilotChipsBar">
+      <button type="button" class="copilot-chip" data-action="summary">Краткая суть</button>
+      <button type="button" class="copilot-chip" data-action="facts">Главные факты</button>
+      <button type="button" class="copilot-chip" data-action="explain">Объясни просто</button>
+      <button type="button" class="copilot-chip" data-action="compare">Сравнение</button>
+      <button type="button" class="copilot-chip" data-action="translate">Перевод</button>
+    </div>
+
+    <!-- Список сообщений диалога -->
+    <div class="copilot-messages" id="copilotMessages">
+      <div class="copilot-welcome-card" id="copilotWelcomeCard">
+        <div class="copilot-welcome-icon">
+          <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+        </div>
+        <h4>Чем я могу помочь?</h4>
+        <p>Я могу проанализировать текущий поисковый запрос, выделить главное из Википедии и сайтов, перевести текст или ответить на любые ваши вопросы.</p>
+      </div>
+    </div>
+
+    <!-- Поле ввода вопроса -->
+    <div class="copilot-input-wrap">
+      <form class="copilot-form" id="copilotForm" action="javascript:void(0);">
+        <textarea class="copilot-textarea" id="copilotInput" placeholder="Спросить Копилота (Enter для отправки)..." rows="1"></textarea>
+        <div class="copilot-form-actions">
+          <button type="button" class="copilot-voice-btn" id="copilotVoiceBtn" title="Голосовой ввод вопроса" aria-label="Голосовой ввод">
+            <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>
+          </button>
+          <button type="submit" class="copilot-send-btn" id="copilotSendBtn" title="Отправить сообщение" aria-label="Отправить">
+            <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+          </button>
+        </div>
+      </form>
+    </div>
+  </aside>
+
   <!-- ПОДВАЛ -->
   <footer class="footer">
-    <span>Proton Browser &copy; 2026 · Версия 2.9.0 · Без рекламы и трекеров</span>
+    <span>Proton Browser &copy; 2026 · Версия 2.10.0 · Без рекламы и трекеров</span>
   </footer>
 
   <!-- МОДАЛЬНОЕ ОКНО НАСТРОЕК (display: none !important когда закрыто) -->
@@ -2348,7 +2792,7 @@ body.has-custom-bg .ambient {
       <div class="modal-header">
         <div class="modal-title-wrap">
           <h2 class="modal-title" id="settingsTitle">Настройки Proton</h2>
-          <span class="badge-version" id="settingsVersionBadge">v2.9.0</span>
+          <span class="badge-version" id="settingsVersionBadge">v2.10.0</span>
         </div>
         <button type="button" class="modal-close" id="settingsCloseBtn" aria-label="Закрыть">
           <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
@@ -2594,7 +3038,7 @@ body.has-custom-bg .ambient {
             </div>
             <h3 style="font-size:18px; margin-bottom:4px;">Proton Desktop</h3>
             <p style="color:var(--text-3); font-size:12.5px; margin-bottom:16px;">
-              Текущая установленная версия: <b style="color:var(--text);">v2.9.0</b>
+              Текущая установленная версия: <b style="color:var(--text);">v2.10.0</b>
             </p>
             <button type="button" class="btn-primary" id="checkUpdatesBtn" style="margin:0 auto;">
               <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/></svg>
@@ -2731,7 +3175,7 @@ body.has-custom-bg .ambient {
   </div>
 
   <!-- ==========================================================================
-       JAVASCRIPT ЛОГИКА PROTON v2.9.0
+       JAVASCRIPT ЛОГИКА PROTON v2.10.0
        ========================================================================== -->
   <script>
 "use strict";
@@ -4246,6 +4690,309 @@ function updateAIConfigVisibility() {
 }
 
 /* ==========================================================================
+   ИИ-КОПИЛОТ (AI COPILOT SIDE-PANEL)
+   ========================================================================== */
+const Copilot = {
+  isOpen: false,
+  history: [],
+
+  init() {
+    const toggleBtn = $("copilotToggleBtn");
+    const closeBtn = $("copilotCloseBtn");
+    const newChatBtn = $("copilotNewChatBtn");
+    const form = $("copilotForm");
+    const input = $("copilotInput");
+    const voiceBtn = $("copilotVoiceBtn");
+    const chipsBar = $("copilotChipsBar");
+
+    if (toggleBtn) {
+      toggleBtn.addEventListener("click", () => this.toggle());
+    }
+    if (closeBtn) {
+      closeBtn.addEventListener("click", () => this.close());
+    }
+    if (newChatBtn) {
+      newChatBtn.addEventListener("click", () => this.clearChat());
+    }
+
+    if (form) {
+      form.addEventListener("submit", (e) => {
+        e.preventDefault();
+        this.submit();
+      });
+    }
+
+    if (input) {
+      input.addEventListener("keydown", (e) => {
+        if (e.key === "Enter" && !e.shiftKey) {
+          e.preventDefault();
+          this.submit();
+        }
+      });
+      input.addEventListener("input", () => {
+        input.style.height = "auto";
+        input.style.height = Math.min(input.scrollHeight, 120) + "px";
+      });
+    }
+
+    if (voiceBtn) {
+      voiceBtn.addEventListener("click", () => this.startVoiceInput());
+    }
+
+    if (chipsBar) {
+      chipsBar.addEventListener("click", (e) => {
+        const chip = e.target.closest(".copilot-chip");
+        if (!chip) return;
+        const act = chip.dataset.action;
+        if (act === "summary") this.ask("Сделай краткую выжимку и передай главную суть.");
+        else if (act === "facts") this.ask("Выдели главные факты, цифры и ключевые тезисы.");
+        else if (act === "explain") this.ask("Объясни эту тему простыми и понятными словами.");
+        else if (act === "compare") this.ask("Какие есть плюсы, минусы и особенности?");
+        else if (act === "translate") this.ask("Переведи ключевые термины и выдели международные названия.");
+      });
+    }
+
+    window.addEventListener("keydown", (e) => {
+      const isCmdOrCtrl = e.ctrlKey || e.metaKey;
+      if (isCmdOrCtrl && e.key.toLowerCase() === "j") {
+        e.preventDefault();
+        this.toggle();
+      } else if (e.key === "Escape" && this.isOpen) {
+        this.close();
+      }
+    });
+
+    this.updateEngineBadge();
+  },
+
+  updateEngineBadge() {
+    const badge = $("copilotEngineBadge");
+    if (!badge) return;
+    const s = getSettings();
+    const p = (s.aiProvider || "builtin").toLowerCase();
+    if (p === "builtin") badge.textContent = "Нейросинтез";
+    else if (p === "groq") badge.textContent = "Groq Llama 3";
+    else if (p === "openai") badge.textContent = "GPT-4o";
+    else if (p === "deepseek") badge.textContent = "DeepSeek";
+    else if (p === "ollama") badge.textContent = "Ollama";
+    else badge.textContent = "LLM";
+  },
+
+  toggle(forceState) {
+    const shouldOpen = typeof forceState === "boolean" ? forceState : !this.isOpen;
+    if (shouldOpen) this.open();
+    else this.close();
+  },
+
+  open() {
+    const panel = $("copilotPanel");
+    const toggleBtn = $("copilotToggleBtn");
+    if (!panel) return;
+    panel.hidden = false;
+    this.isOpen = true;
+    if (toggleBtn) toggleBtn.classList.add("active");
+    this.updateEngineBadge();
+    const input = $("copilotInput");
+    if (input) setTimeout(() => input.focus(), 150);
+  },
+
+  close() {
+    const panel = $("copilotPanel");
+    const toggleBtn = $("copilotToggleBtn");
+    if (!panel) return;
+    panel.hidden = true;
+    this.isOpen = false;
+    if (toggleBtn) toggleBtn.classList.remove("active");
+  },
+
+  clearChat() {
+    this.history = [];
+    const container = $("copilotMessages");
+    if (!container) return;
+    container.innerHTML = `
+      <div class="copilot-welcome-card" id="copilotWelcomeCard">
+        <div class="copilot-welcome-icon">
+          <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+        </div>
+        <h4>Чем я могу помочь?</h4>
+        <p>Я могу проанализировать текущий поисковый запрос, выделить главное из Википедии и сайтов, перевести текст или ответить на любые ваши вопросы.</p>
+      </div>
+    `;
+  },
+
+  submit() {
+    const input = $("copilotInput");
+    if (!input) return;
+    const val = input.value.trim();
+    if (!val) return;
+    input.value = "";
+    input.style.height = "auto";
+    this.ask(val);
+  },
+
+  async ask(text) {
+    if (!text) return;
+    if (!this.isOpen) this.open();
+
+    const welcome = $("copilotWelcomeCard");
+    if (welcome) welcome.style.display = "none";
+
+    this.appendMessage("user", text);
+    this.history.push({ role: "user", content: text });
+
+    const typingId = this.showTyping();
+
+    const curTab = TabManager.getActiveTab() || {};
+    const context = {
+      query: curTab.query || state.query || "",
+      results: (curTab.resultsData && curTab.resultsData.results) || [],
+      wiki: (curTab.resultsData && curTab.resultsData.wiki) || {},
+      instant: (curTab.resultsData && curTab.resultsData.instant) || {}
+    };
+
+    try {
+      let replyContent = "";
+      let providerLabel = "";
+
+      if (window.iskatelAPI && window.iskatelAPI.askCopilot) {
+        const res = await window.iskatelAPI.askCopilot({
+          messages: this.history,
+          context
+        });
+        if (res && res.content) {
+          replyContent = res.content;
+          providerLabel = res.provider || "";
+        }
+      }
+
+      this.removeTyping(typingId);
+
+      if (!replyContent) {
+        replyContent = `По запросу «${context.query || text}» я готов ответить на любые вопросы. Попробуйте уточнить тему.`;
+      }
+
+      this.history.push({ role: "assistant", content: replyContent });
+      this.appendMessage("assistant", replyContent, providerLabel);
+    } catch (err) {
+      this.removeTyping(typingId);
+      this.appendMessage("assistant", `Не удалось получить ответ: ${err.message}`);
+    }
+  },
+
+  appendMessage(role, text, provider) {
+    const container = $("copilotMessages");
+    if (!container) return;
+
+    const div = document.createElement("div");
+    div.className = `copilot-msg ${role}`;
+
+    const bubble = document.createElement("div");
+    bubble.className = "copilot-bubble";
+    bubble.textContent = text;
+    div.appendChild(bubble);
+
+    if (role === "assistant") {
+      const actions = document.createElement("div");
+      actions.className = "copilot-msg-actions";
+
+      const speakBtn = document.createElement("button");
+      speakBtn.type = "button";
+      speakBtn.className = "copilot-msg-btn";
+      speakBtn.innerHTML = `
+        <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/></svg>
+        <span>Озвучить</span>
+      `;
+      speakBtn.addEventListener("click", () => {
+        speakText(text);
+      });
+
+      const copyBtn = document.createElement("button");
+      copyBtn.type = "button";
+      copyBtn.className = "copilot-msg-btn";
+      copyBtn.innerHTML = `
+        <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+        <span>Копировать</span>
+      `;
+      copyBtn.addEventListener("click", () => {
+        navigator.clipboard.writeText(text).then(() => {
+          const s = copyBtn.querySelector("span");
+          if (s) s.textContent = "Скопировано!";
+          setTimeout(() => { if (s) s.textContent = "Копировать"; }, 1500);
+        });
+      });
+
+      actions.appendChild(speakBtn);
+      actions.appendChild(copyBtn);
+      div.appendChild(actions);
+    }
+
+    container.appendChild(div);
+    container.scrollTo({ top: container.scrollHeight, behavior: "smooth" });
+  },
+
+  showTyping() {
+    const container = $("copilotMessages");
+    if (!container) return null;
+    const id = "cpTyping_" + Date.now();
+    const div = document.createElement("div");
+    div.id = id;
+    div.className = "copilot-typing";
+    div.innerHTML = `
+      <div class="copilot-typing-dot"></div>
+      <div class="copilot-typing-dot"></div>
+      <div class="copilot-typing-dot"></div>
+    `;
+    container.appendChild(div);
+    container.scrollTo({ top: container.scrollHeight, behavior: "smooth" });
+    return id;
+  },
+
+  removeTyping(id) {
+    if (!id) return;
+    const el = $(id);
+    if (el) el.remove();
+  },
+
+  startVoiceInput() {
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SpeechRecognition) {
+      alert("Голосовой ввод не поддерживается");
+      return;
+    }
+    const btn = $("copilotVoiceBtn");
+    if (btn) btn.classList.add("listening");
+
+    try {
+      const recognition = new SpeechRecognition();
+      recognition.lang = "ru-RU";
+      recognition.interimResults = false;
+      recognition.maxAlternatives = 1;
+
+      recognition.onresult = (event) => {
+        const text = event.results[0][0].transcript;
+        if (text) {
+          const input = $("copilotInput");
+          if (input) input.value = text;
+          this.submit();
+        }
+      };
+
+      recognition.onend = () => {
+        if (btn) btn.classList.remove("listening");
+      };
+
+      recognition.onerror = () => {
+        if (btn) btn.classList.remove("listening");
+      };
+
+      recognition.start();
+    } catch (_) {
+      if (btn) btn.classList.remove("listening");
+    }
+  }
+};
+
+/* ==========================================================================
    ПОДСКАЗКИ ПРИ ВВОДЕ (AUTOCOMPLETE SUGGESTIONS)
    ========================================================================== */
 function bindSuggest(input, box) {
@@ -4624,6 +5371,10 @@ function saveSettings() {
     quickTagsEl.hidden = !s.showQuickTags;
   }
 
+  if (typeof Copilot !== "undefined") {
+    Copilot.updateEngineBadge();
+  }
+
   closeSettings();
 }
 
@@ -4751,7 +5502,7 @@ function initSettings() {
             if (updateProgressWrap) updateProgressWrap.style.display = "none";
             if (updateFoundCard) updateFoundCard.style.display = "block";
           } else {
-            if (updateStatusText) updateStatusText.innerHTML = `<span style="color:#10b981;">У вас установлена самая последняя версия Proton (v2.9.0)!</span>`;
+            if (updateStatusText) updateStatusText.innerHTML = `<span style="color:#10b981;">У вас установлена самая последняя версия Proton (v2.10.0)!</span>`;
           }
         } else {
           checkUpdatesBtn.disabled = false;
@@ -4863,6 +5614,7 @@ function init() {
   try { initSettings(); } catch (e) { console.error("initSettings error:", e); }
   try { bindAICardEvents(); } catch (e) { console.error("bindAICardEvents error:", e); }
   try { populateVoiceList(); } catch (e) { console.error("populateVoiceList error:", e); }
+  try { Copilot.init(); } catch (e) { console.error("Copilot error:", e); }
   try { initVoiceSearch(); } catch (e) { console.error("initVoiceSearch error:", e); }
   try { updateBookmarksUI(); } catch (e) { console.error("updateBookmarksUI error:", e); }
   try { renderRecent(); } catch (e) { console.error("renderRecent error:", e); }

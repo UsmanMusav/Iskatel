@@ -14,7 +14,7 @@ const crypto = require("crypto");
 
 app.setName("Proton");
 
-const APP_VERSION = "2.9.0";
+const APP_VERSION = "2.10.0";
 const GITHUB_REPO = "UsmanMusav/Iskatel";
 const LATEST_RELEASE_URL = `https://api.github.com/repos/${GITHUB_REPO}/releases/latest`;
 
@@ -977,6 +977,206 @@ async function testAIConnection({ provider, apiKey, model, customEndpoint }) {
   }
 }
 
+function generateBuiltinCopilotReply(userText, query, wiki, instant, results) {
+  const uLower = (userText || "").toLowerCase().trim();
+  const allSentences = [];
+
+  if (wiki && wiki.extract) {
+    extractSentencesForAI(wiki.extract).forEach(s => allSentences.push(s));
+  }
+  if (instant && (instant.text || instant.abstract)) {
+    extractSentencesForAI(instant.text || instant.abstract).forEach(s => allSentences.push(s));
+  }
+  for (const r of (results || []).slice(0, 5)) {
+    if (r && r.snippet) {
+      extractSentencesForAI(r.snippet).forEach(s => allSentences.push(s));
+    }
+  }
+
+  // 1. TL;DR / Краткая суть
+  if (/кратк|суть|пересказ|тлдр|главное|в двух словах/i.test(uLower)) {
+    if (allSentences.length > 0) {
+      const main = allSentences.slice(0, 2).join(" ");
+      const bullets = allSentences.slice(2, 5).map(s => "- " + s).join("\n");
+      return {
+        ok: true,
+        content: `Краткая суть по теме «${query || "запроса"}»:\n\n${main}\n\nКлючевые моменты:\n${bullets}`,
+        provider: "Встроенный Copilot"
+      };
+    }
+  }
+
+  // 2. Факты и цифры
+  if (/факт|цифр|числа|статистик/i.test(uLower)) {
+    const factSentences = allSentences.filter(s => /\d+/.test(s) || /является|состоит|включает/i.test(s));
+    if (factSentences.length > 0) {
+      return {
+        ok: true,
+        content: `Ключевые факты по теме «${query || "запроса"}»:\n\n` + factSentences.slice(0, 5).map(s => "- " + s).join("\n"),
+        provider: "Встроенный Copilot"
+      };
+    }
+  }
+
+  // 3. Объясни просто
+  if (/просто|простыми словами|для чайников|понятно/i.test(uLower)) {
+    if (allSentences.length > 0) {
+      return {
+        ok: true,
+        content: `Простыми словами о том, что такое «${query || "это понятие"}»:\n\n` +
+          allSentences[0] + "\n\n" +
+          "Если говорить простым языком: " + (allSentences[1] || allSentences[0]),
+        provider: "Встроенный Copilot"
+      };
+    }
+  }
+
+  // 4. Сравнение / Плюсы и минусы
+  if (/сравн|плюс|минус|преимуществ|недостат/i.test(uLower)) {
+    if (allSentences.length > 0) {
+      return {
+        ok: true,
+        content: `Анализ темы «${query || userText}»:\n\n` +
+          "- Основные характеристики: " + (allSentences[0] || "") + "\n" +
+          "- Особенности и специфика: " + (allSentences[1] || "") + "\n" +
+          "- Практическое применение: " + (allSentences[2] || allSentences[0]),
+        provider: "Встроенный Copilot"
+      };
+    }
+  }
+
+  // 5. Перевод
+  if (/перевод|переведи|на английск|на русский/i.test(uLower)) {
+    return {
+      ok: true,
+      content: `Перевод и ключевые термины по запросу «${query || userText}»:\n\n` +
+        (wiki && wiki.title ? `- Понятие: ${wiki.title}\n` : "") +
+        `- В международном контексте: ${query}\n\n` +
+        (allSentences[0] ? `Определение: ${allSentences[0]}` : ""),
+      provider: "Встроенный Copilot"
+    };
+  }
+
+  // 6. Обычный контекстный ответ
+  if (allSentences.length > 0) {
+    const relevant = allSentences.slice(0, 3).join(" ");
+    return {
+      ok: true,
+      content: `По теме «${query || userText}»:\n\n${relevant}\n\nВы можете задать любой уточняющий вопрос или нажать на быстрые действия выше.`,
+      provider: "Встроенный Copilot"
+    };
+  }
+
+  return {
+    ok: true,
+    content: `Я готов помочь вам с поиском и анализом информации. Введите интересующий вас вопрос или поисковый запрос в строке Proton.`,
+    provider: "Встроенный Copilot"
+  };
+}
+
+async function handleCopilotChat({ messages = [], context = {} }) {
+  const settings = loadSettings();
+  const provider = (settings.aiProvider || "builtin").toLowerCase();
+  const apiKey = settings.aiApiKey || "";
+  const model = settings.aiModel || "";
+  const customEndpoint = settings.aiCustomEndpoint || "";
+
+  const lastMsgObj = messages[messages.length - 1] || {};
+  const userText = cleanTextForAI(lastMsgObj.content || "");
+  const query = cleanTextForAI(context.query || "");
+  const wiki = context.wiki || {};
+  const results = context.results || [];
+  const instant = context.instant || {};
+
+  if (provider !== "builtin" && (apiKey || provider === "ollama")) {
+    try {
+      let endpoint = "";
+      let modelName = model;
+      const headers = { "Content-Type": "application/json" };
+
+      if (provider === "groq") {
+        endpoint = "https://api.groq.com/openai/v1/chat/completions";
+        modelName = modelName || "llama-3.3-70b-versatile";
+        headers["Authorization"] = `Bearer ${apiKey}`;
+      } else if (provider === "openai") {
+        endpoint = "https://api.openai.com/v1/chat/completions";
+        modelName = modelName || "gpt-4o-mini";
+        headers["Authorization"] = `Bearer ${apiKey}`;
+      } else if (provider === "deepseek") {
+        endpoint = "https://api.deepseek.com/chat/completions";
+        modelName = modelName || "deepseek-chat";
+        headers["Authorization"] = `Bearer ${apiKey}`;
+      } else if (provider === "ollama") {
+        endpoint = customEndpoint || "http://127.0.0.1:11434/v1/chat/completions";
+        modelName = modelName || "llama3.2";
+        if (apiKey) headers["Authorization"] = `Bearer ${apiKey}`;
+      } else if (provider === "custom") {
+        endpoint = customEndpoint;
+        modelName = modelName || "gpt-3.5-turbo";
+        if (apiKey) headers["Authorization"] = `Bearer ${apiKey}`;
+      }
+
+      const contextSnippets = [];
+      if (query) contextSnippets.push(`Текущий поисковый запрос: "${query}"`);
+      if (wiki.extract) contextSnippets.push(`Википедия: ${cleanTextForAI(wiki.extract)}`);
+      if (instant.text || instant.abstract) contextSnippets.push(`Факт: ${cleanTextForAI(instant.text || instant.abstract)}`);
+      for (const r of (results || []).slice(0, 4)) {
+        if (r && r.snippet) contextSnippets.push(`- ${cleanTextForAI(r.title)}: ${cleanTextForAI(r.snippet)}`);
+      }
+
+      const systemPrompt = `Ты — интеллектуальный ИИ-ассистент Proton Copilot в боковой панели браузера Proton.
+Твоя задача — помогать пользователю анализировать информацию, отвечать на вопросы, делать выжимки и давать четкие объяснения.
+Контекст открытой страницы/запроса:
+${contextSnippets.join("\n") || "(контекст поиска отсутствует)"}
+
+Требования:
+1. Отвечай прямо, информативно и вежливо на русском языке.
+2. Форматируй текст понятными абзацами и четкими пунктами списков (через дефис).
+3. Стиль лаконичный, энциклопедический.
+4. Не используй эмодзи.`;
+
+      const apiMessages = [
+        { role: "system", content: systemPrompt },
+        ...messages.slice(-8).map(m => ({
+          role: m.role === "assistant" ? "assistant" : "user",
+          content: String(m.content || "")
+        }))
+      ];
+
+      const resp = await fetch(endpoint, {
+        method: "POST",
+        headers,
+        body: JSON.stringify({
+          model: modelName,
+          messages: apiMessages,
+          temperature: 0.3,
+          max_tokens: 800
+        }),
+        signal: AbortSignal.timeout(14000)
+      });
+
+      if (!resp.ok) {
+        const errT = await resp.text().catch(() => "");
+        throw new Error(`API error ${resp.status}: ${errT.slice(0, 100)}`);
+      }
+
+      const data = await resp.json();
+      const answer = data.choices && data.choices[0] && data.choices[0].message && data.choices[0].message.content;
+      if (!answer) throw new Error("Пустой ответ от нейросети");
+
+      return {
+        ok: true,
+        content: answer.trim(),
+        provider: `${provider.toUpperCase()} (${modelName})`
+      };
+    } catch (err) {
+      console.warn("External LLM copilot failed, fallback to built-in synthesizer:", err.message);
+    }
+  }
+
+  return generateBuiltinCopilotReply(userText, query, wiki, instant, results);
+}
+
 /* ---------- сборка ответа поиска ---------- */
 
 async function doSearch({ q, page = 0 }) {
@@ -1389,9 +1589,10 @@ app.whenReady().then(() => {
     return { suggestions: s };
   });
 
-  // ИИ-ассистент (Google Assistant / AI Overview)
+  // ИИ-ассистент (Google Assistant / AI Overview) и Copilot
   ipcMain.handle("iskatel:ai-ask", async (_e, params) => generateAIAssistantAnswer(params || {}));
   ipcMain.handle("iskatel:ai-test-provider", async (_e, params) => testAIConnection(params || {}));
+  ipcMain.handle("iskatel:ai-copilot", async (_e, params) => handleCopilotChat(params || {}));
 
   // Метаданные
   ipcMain.handle("iskatel:get-version", () => APP_VERSION);
